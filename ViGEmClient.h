@@ -53,7 +53,7 @@ typedef enum _VIGEM_ERRORS
 // 
 typedef struct _VIGEM_TARGET *PVIGEM_TARGET;
 
-typedef VOID(CALLBACK* PVIGEM_XUSB_NOTIFICATION)(
+typedef VOID(CALLBACK* PVIGEM_X360_NOTIFICATION)(
     PVIGEM_TARGET Target,
     UCHAR LargeMotor,
     UCHAR SmallMotor,
@@ -84,5 +84,13 @@ void vigem_target_free(PVIGEM_TARGET target);
 VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
 
 VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
+
+VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_X360_NOTIFICATION notification);
+
+VIGEM_ERROR vigem_target_ds4_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_DS4_NOTIFICATION notification);
+
+void vigem_target_x360_unregister_notification(PVIGEM_TARGET target);
+
+void vigem_target_ds4_unregister_notification(PVIGEM_TARGET target);
 
 #endif // ViGEmClient_h__
