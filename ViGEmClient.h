@@ -93,4 +93,12 @@ void vigem_target_x360_unregister_notification(PVIGEM_TARGET target);
 
 void vigem_target_ds4_unregister_notification(PVIGEM_TARGET target);
 
+void vigem_target_set_vid(PVIGEM_TARGET target, USHORT vid);
+
+void vigem_target_set_pid(PVIGEM_TARGET target, USHORT pid);
+
+VIGEM_ERROR vigem_target_x360_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, XUSB_REPORT report);
+
+VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, DS4_REPORT report);
+
 #endif // ViGEmClient_h__
