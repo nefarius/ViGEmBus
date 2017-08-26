@@ -255,6 +255,13 @@ typedef struct _XUSB_REPORT
     SHORT sThumbRY;
 } XUSB_REPORT, *PXUSB_REPORT;
 
+VOID FORCEINLINE XUSB_REPORT_INIT(
+    _Out_ PXUSB_REPORT Report
+)
+{
+    RtlZeroMemory(Report, sizeof(XUSB_REPORT));
+}
+
 //
 // Data structure used in IOCTL_XUSB_SUBMIT_REPORT requests.
 // 

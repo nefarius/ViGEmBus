@@ -48,24 +48,22 @@ typedef enum _VIGEM_ERRORS
 
 #define VIGEM_SUCCESS(_val_) (_val_ == VIGEM_ERROR_NONE)
 
-//
-// Represents a virtual gamepad object.
-// 
-typedef struct _VIGEM_TARGET *PVIGEM_TARGET;
+
+typedef struct _VIGEM_CLIENT_T *PVIGEM_CLIENT;
+typedef struct _VIGEM_TARGET_T *PVIGEM_TARGET;
 
 typedef VOID(CALLBACK* PVIGEM_X360_NOTIFICATION)(
-    PVIGEM_TARGET Target,
+    ULONG Index,
     UCHAR LargeMotor,
     UCHAR SmallMotor,
     UCHAR LedNumber);
 
 typedef VOID(CALLBACK* PVIGEM_DS4_NOTIFICATION)(
-    PVIGEM_TARGET Target,
+    ULONG Index,
     UCHAR LargeMotor,
     UCHAR SmallMotor,
     DS4_LIGHTBAR_COLOR LightbarColor);
 
-typedef struct _VIGEM_CLIENT_T* PVIGEM_CLIENT;
 
 PVIGEM_CLIENT vigem_alloc(void);
 
@@ -100,5 +98,7 @@ void vigem_target_set_pid(PVIGEM_TARGET target, USHORT pid);
 VIGEM_ERROR vigem_target_x360_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, XUSB_REPORT report);
 
 VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, DS4_REPORT report);
+
+ULONG vigem_target_get_index(PVIGEM_TARGET target);
 
 #endif // ViGEmClient_h__
