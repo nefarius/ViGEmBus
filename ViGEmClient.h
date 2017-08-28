@@ -53,16 +53,23 @@ typedef struct _VIGEM_CLIENT_T *PVIGEM_CLIENT;
 typedef struct _VIGEM_TARGET_T *PVIGEM_TARGET;
 
 typedef VOID(CALLBACK* PVIGEM_X360_NOTIFICATION)(
+    PVIGEM_CLIENT Client,
     PVIGEM_TARGET Target,
     UCHAR LargeMotor,
     UCHAR SmallMotor,
     UCHAR LedNumber);
 
 typedef VOID(CALLBACK* PVIGEM_DS4_NOTIFICATION)(
+    PVIGEM_CLIENT Client,
     PVIGEM_TARGET Target,
     UCHAR LargeMotor,
     UCHAR SmallMotor,
     DS4_LIGHTBAR_COLOR LightbarColor);
+
+typedef VOID(CALLBACK* PVIGEM_TARGET_ADD_RESULT)(
+    PVIGEM_CLIENT Client,
+    PVIGEM_TARGET Target,
+    VIGEM_ERROR Result);
 
 
 PVIGEM_CLIENT vigem_alloc(void);
@@ -80,6 +87,8 @@ PVIGEM_TARGET vigem_target_ds4_alloc(void);
 void vigem_target_free(PVIGEM_TARGET target);
 
 VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
+
+VIGEM_ERROR vigem_target_add_async(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_TARGET_ADD_RESULT result);
 
 VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
 
