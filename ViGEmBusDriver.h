@@ -33,4 +33,24 @@ DEFINE_GUID(GUID_VIGEM_INTERFACE_STANDARD,
 DECLARE_GLOBAL_CONST_UNICODE_STRING(VigemNtDeviceName, L"\\Device\\ViGEmBus");
 DECLARE_GLOBAL_CONST_UNICODE_STRING(VigemDosDeviceName, L"\\DosDevices\\ViGEmBus");
 
+typedef
+NTSTATUS
+(*PVIGEM_BUS_CREATE_PDO_RESULT)(
+    _In_ PINTERFACE InterfaceHeader,
+    _In_ ULONG Serial,
+    _In_ NTSTATUS Status
+    );
+
+typedef struct _VIGEM_BUS_INTERFACE {
+    // 
+    // Standard interface header, must be present
+    // 
+    INTERFACE                       InterfaceHeader;
+
+    PVIGEM_BUS_CREATE_PDO_RESULT    BusCreatePdoResult;
+
+} VIGEM_BUS_INTERFACE, *PVIGEM_BUS_INTERFACE;
+
+#define VIGEM_BUS_INTERFACE_VERSION      1
+
 #include "ViGEmBusShared.h"
