@@ -44,7 +44,7 @@ typedef enum _VIGEM_PDO_STAGE
 {
     ViGEmPdoCreate,
     ViGEmPdoPrepareHardware,
-    ViGEmPdoUsbGetStatusFromDevice
+    ViGEmPdoInternalIoControl
 
 } VIGEM_PDO_STAGE, *PVIGEM_PDO_STAGE;
 
