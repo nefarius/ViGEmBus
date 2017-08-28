@@ -95,10 +95,16 @@ void vigem_target_set_vid(PVIGEM_TARGET target, USHORT vid);
 
 void vigem_target_set_pid(PVIGEM_TARGET target, USHORT pid);
 
+USHORT vigem_target_get_vid(PVIGEM_TARGET target);
+
+USHORT vigem_target_get_pid(PVIGEM_TARGET target);
+
 VIGEM_ERROR vigem_target_x360_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, XUSB_REPORT report);
 
 VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, DS4_REPORT report);
 
 ULONG vigem_target_get_index(PVIGEM_TARGET target);
+
+VIGEM_TARGET_TYPE vigem_target_get_type(PVIGEM_TARGET target);
 
 #endif // ViGEmClient_h__
