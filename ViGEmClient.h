@@ -71,13 +71,58 @@ typedef VOID(CALLBACK* PVIGEM_TARGET_ADD_RESULT)(
     PVIGEM_TARGET Target,
     VIGEM_ERROR Result);
 
-
+/**
+ * \fn  PVIGEM_CLIENT vigem_alloc(void);
+ *
+ * \brief   Allocates an object representing a driver connection.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    28.08.2017
+ *
+ * \return  A new driver connection object.
+ */
 PVIGEM_CLIENT vigem_alloc(void);
 
+/**
+ * \fn  void vigem_free(PVIGEM_CLIENT vigem);
+ *
+ * \brief   Frees up memory used by the driver connection object.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    28.08.2017
+ *
+ * \param   vigem   The driver connection object.
+ */
 void vigem_free(PVIGEM_CLIENT vigem);
 
+/**
+ * \fn  VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem);
+ *
+ * \brief   Initializes the driver object and establishes a connection to the emulation bus
+ *          driver. Returns an error if no compatible bus device has been found.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    28.08.2017
+ *
+ * \param   vigem   The driver connection object.
+ *
+ * \return  A VIGEM_ERROR.
+ */
 VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem);
 
+/**
+ * \fn  void vigem_disconnect(PVIGEM_CLIENT vigem);
+ *
+ * \brief   Disconnects from the bus device and resets the driver object state. The driver object
+ *          may be reused again after calling this function. When called, all targets which may
+ *          still be connected will be destroyed automatically. Be aware, that allocated target
+ *          objects won't be automatically freed, this has to be taken care of by the caller.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    28.08.2017
+ *
+ * \param   vigem   The driver connection object.
+ */
 void vigem_disconnect(PVIGEM_CLIENT vigem);
 
 PVIGEM_TARGET vigem_target_x360_alloc(void);
