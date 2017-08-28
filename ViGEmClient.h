@@ -53,13 +53,13 @@ typedef struct _VIGEM_CLIENT_T *PVIGEM_CLIENT;
 typedef struct _VIGEM_TARGET_T *PVIGEM_TARGET;
 
 typedef VOID(CALLBACK* PVIGEM_X360_NOTIFICATION)(
-    ULONG Index,
+    PVIGEM_TARGET Target,
     UCHAR LargeMotor,
     UCHAR SmallMotor,
     UCHAR LedNumber);
 
 typedef VOID(CALLBACK* PVIGEM_DS4_NOTIFICATION)(
-    ULONG Index,
+    PVIGEM_TARGET Target,
     UCHAR LargeMotor,
     UCHAR SmallMotor,
     DS4_LIGHTBAR_COLOR LightbarColor);
