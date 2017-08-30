@@ -421,4 +421,19 @@ ULONG vigem_target_get_index(PVIGEM_TARGET target);
  */
 VIGEM_TARGET_TYPE vigem_target_get_type(PVIGEM_TARGET target);
 
+/**
+ * \fn  BOOL vigem_target_is_attached(PVIGEM_TARGET target);
+ *
+ * \brief   Returns TRUE if the provided target device object is currently attached to the bus,
+ *          FALSE otherwise.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    30.08.2017
+ *
+ * \param   target  The target device object.
+ *
+ * \return  TRUE if device is attached to the bus, FALSE otherwise.
+ */
+BOOL vigem_target_is_attached(PVIGEM_TARGET target);
+
 #endif // ViGEmClient_h__
