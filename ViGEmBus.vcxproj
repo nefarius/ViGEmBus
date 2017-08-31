@@ -253,6 +253,7 @@
   <ItemGroup>
     <ClInclude Include="$(SolutionDir)\Include\ViGEmBusDriver.h" />
     <ClInclude Include="$(SolutionDir)\Include\ViGEmBusShared.h" />
+    <ClInclude Include="$(SolutionDir)\Include\ViGEmCommon.h" />
     <ClInclude Include="busenum.h" />
     <ClInclude Include="ByteArray.h" />
     <ClInclude Include="Context.h" />
