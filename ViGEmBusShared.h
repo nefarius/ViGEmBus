@@ -25,6 +25,7 @@ SOFTWARE.
 
 // {96E42B22-F5E9-42F8-B043-ED0F932F014F}
 // ReSharper disable once CppMissingIncludeGuard
+#include <limits.h>
 DEFINE_GUID(GUID_DEVINTERFACE_BUSENUM_VIGEM,
     0x96E42B22, 0xF5E9, 0x42F8, 0xB0, 0x43, 0xED, 0x0F, 0x93, 0x2F, 0x01, 0x4F);
 
@@ -128,8 +129,8 @@ typedef struct _VIGEM_PLUGIN_TARGET
 // 
 VOID FORCEINLINE VIGEM_PLUGIN_TARGET_INIT(
     _Out_ PVIGEM_PLUGIN_TARGET PlugIn,
-    _In_ ULONG SerialNo,
-    _In_ VIGEM_TARGET_TYPE TargetType
+          _In_ ULONG SerialNo,
+          _In_ VIGEM_TARGET_TYPE TargetType
 )
 {
     RtlZeroMemory(PlugIn, sizeof(VIGEM_PLUGIN_TARGET));
@@ -161,7 +162,7 @@ typedef struct _VIGEM_UNPLUG_TARGET
 // 
 VOID FORCEINLINE VIGEM_UNPLUG_TARGET_INIT(
     _Out_ PVIGEM_UNPLUG_TARGET UnPlug,
-    _In_ ULONG SerialNo
+          _In_ ULONG SerialNo
 )
 {
     RtlZeroMemory(UnPlug, sizeof(VIGEM_UNPLUG_TARGET));
@@ -206,7 +207,7 @@ typedef struct _XUSB_REQUEST_NOTIFICATION
 // 
 VOID FORCEINLINE XUSB_REQUEST_NOTIFICATION_INIT(
     _Out_ PXUSB_REQUEST_NOTIFICATION Request,
-    _In_ ULONG SerialNo
+          _In_ ULONG SerialNo
 )
 {
     RtlZeroMemory(Request, sizeof(XUSB_REQUEST_NOTIFICATION));
@@ -284,7 +285,7 @@ typedef struct _XUSB_SUBMIT_REPORT
 // 
 VOID FORCEINLINE XUSB_SUBMIT_REPORT_INIT(
     _Out_ PXUSB_SUBMIT_REPORT Report,
-    _In_ ULONG SerialNo
+          _In_ ULONG SerialNo
 )
 {
     RtlZeroMemory(Report, sizeof(XUSB_SUBMIT_REPORT));
@@ -354,7 +355,7 @@ typedef struct _DS4_REQUEST_NOTIFICATION
 // 
 VOID FORCEINLINE DS4_REQUEST_NOTIFICATION_INIT(
     _Out_ PDS4_REQUEST_NOTIFICATION Request,
-    _In_ ULONG SerialNo
+          _In_ ULONG SerialNo
 )
 {
     RtlZeroMemory(Request, sizeof(DS4_REQUEST_NOTIFICATION));
@@ -384,18 +385,18 @@ typedef struct _DS4_REPORT
 // 
 typedef enum _DS4_BUTTONS
 {
-    Ds4ThumbR = 1 << 15,
-    Ds4ThumbL = 1 << 14,
-    Ds4Options = 1 << 13,
-    Ds4Share = 1 << 12,
-    Ds4TriggerR = 1 << 11,
-    Ds4TriggerL = 1 << 10,
-    Ds4ShoulderR = 1 << 9,
-    Ds4ShoulderL = 1 << 8,
-    Ds4Triangle = 1 << 7,
-    Ds4Circle = 1 << 6,
-    Ds4Cross = 1 << 5,
-    Ds4Square = 1 << 4
+    DS4_BUTTON_THUMB_RIGHT = 1 << 15,
+    DS4_BUTTON_THUMB_LEFT = 1 << 14,
+    DS4_BUTTON_OPTIONS = 1 << 13,
+    DS4_BUTTON_SHARE = 1 << 12,
+    DS4_BUTTON_TriggerR = 1 << 11,
+    DS4_BUTTON_TriggerL = 1 << 10,
+    DS4_BUTTON_SHOULDER_RIGHT = 1 << 9,
+    DS4_BUTTON_SHOULDER_LEFT = 1 << 8,
+    DS4_BUTTON_TRIANGLE = 1 << 7,
+    DS4_BUTTON_CIRCLE = 1 << 6,
+    DS4_BUTTON_CROSS = 1 << 5,
+    DS4_BUTTON_SQUARE = 1 << 4
 } DS4_BUTTONS, *PDS4_BUTTONS;
 
 //
@@ -403,8 +404,8 @@ typedef enum _DS4_BUTTONS
 // 
 typedef enum _DS4_SPECIAL_BUTTONS
 {
-    Ds4Ps = 1 << 0,
-    Ds4Touchpad = 1 << 1
+    DS4_SPECIAL_BUTTON_PS = 1 << 0,
+    DS4_SPECIAL_BUTTON_TOUCHPAD = 1 << 1
 } DS4_SPECIAL_BUTTONS, *PDS4_SPECIAL_BUTTONS;
 
 //
@@ -412,15 +413,15 @@ typedef enum _DS4_SPECIAL_BUTTONS
 // 
 typedef enum _DS4_DPAD_DIRECTIONS
 {
-    Ds4DpadNone = 0x8,
-    Ds4DpadNW = 0x7,
-    Ds4DpadW = 0x6,
-    Ds4DpadSW = 0x5,
-    Ds4DpadS = 0x4,
-    Ds4DpadSE = 0x3,
-    Ds4DpadE = 0x2,
-    Ds4DpadNE = 0x1,
-    Ds4DpadN = 0x0
+    DS4_BUTTON_DPAD_NONE = 0x8,
+    DS4_BUTTON_DPAD_NORTHWEST = 0x7,
+    DS4_BUTTON_DPAD_WEST = 0x6,
+    DS4_BUTTON_DPAD_SOUTHWEST = 0x5,
+    DS4_BUTTON_DPAD_SOUTH = 0x4,
+    DS4_BUTTON_DPAD_SOUTHEAST = 0x3,
+    DS4_BUTTON_DPAD_EAST = 0x2,
+    DS4_BUTTON_DPAD_NORTHEAST = 0x1,
+    DS4_BUTTON_DPAD_NORTH = 0x0
 } DS4_DPAD_DIRECTIONS, *PDS4_DPAD_DIRECTIONS;
 
 //
@@ -449,7 +450,7 @@ typedef struct _DS4_SUBMIT_REPORT
 // 
 VOID FORCEINLINE DS4_SET_DPAD(
     _Out_ PDS4_REPORT Report,
-    _In_ DS4_DPAD_DIRECTIONS Dpad
+          _In_ DS4_DPAD_DIRECTIONS Dpad
 )
 {
     Report->wButtons &= ~0xF;
@@ -460,12 +461,14 @@ VOID FORCEINLINE DS4_REPORT_INIT(
     _Out_ PDS4_REPORT Report
 )
 {
+    RtlZeroMemory(Report, sizeof(DS4_REPORT));
+
     Report->bThumbLX = 0x80;
     Report->bThumbLY = 0x80;
     Report->bThumbRX = 0x80;
     Report->bThumbRY = 0x80;
 
-    DS4_SET_DPAD(Report, Ds4DpadNone);
+    DS4_SET_DPAD(Report, DS4_BUTTON_DPAD_NONE);
 }
 
 //
@@ -473,7 +476,7 @@ VOID FORCEINLINE DS4_REPORT_INIT(
 // 
 VOID FORCEINLINE DS4_SUBMIT_REPORT_INIT(
     _Out_ PDS4_SUBMIT_REPORT Report,
-    _In_ ULONG SerialNo
+          _In_ ULONG SerialNo
 )
 {
     RtlZeroMemory(Report, sizeof(DS4_SUBMIT_REPORT));
@@ -522,7 +525,7 @@ typedef struct _XGIP_SUBMIT_REPORT
 // 
 VOID FORCEINLINE XGIP_SUBMIT_REPORT_INIT(
     _Out_ PXGIP_SUBMIT_REPORT Report,
-    _In_ ULONG SerialNo
+          _In_ ULONG SerialNo
 )
 {
     RtlZeroMemory(Report, sizeof(XGIP_SUBMIT_REPORT));
@@ -562,7 +565,7 @@ typedef struct _XGIP_SUBMIT_INTERRUPT
 // 
 VOID FORCEINLINE XGIP_SUBMIT_INTERRUPT_INIT(
     _Out_ PXGIP_SUBMIT_INTERRUPT Report,
-    _In_ ULONG SerialNo
+          _In_ ULONG SerialNo
 )
 {
     RtlZeroMemory(Report, sizeof(XGIP_SUBMIT_INTERRUPT));
@@ -581,12 +584,54 @@ typedef struct _VIGEM_CHECK_VERSION
 
 VOID FORCEINLINE VIGEM_CHECK_VERSION_INIT(
     _Out_ PVIGEM_CHECK_VERSION CheckVersion,
-    _In_ ULONG Version
+          _In_ ULONG Version
 )
 {
     RtlZeroMemory(CheckVersion, sizeof(VIGEM_CHECK_VERSION));
 
     CheckVersion->Size = sizeof(VIGEM_CHECK_VERSION);
     CheckVersion->Version = Version;
+}
+
+VOID FORCEINLINE XUSB_TO_DS4_REPORT(
+    _Out_ PXUSB_REPORT Input,
+          _Out_ PDS4_REPORT Output
+)
+{
+    if (Input->wButtons & XUSB_GAMEPAD_BACK) Output->wButtons |= DS4_BUTTON_SHARE;
+    if (Input->wButtons & XUSB_GAMEPAD_START) Output->wButtons |= DS4_BUTTON_OPTIONS;
+    if (Input->wButtons & XUSB_GAMEPAD_LEFT_THUMB) Output->wButtons |= DS4_BUTTON_THUMB_LEFT;
+    if (Input->wButtons & XUSB_GAMEPAD_RIGHT_THUMB) Output->wButtons |= DS4_BUTTON_THUMB_RIGHT;
+    if (Input->wButtons & XUSB_GAMEPAD_LEFT_SHOULDER) Output->wButtons |= DS4_BUTTON_SHOULDER_LEFT;
+    if (Input->wButtons & XUSB_GAMEPAD_RIGHT_SHOULDER) Output->wButtons |= DS4_BUTTON_SHOULDER_RIGHT;
+    if (Input->wButtons & XUSB_GAMEPAD_GUIDE) Output->bSpecial |= DS4_SPECIAL_BUTTON_PS;
+    if (Input->wButtons & XUSB_GAMEPAD_A) Output->wButtons |= DS4_BUTTON_CROSS;
+    if (Input->wButtons & XUSB_GAMEPAD_B) Output->wButtons |= DS4_BUTTON_CIRCLE;
+    if (Input->wButtons & XUSB_GAMEPAD_X) Output->wButtons |= DS4_BUTTON_SQUARE;
+    if (Input->wButtons & XUSB_GAMEPAD_Y) Output->wButtons |= DS4_BUTTON_TRIANGLE;
+
+    Output->bTriggerL = Input->bLeftTrigger;
+    Output->bTriggerR = Input->bRightTrigger;
+
+    if (Input->wButtons & XUSB_GAMEPAD_DPAD_UP) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_NORTH);
+    if (Input->wButtons & XUSB_GAMEPAD_DPAD_RIGHT) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_EAST);
+    if (Input->wButtons & XUSB_GAMEPAD_DPAD_DOWN) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_SOUTH);
+    if (Input->wButtons & XUSB_GAMEPAD_DPAD_LEFT) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_WEST);
+
+    if (Input->wButtons & XUSB_GAMEPAD_DPAD_UP
+        && Input->wButtons & XUSB_GAMEPAD_DPAD_RIGHT) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_NORTHEAST);
+    if (Input->wButtons & XUSB_GAMEPAD_DPAD_RIGHT
+        && Input->wButtons & XUSB_GAMEPAD_DPAD_DOWN) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_SOUTHEAST);
+    if (Input->wButtons & XUSB_GAMEPAD_DPAD_DOWN
+        && Input->wButtons & XUSB_GAMEPAD_DPAD_LEFT) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_SOUTHWEST);
+    if (Input->wButtons & XUSB_GAMEPAD_DPAD_LEFT
+        && Input->wButtons & XUSB_GAMEPAD_DPAD_UP) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_NORTHWEST);
+
+    Output->bThumbLX = ((Input->sThumbLX + ((USHRT_MAX / 2) + 1)) / 257);
+    Output->bThumbLY = (-(Input->sThumbLY + ((USHRT_MAX / 2) - 1)) / 257);
+    Output->bThumbLY = (Output->bThumbLY == 0) ? 0xFF : Output->bThumbLY;
+    Output->bThumbRX = ((Input->sThumbRX + ((USHRT_MAX / 2) + 1)) / 257);
+    Output->bThumbRY = (-(Input->sThumbRY + ((USHRT_MAX / 2) + 1)) / 257);
+    Output->bThumbRY = (Output->bThumbRY == 0) ? 0xFF : Output->bThumbRY;
 }
 
