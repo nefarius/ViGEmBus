@@ -35,6 +35,8 @@ DEFINE_GUID(GUID_DEVINTERFACE_VIGEM,
 
 #pragma once
 
+#include "ViGEmCommon.h"
+
 //
 // Common version for user-mode library and driver compatibility
 // 
@@ -73,24 +75,6 @@ DEFINE_GUID(GUID_DEVINTERFACE_VIGEM,
 //  Data structure used in PlugIn and UnPlug ioctls
 //
 
-//
-// Represents the desired target type for the emulated device.
-//  
-typedef enum _VIGEM_TARGET_TYPE
-{
-    // 
-    // Microsoft Xbox 360 Controller (wired)
-    // 
-    Xbox360Wired,
-    // 
-    // Microsoft Xbox One Controller (wired)
-    // 
-    XboxOneWired,
-    //
-    // Sony DualShock 4 (wired)
-    // 
-    DualShock4Wired
-} VIGEM_TARGET_TYPE, *PVIGEM_TARGET_TYPE;
 
 //
 // Data structure used in IOCTL_VIGEM_PLUGIN_TARGET requests.
@@ -216,48 +200,6 @@ VOID FORCEINLINE XUSB_REQUEST_NOTIFICATION_INIT(
     Request->SerialNo = SerialNo;
 }
 
-//
-// Possible XUSB report buttons.
-// 
-typedef enum _XUSB_BUTTON
-{
-    XUSB_GAMEPAD_DPAD_UP = 0x0001,
-    XUSB_GAMEPAD_DPAD_DOWN = 0x0002,
-    XUSB_GAMEPAD_DPAD_LEFT = 0x0004,
-    XUSB_GAMEPAD_DPAD_RIGHT = 0x0008,
-    XUSB_GAMEPAD_START = 0x0010,
-    XUSB_GAMEPAD_BACK = 0x0020,
-    XUSB_GAMEPAD_LEFT_THUMB = 0x0040,
-    XUSB_GAMEPAD_RIGHT_THUMB = 0x0080,
-    XUSB_GAMEPAD_LEFT_SHOULDER = 0x0100,
-    XUSB_GAMEPAD_RIGHT_SHOULDER = 0x0200,
-    XUSB_GAMEPAD_GUIDE = 0x0400,
-    XUSB_GAMEPAD_A = 0x1000,
-    XUSB_GAMEPAD_B = 0x2000,
-    XUSB_GAMEPAD_X = 0x4000,
-    XUSB_GAMEPAD_Y = 0x8000
-} XUSB_BUTTON, *PXUSB_BUTTON;
-
-//
-// Represents an XINPUT_GAMEPAD-compatible report structure.
-// 
-typedef struct _XUSB_REPORT
-{
-    USHORT wButtons;
-    BYTE bLeftTrigger;
-    BYTE bRightTrigger;
-    SHORT sThumbLX;
-    SHORT sThumbLY;
-    SHORT sThumbRX;
-    SHORT sThumbRY;
-} XUSB_REPORT, *PXUSB_REPORT;
-
-VOID FORCEINLINE XUSB_REPORT_INIT(
-    _Out_ PXUSB_REPORT Report
-)
-{
-    RtlZeroMemory(Report, sizeof(XUSB_REPORT));
-}
 
 //
 // Data structure used in IOCTL_XUSB_SUBMIT_REPORT requests.
@@ -294,23 +236,7 @@ VOID FORCEINLINE XUSB_SUBMIT_REPORT_INIT(
     Report->SerialNo = SerialNo;
 }
 
-typedef struct _DS4_LIGHTBAR_COLOR
-{
-    //
-    // Red part of the Lightbar (0-255).
-    //
-    UCHAR Red;
 
-    //
-    // Green part of the Lightbar (0-255).
-    //
-    UCHAR Green;
-
-    //
-    // Blue part of the Lightbar (0-255).
-    //
-    UCHAR Blue;
-} DS4_LIGHTBAR_COLOR, *PDS4_LIGHTBAR_COLOR;
 
 typedef struct _DS4_OUTPUT_REPORT
 {
@@ -364,66 +290,6 @@ VOID FORCEINLINE DS4_REQUEST_NOTIFICATION_INIT(
     Request->SerialNo = SerialNo;
 }
 
-
-//
-// DualShock 4 HID Input report
-// 
-typedef struct _DS4_REPORT
-{
-    BYTE bThumbLX;
-    BYTE bThumbLY;
-    BYTE bThumbRX;
-    BYTE bThumbRY;
-    USHORT wButtons;
-    BYTE bSpecial;
-    BYTE bTriggerL;
-    BYTE bTriggerR;
-} DS4_REPORT, *PDS4_REPORT;
-
-//
-// DualShock 4 digital buttons
-// 
-typedef enum _DS4_BUTTONS
-{
-    DS4_BUTTON_THUMB_RIGHT = 1 << 15,
-    DS4_BUTTON_THUMB_LEFT = 1 << 14,
-    DS4_BUTTON_OPTIONS = 1 << 13,
-    DS4_BUTTON_SHARE = 1 << 12,
-    DS4_BUTTON_TriggerR = 1 << 11,
-    DS4_BUTTON_TriggerL = 1 << 10,
-    DS4_BUTTON_SHOULDER_RIGHT = 1 << 9,
-    DS4_BUTTON_SHOULDER_LEFT = 1 << 8,
-    DS4_BUTTON_TRIANGLE = 1 << 7,
-    DS4_BUTTON_CIRCLE = 1 << 6,
-    DS4_BUTTON_CROSS = 1 << 5,
-    DS4_BUTTON_SQUARE = 1 << 4
-} DS4_BUTTONS, *PDS4_BUTTONS;
-
-//
-// DualShock 4 special buttons
-// 
-typedef enum _DS4_SPECIAL_BUTTONS
-{
-    DS4_SPECIAL_BUTTON_PS = 1 << 0,
-    DS4_SPECIAL_BUTTON_TOUCHPAD = 1 << 1
-} DS4_SPECIAL_BUTTONS, *PDS4_SPECIAL_BUTTONS;
-
-//
-// DualShock 4 directional pad values
-// 
-typedef enum _DS4_DPAD_DIRECTIONS
-{
-    DS4_BUTTON_DPAD_NONE = 0x8,
-    DS4_BUTTON_DPAD_NORTHWEST = 0x7,
-    DS4_BUTTON_DPAD_WEST = 0x6,
-    DS4_BUTTON_DPAD_SOUTHWEST = 0x5,
-    DS4_BUTTON_DPAD_SOUTH = 0x4,
-    DS4_BUTTON_DPAD_SOUTHEAST = 0x3,
-    DS4_BUTTON_DPAD_EAST = 0x2,
-    DS4_BUTTON_DPAD_NORTHEAST = 0x1,
-    DS4_BUTTON_DPAD_NORTH = 0x0
-} DS4_DPAD_DIRECTIONS, *PDS4_DPAD_DIRECTIONS;
-
 //
 // DualShock 4 request data
 // 
@@ -444,32 +310,6 @@ typedef struct _DS4_SUBMIT_REPORT
     // 
     DS4_REPORT Report;
 } DS4_SUBMIT_REPORT, *PDS4_SUBMIT_REPORT;
-
-//
-// Sets the current state of the D-PAD on a DualShock 4 report.
-// 
-VOID FORCEINLINE DS4_SET_DPAD(
-    _Out_ PDS4_REPORT Report,
-          _In_ DS4_DPAD_DIRECTIONS Dpad
-)
-{
-    Report->wButtons &= ~0xF;
-    Report->wButtons |= (USHORT)Dpad;
-}
-
-VOID FORCEINLINE DS4_REPORT_INIT(
-    _Out_ PDS4_REPORT Report
-)
-{
-    RtlZeroMemory(Report, sizeof(DS4_REPORT));
-
-    Report->bThumbLX = 0x80;
-    Report->bThumbLY = 0x80;
-    Report->bThumbRX = 0x80;
-    Report->bThumbRY = 0x80;
-
-    DS4_SET_DPAD(Report, DS4_BUTTON_DPAD_NONE);
-}
 
 //
 // Initializes a DualShock 4 report.
@@ -592,46 +432,3 @@ VOID FORCEINLINE VIGEM_CHECK_VERSION_INIT(
     CheckVersion->Size = sizeof(VIGEM_CHECK_VERSION);
     CheckVersion->Version = Version;
 }
-
-VOID FORCEINLINE XUSB_TO_DS4_REPORT(
-    _Out_ PXUSB_REPORT Input,
-          _Out_ PDS4_REPORT Output
-)
-{
-    if (Input->wButtons & XUSB_GAMEPAD_BACK) Output->wButtons |= DS4_BUTTON_SHARE;
-    if (Input->wButtons & XUSB_GAMEPAD_START) Output->wButtons |= DS4_BUTTON_OPTIONS;
-    if (Input->wButtons & XUSB_GAMEPAD_LEFT_THUMB) Output->wButtons |= DS4_BUTTON_THUMB_LEFT;
-    if (Input->wButtons & XUSB_GAMEPAD_RIGHT_THUMB) Output->wButtons |= DS4_BUTTON_THUMB_RIGHT;
-    if (Input->wButtons & XUSB_GAMEPAD_LEFT_SHOULDER) Output->wButtons |= DS4_BUTTON_SHOULDER_LEFT;
-    if (Input->wButtons & XUSB_GAMEPAD_RIGHT_SHOULDER) Output->wButtons |= DS4_BUTTON_SHOULDER_RIGHT;
-    if (Input->wButtons & XUSB_GAMEPAD_GUIDE) Output->bSpecial |= DS4_SPECIAL_BUTTON_PS;
-    if (Input->wButtons & XUSB_GAMEPAD_A) Output->wButtons |= DS4_BUTTON_CROSS;
-    if (Input->wButtons & XUSB_GAMEPAD_B) Output->wButtons |= DS4_BUTTON_CIRCLE;
-    if (Input->wButtons & XUSB_GAMEPAD_X) Output->wButtons |= DS4_BUTTON_SQUARE;
-    if (Input->wButtons & XUSB_GAMEPAD_Y) Output->wButtons |= DS4_BUTTON_TRIANGLE;
-
-    Output->bTriggerL = Input->bLeftTrigger;
-    Output->bTriggerR = Input->bRightTrigger;
-
-    if (Input->wButtons & XUSB_GAMEPAD_DPAD_UP) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_NORTH);
-    if (Input->wButtons & XUSB_GAMEPAD_DPAD_RIGHT) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_EAST);
-    if (Input->wButtons & XUSB_GAMEPAD_DPAD_DOWN) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_SOUTH);
-    if (Input->wButtons & XUSB_GAMEPAD_DPAD_LEFT) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_WEST);
-
-    if (Input->wButtons & XUSB_GAMEPAD_DPAD_UP
-        && Input->wButtons & XUSB_GAMEPAD_DPAD_RIGHT) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_NORTHEAST);
-    if (Input->wButtons & XUSB_GAMEPAD_DPAD_RIGHT
-        && Input->wButtons & XUSB_GAMEPAD_DPAD_DOWN) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_SOUTHEAST);
-    if (Input->wButtons & XUSB_GAMEPAD_DPAD_DOWN
-        && Input->wButtons & XUSB_GAMEPAD_DPAD_LEFT) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_SOUTHWEST);
-    if (Input->wButtons & XUSB_GAMEPAD_DPAD_LEFT
-        && Input->wButtons & XUSB_GAMEPAD_DPAD_UP) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_NORTHWEST);
-
-    Output->bThumbLX = ((Input->sThumbLX + ((USHRT_MAX / 2) + 1)) / 257);
-    Output->bThumbLY = (-(Input->sThumbLY + ((USHRT_MAX / 2) - 1)) / 257);
-    Output->bThumbLY = (Output->bThumbLY == 0) ? 0xFF : Output->bThumbLY;
-    Output->bThumbRX = ((Input->sThumbRX + ((USHRT_MAX / 2) + 1)) / 257);
-    Output->bThumbRY = (-(Input->sThumbRY + ((USHRT_MAX / 2) + 1)) / 257);
-    Output->bThumbRY = (Output->bThumbRY == 0) ? 0xFF : Output->bThumbRY;
-}
-

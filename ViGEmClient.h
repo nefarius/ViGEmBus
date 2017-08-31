@@ -26,7 +26,7 @@ SOFTWARE.
 #ifndef ViGEmClient_h__
 #define ViGEmClient_h__
 
-#include "ViGEmBusShared.h"
+#include "ViGEmCommon.h"
 
 /**
  * \typedef enum _VIGEM_ERRORS
