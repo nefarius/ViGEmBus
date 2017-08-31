@@ -142,10 +142,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\Include\ViGEmBusShared.h" />
-    <ClInclude Include="..\Include\ViGEmClient.h" />
-    <ClInclude Include="..\Include\ViGEmCommon.h" />
-    <ClInclude Include="..\Include\ViGEmUtil.h" />
+    <ClInclude Include="$(SolutionDir)\Include\ViGEmBusShared.h" />
+    <ClInclude Include="$(SolutionDir)\Include\ViGEmClient.h" />
+    <ClInclude Include="$(SolutionDir)\Include\ViGEmCommon.h" />
+    <ClInclude Include="$(SolutionDir)\Include\ViGEmUtil.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
