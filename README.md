@@ -14,9 +14,11 @@ Before installing the bus driver on Windows 7 (x86 or x64) the following 3rd par
    * [Security Update for Windows 7 for x64-based Systems (KB3033929)](https://www.microsoft.com/en-us/download/details.aspx?id=46148)
 
 ## Manual Installation
+From an elevated prompt execute:
 ```
 devcon.exe install ViGEmBus.inf Root\ViGEmBus
 ```
+The [Windows Device Console (Devcon.exe)](https://docs.microsoft.com/en-us/windows-hardware/drivers/devtest/devcon) is included in the Windows Driver Kit.
 
 ## Manual Removal
 ```
