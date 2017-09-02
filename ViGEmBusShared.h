@@ -70,6 +70,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_BUSENUM_VIGEM,
 //  Data structure used in PlugIn and UnPlug ioctls
 //
 
+#pragma region Plugin
 
 //
 // Data structure used in IOCTL_VIGEM_PLUGIN_TARGET requests.
@@ -119,6 +120,10 @@ VOID FORCEINLINE VIGEM_PLUGIN_TARGET_INIT(
     PlugIn->TargetType = TargetType;
 }
 
+#pragma endregion 
+
+#pragma region Unplug
+
 //
 // Data structure used in IOCTL_VIGEM_UNPLUG_TARGET requests.
 // 
@@ -149,6 +154,33 @@ VOID FORCEINLINE VIGEM_UNPLUG_TARGET_INIT(
     UnPlug->Size = sizeof(VIGEM_UNPLUG_TARGET);
     UnPlug->SerialNo = SerialNo;
 }
+
+#pragma endregion
+
+#pragma region Check version
+
+typedef struct _VIGEM_CHECK_VERSION
+{
+    IN ULONG Size;
+
+    IN ULONG Version;
+
+} VIGEM_CHECK_VERSION, *PVIGEM_CHECK_VERSION;
+
+VOID FORCEINLINE VIGEM_CHECK_VERSION_INIT(
+    _Out_ PVIGEM_CHECK_VERSION CheckVersion,
+    _In_ ULONG Version
+)
+{
+    RtlZeroMemory(CheckVersion, sizeof(VIGEM_CHECK_VERSION));
+
+    CheckVersion->Size = sizeof(VIGEM_CHECK_VERSION);
+    CheckVersion->Version = Version;
+}
+
+#pragma endregion 
+
+#pragma region XUSB (aka Xbox 360 device) section
 
 //
 // Data structure used in IOCTL_XUSB_REQUEST_NOTIFICATION requests.
@@ -195,7 +227,6 @@ VOID FORCEINLINE XUSB_REQUEST_NOTIFICATION_INIT(
     Request->SerialNo = SerialNo;
 }
 
-
 //
 // Data structure used in IOCTL_XUSB_SUBMIT_REPORT requests.
 // 
@@ -222,7 +253,7 @@ typedef struct _XUSB_SUBMIT_REPORT
 // 
 VOID FORCEINLINE XUSB_SUBMIT_REPORT_INIT(
     _Out_ PXUSB_SUBMIT_REPORT Report,
-          _In_ ULONG SerialNo
+    _In_ ULONG SerialNo
 )
 {
     RtlZeroMemory(Report, sizeof(XUSB_SUBMIT_REPORT));
@@ -231,7 +262,9 @@ VOID FORCEINLINE XUSB_SUBMIT_REPORT_INIT(
     Report->SerialNo = SerialNo;
 }
 
+#pragma endregion
 
+#pragma region DualShock 4 section
 
 typedef struct _DS4_OUTPUT_REPORT
 {
@@ -249,8 +282,8 @@ typedef struct _DS4_OUTPUT_REPORT
     // Color values of the Lightbar.
     //
     DS4_LIGHTBAR_COLOR LightbarColor;
-} DS4_OUTPUT_REPORT, *PDS4_OUTPUT_REPORT;
 
+} DS4_OUTPUT_REPORT, *PDS4_OUTPUT_REPORT;
 
 //
 // Data structure used in IOCTL_DS4_REQUEST_NOTIFICATION requests.
@@ -267,6 +300,9 @@ typedef struct _DS4_REQUEST_NOTIFICATION
     // 
     ULONG SerialNo;
 
+    //
+    // The HID output report
+    // 
     DS4_OUTPUT_REPORT Report;
 
 } DS4_REQUEST_NOTIFICATION, *PDS4_REQUEST_NOTIFICATION;
@@ -276,7 +312,7 @@ typedef struct _DS4_REQUEST_NOTIFICATION
 // 
 VOID FORCEINLINE DS4_REQUEST_NOTIFICATION_INIT(
     _Out_ PDS4_REQUEST_NOTIFICATION Request,
-          _In_ ULONG SerialNo
+    _In_ ULONG SerialNo
 )
 {
     RtlZeroMemory(Request, sizeof(DS4_REQUEST_NOTIFICATION));
@@ -304,6 +340,7 @@ typedef struct _DS4_SUBMIT_REPORT
     // HID Input report
     // 
     DS4_REPORT Report;
+
 } DS4_SUBMIT_REPORT, *PDS4_SUBMIT_REPORT;
 
 //
@@ -311,7 +348,7 @@ typedef struct _DS4_SUBMIT_REPORT
 // 
 VOID FORCEINLINE DS4_SUBMIT_REPORT_INIT(
     _Out_ PDS4_SUBMIT_REPORT Report,
-          _In_ ULONG SerialNo
+    _In_ ULONG SerialNo
 )
 {
     RtlZeroMemory(Report, sizeof(DS4_SUBMIT_REPORT));
@@ -321,6 +358,10 @@ VOID FORCEINLINE DS4_SUBMIT_REPORT_INIT(
 
     DS4_REPORT_INIT(&Report->Report);
 }
+
+#pragma endregion
+
+#pragma region XGIP (aka Xbox One device) section - EXPERIMENTAL
 
 typedef struct _XGIP_REPORT
 {
@@ -360,7 +401,7 @@ typedef struct _XGIP_SUBMIT_REPORT
 // 
 VOID FORCEINLINE XGIP_SUBMIT_REPORT_INIT(
     _Out_ PXGIP_SUBMIT_REPORT Report,
-          _In_ ULONG SerialNo
+    _In_ ULONG SerialNo
 )
 {
     RtlZeroMemory(Report, sizeof(XGIP_SUBMIT_REPORT));
@@ -393,6 +434,7 @@ typedef struct _XGIP_SUBMIT_INTERRUPT
     // Length of interrupt buffer.
     // 
     ULONG InterruptLength;
+
 } XGIP_SUBMIT_INTERRUPT, *PXGIP_SUBMIT_INTERRUPT;
 
 //
@@ -400,7 +442,7 @@ typedef struct _XGIP_SUBMIT_INTERRUPT
 // 
 VOID FORCEINLINE XGIP_SUBMIT_INTERRUPT_INIT(
     _Out_ PXGIP_SUBMIT_INTERRUPT Report,
-          _In_ ULONG SerialNo
+    _In_ ULONG SerialNo
 )
 {
     RtlZeroMemory(Report, sizeof(XGIP_SUBMIT_INTERRUPT));
@@ -409,21 +451,5 @@ VOID FORCEINLINE XGIP_SUBMIT_INTERRUPT_INIT(
     Report->SerialNo = SerialNo;
 }
 
-typedef struct _VIGEM_CHECK_VERSION
-{
-    IN ULONG Size;
+#pragma endregion
 
-    IN ULONG Version;
-
-} VIGEM_CHECK_VERSION, *PVIGEM_CHECK_VERSION;
-
-VOID FORCEINLINE VIGEM_CHECK_VERSION_INIT(
-    _Out_ PVIGEM_CHECK_VERSION CheckVersion,
-          _In_ ULONG Version
-)
-{
-    RtlZeroMemory(CheckVersion, sizeof(VIGEM_CHECK_VERSION));
-
-    CheckVersion->Size = sizeof(VIGEM_CHECK_VERSION);
-    CheckVersion->Version = Version;
-}
