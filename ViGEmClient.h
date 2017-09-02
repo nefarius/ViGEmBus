@@ -26,6 +26,10 @@ SOFTWARE.
 #ifndef ViGEmClient_h__
 #define ViGEmClient_h__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "ViGEmCommon.h"
 
 /**
@@ -435,5 +439,9 @@ VIGEM_TARGET_TYPE vigem_target_get_type(PVIGEM_TARGET target);
  * \return  TRUE if device is attached to the bus, FALSE otherwise.
  */
 BOOL vigem_target_is_attached(PVIGEM_TARGET target);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ViGEmClient_h__
