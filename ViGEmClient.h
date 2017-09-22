@@ -32,6 +32,16 @@ extern "C" {
 
 #include "ViGEmCommon.h"
 
+#ifdef VIGEM_DYNAMIC
+#ifdef VIGEM_EXPORTS
+#define VIGEM_API __declspec(dllexport)
+#else
+#define VIGEM_API __declspec(dllimport)
+#endif
+#else
+#define VIGEM_API
+#endif
+
 /**
  * \typedef enum _VIGEM_ERRORS
  *
@@ -109,7 +119,7 @@ typedef VOID(CALLBACK* PVIGEM_TARGET_ADD_RESULT)(
  *
  * \return  A new driver connection object.
  */
-PVIGEM_CLIENT vigem_alloc(void);
+VIGEM_API PVIGEM_CLIENT vigem_alloc(void);
 
 /**
  * \fn  void vigem_free(PVIGEM_CLIENT vigem);
@@ -121,7 +131,7 @@ PVIGEM_CLIENT vigem_alloc(void);
  *
  * \param   vigem   The driver connection object.
  */
-void vigem_free(PVIGEM_CLIENT vigem);
+VIGEM_API void vigem_free(PVIGEM_CLIENT vigem);
 
 /**
  * \fn  VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem);
@@ -136,7 +146,7 @@ void vigem_free(PVIGEM_CLIENT vigem);
  *
  * \return  A VIGEM_ERROR.
  */
-VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem);
+VIGEM_API VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem);
 
 /**
  * \fn  void vigem_disconnect(PVIGEM_CLIENT vigem);
@@ -151,7 +161,7 @@ VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem);
  *
  * \param   vigem   The driver connection object.
  */
-void vigem_disconnect(PVIGEM_CLIENT vigem);
+VIGEM_API void vigem_disconnect(PVIGEM_CLIENT vigem);
 
 /**
  * \fn  PVIGEM_TARGET vigem_target_x360_alloc(void);
@@ -163,7 +173,7 @@ void vigem_disconnect(PVIGEM_CLIENT vigem);
  *
  * \return  A PVIGEM_TARGET representing an Xbox 360 Controller device.
  */
-PVIGEM_TARGET vigem_target_x360_alloc(void);
+VIGEM_API PVIGEM_TARGET vigem_target_x360_alloc(void);
 
 /**
  * \fn  PVIGEM_TARGET vigem_target_ds4_alloc(void);
@@ -175,7 +185,7 @@ PVIGEM_TARGET vigem_target_x360_alloc(void);
  *
  * \return  A PVIGEM_TARGET representing a DualShock 4 Controller device.
  */
-PVIGEM_TARGET vigem_target_ds4_alloc(void);
+VIGEM_API PVIGEM_TARGET vigem_target_ds4_alloc(void);
 
 /**
  * \fn  void vigem_target_free(PVIGEM_TARGET target);
@@ -190,7 +200,7 @@ PVIGEM_TARGET vigem_target_ds4_alloc(void);
  *
  * \param   target  The target device object.
  */
-void vigem_target_free(PVIGEM_TARGET target);
+VIGEM_API void vigem_target_free(PVIGEM_TARGET target);
 
 /**
  * \fn  VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
@@ -207,7 +217,7 @@ void vigem_target_free(PVIGEM_TARGET target);
  *
  * \return  A VIGEM_ERROR.
  */
-VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
+VIGEM_API VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
 
 /**
  * \fn  VIGEM_ERROR vigem_target_add_async(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_TARGET_ADD_RESULT result);
@@ -226,7 +236,7 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
  *
  * \return  A VIGEM_ERROR.
  */
-VIGEM_ERROR vigem_target_add_async(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_TARGET_ADD_RESULT result);
+VIGEM_API VIGEM_ERROR vigem_target_add_async(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_TARGET_ADD_RESULT result);
 
 /**
  * \fn  VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
@@ -244,7 +254,7 @@ VIGEM_ERROR vigem_target_add_async(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PV
  *
  * \return  A VIGEM_ERROR.
  */
-VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
+VIGEM_API VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
 
 /**
  * \fn  VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_X360_NOTIFICATION notification);
@@ -262,7 +272,7 @@ VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
  *
  * \return  A VIGEM_ERROR.
  */
-VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_X360_NOTIFICATION notification);
+VIGEM_API VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_X360_NOTIFICATION notification);
 
 /**
  * \fn  VIGEM_ERROR vigem_target_ds4_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_DS4_NOTIFICATION notification);
@@ -280,7 +290,7 @@ VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_
  *
  * \return  A VIGEM_ERROR.
  */
-VIGEM_ERROR vigem_target_ds4_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_DS4_NOTIFICATION notification);
+VIGEM_API VIGEM_ERROR vigem_target_ds4_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_DS4_NOTIFICATION notification);
 
 /**
  * \fn  void vigem_target_x360_unregister_notification(PVIGEM_TARGET target);
@@ -292,7 +302,7 @@ VIGEM_ERROR vigem_target_ds4_register_notification(PVIGEM_CLIENT vigem, PVIGEM_T
  *
  * \param   target  The target device object.
  */
-void vigem_target_x360_unregister_notification(PVIGEM_TARGET target);
+VIGEM_API void vigem_target_x360_unregister_notification(PVIGEM_TARGET target);
 
 /**
  * \fn  void vigem_target_ds4_unregister_notification(PVIGEM_TARGET target);
@@ -304,7 +314,7 @@ void vigem_target_x360_unregister_notification(PVIGEM_TARGET target);
  *
  * \param   target  The target device object.
  */
-void vigem_target_ds4_unregister_notification(PVIGEM_TARGET target);
+VIGEM_API void vigem_target_ds4_unregister_notification(PVIGEM_TARGET target);
 
 /**
  * \fn  void vigem_target_set_vid(PVIGEM_TARGET target, USHORT vid);
@@ -317,7 +327,7 @@ void vigem_target_ds4_unregister_notification(PVIGEM_TARGET target);
  * \param   target  The target device object.
  * \param   vid     The Vendor ID to set.
  */
-void vigem_target_set_vid(PVIGEM_TARGET target, USHORT vid);
+VIGEM_API void vigem_target_set_vid(PVIGEM_TARGET target, USHORT vid);
 
 /**
  * \fn  void vigem_target_set_pid(PVIGEM_TARGET target, USHORT pid);
@@ -330,7 +340,7 @@ void vigem_target_set_vid(PVIGEM_TARGET target, USHORT vid);
  * \param   target  The target device object.
  * \param   pid     The Product ID to set.
  */
-void vigem_target_set_pid(PVIGEM_TARGET target, USHORT pid);
+VIGEM_API void vigem_target_set_pid(PVIGEM_TARGET target, USHORT pid);
 
 /**
  * \fn  USHORT vigem_target_get_vid(PVIGEM_TARGET target);
@@ -344,7 +354,7 @@ void vigem_target_set_pid(PVIGEM_TARGET target, USHORT pid);
  *
  * \return  The Vendor ID.
  */
-USHORT vigem_target_get_vid(PVIGEM_TARGET target);
+VIGEM_API USHORT vigem_target_get_vid(PVIGEM_TARGET target);
 
 /**
  * \fn  USHORT vigem_target_get_pid(PVIGEM_TARGET target);
@@ -358,7 +368,7 @@ USHORT vigem_target_get_vid(PVIGEM_TARGET target);
  *
  * \return  The Product ID.
  */
-USHORT vigem_target_get_pid(PVIGEM_TARGET target);
+VIGEM_API USHORT vigem_target_get_pid(PVIGEM_TARGET target);
 
 /**
  * \fn  VIGEM_ERROR vigem_target_x360_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, XUSB_REPORT report);
@@ -374,7 +384,7 @@ USHORT vigem_target_get_pid(PVIGEM_TARGET target);
  *
  * \return  A VIGEM_ERROR.
  */
-VIGEM_ERROR vigem_target_x360_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, XUSB_REPORT report);
+VIGEM_API VIGEM_ERROR vigem_target_x360_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, XUSB_REPORT report);
 
 /**
  * \fn  VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, DS4_REPORT report);
@@ -390,7 +400,7 @@ VIGEM_ERROR vigem_target_x360_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, 
  *
  * \return  A VIGEM_ERROR.
  */
-VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, DS4_REPORT report);
+VIGEM_API VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, DS4_REPORT report);
 
 /**
  * \fn  ULONG vigem_target_get_index(PVIGEM_TARGET target);
@@ -409,7 +419,7 @@ VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, D
  *
  * \return  The internally used index of the target device.
  */
-ULONG vigem_target_get_index(PVIGEM_TARGET target);
+VIGEM_API ULONG vigem_target_get_index(PVIGEM_TARGET target);
 
 /**
  * \fn  VIGEM_TARGET_TYPE vigem_target_get_type(PVIGEM_TARGET target);
@@ -423,7 +433,7 @@ ULONG vigem_target_get_index(PVIGEM_TARGET target);
  *
  * \return  A VIGEM_TARGET_TYPE.
  */
-VIGEM_TARGET_TYPE vigem_target_get_type(PVIGEM_TARGET target);
+VIGEM_API VIGEM_TARGET_TYPE vigem_target_get_type(PVIGEM_TARGET target);
 
 /**
  * \fn  BOOL vigem_target_is_attached(PVIGEM_TARGET target);
@@ -438,7 +448,7 @@ VIGEM_TARGET_TYPE vigem_target_get_type(PVIGEM_TARGET target);
  *
  * \return  TRUE if device is attached to the bus, FALSE otherwise.
  */
-BOOL vigem_target_is_attached(PVIGEM_TARGET target);
+VIGEM_API BOOL vigem_target_is_attached(PVIGEM_TARGET target);
 
 #ifdef __cplusplus
 }
