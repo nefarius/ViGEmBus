@@ -15,19 +15,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Include\ViGEmClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\ViGEmBusShared.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\ViGEmCommon.h">
+    <ClInclude Include="$(SolutionDir)\Include\ViGEmBusShared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\ViGEmUtil.h">
+    <ClInclude Include="$(SolutionDir)\Include\ViGEmClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)\Include\ViGEmCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)\Include\ViGEmUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
