@@ -23,6 +23,9 @@ VOID FORCEINLINE XUSB_TO_DS4_REPORT(
     Output->bTriggerL = Input->bLeftTrigger;
     Output->bTriggerR = Input->bRightTrigger;
 
+    if (Input->bLeftTrigger > 0)Output->wButtons |= DS4_BUTTON_TRIGGER_LEFT;
+    if (Input->bRightTrigger > 0)Output->wButtons |= DS4_BUTTON_TRIGGER_RIGHT;
+
     if (Input->wButtons & XUSB_GAMEPAD_DPAD_UP) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_NORTH);
     if (Input->wButtons & XUSB_GAMEPAD_DPAD_RIGHT) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_EAST);
     if (Input->wButtons & XUSB_GAMEPAD_DPAD_DOWN) DS4_SET_DPAD(Output, DS4_BUTTON_DPAD_SOUTH);
