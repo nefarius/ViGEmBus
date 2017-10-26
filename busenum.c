@@ -372,8 +372,13 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
 
         if (ds4Data == NULL) break;
 
+        WdfSpinLockAcquire(pdoData->PendingNotificationRequestsLock);
         status = WdfRequestForwardToIoQueue(Request, pdoData->PendingNotificationRequests);
+        WdfSpinLockRelease(pdoData->PendingNotificationRequestsLock);
 
+        break;
+    default:
+        status = STATUS_NOT_SUPPORTED;
         break;
     }
 
