@@ -361,9 +361,9 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
 
         if (xusbData == NULL) break;
 
-        WdfSpinLockAcquire(xusbData->PendingNotificationRequestsLock);
-        status = WdfRequestForwardToIoQueue(Request, xusbData->PendingNotificationRequests);
-        WdfSpinLockRelease(xusbData->PendingNotificationRequestsLock);
+        WdfSpinLockAcquire(pdoData->PendingNotificationRequestsLock);
+        status = WdfRequestForwardToIoQueue(Request, pdoData->PendingNotificationRequests);
+        WdfSpinLockRelease(pdoData->PendingNotificationRequestsLock);
 
         break;
     case DualShock4Wired:
@@ -372,7 +372,7 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
 
         if (ds4Data == NULL) break;
 
-        status = WdfRequestForwardToIoQueue(Request, ds4Data->PendingNotificationRequests);
+        status = WdfRequestForwardToIoQueue(Request, pdoData->PendingNotificationRequests);
 
         break;
     }
@@ -491,19 +491,19 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
 
     KdPrint((DRIVERNAME "Bus_SubmitReport: received new report\n"));
 
+    WdfSpinLockAcquire(pdoData->PendingUsbInRequestsLock);
+
     // Get pending USB request
     switch (pdoData->TargetType)
     {
     case Xbox360Wired:
-
-        WdfSpinLockAcquire(XusbGetData(hChild)->PendingUsbInRequestsLock);
-        status = WdfIoQueueRetrieveNextRequest(XusbGetData(hChild)->PendingUsbInRequests, &usbRequest);
-        WdfSpinLockRelease(XusbGetData(hChild)->PendingUsbInRequestsLock);
+        
+        status = WdfIoQueueRetrieveNextRequest(pdoData->PendingUsbInRequests, &usbRequest);
 
         break;
     case DualShock4Wired:
 
-        status = WdfIoQueueRetrieveNextRequest(Ds4GetData(hChild)->PendingUsbInRequests, &usbRequest);
+        status = WdfIoQueueRetrieveNextRequest(pdoData->PendingUsbInRequests, &usbRequest);
 
         break;
     case XboxOneWired:
@@ -525,7 +525,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
             if (!NT_SUCCESS(status))
             {
                 KdPrint((DRIVERNAME "WdfMemoryCreate failed with status 0x%X\n", status));
-                return status;
+                goto releaseAndExit;
             }
 
             // Copy interrupt buffer to memory object
@@ -533,7 +533,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
             if (!NT_SUCCESS(status))
             {
                 KdPrint((DRIVERNAME "WdfMemoryCopyFromBuffer failed with status 0x%X\n", status));
-                return status;
+                goto releaseAndExit;
             }
 
             // Add memory object to collection
@@ -541,7 +541,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
             if (!NT_SUCCESS(status))
             {
                 KdPrint((DRIVERNAME "WdfCollectionAdd failed with status 0x%X\n", status));
-                return status;
+                goto releaseAndExit;
             }
 
             // Check if all packets have been received
@@ -554,7 +554,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
                 WdfTimerStart(xgip->XboxgipSysInitTimer, XGIP_SYS_INIT_PERIOD);
             }
 
-            return status;
+            goto releaseAndExit;
         }
 
         status = WdfIoQueueRetrieveNextRequest(XgipGetData(hChild)->PendingUsbInRequests, &usbRequest);
@@ -562,11 +562,12 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
         break;
     default:
 
-        return STATUS_NOT_SUPPORTED;
+        status = STATUS_NOT_SUPPORTED;
+        goto releaseAndExit;
     }
 
     if (!NT_SUCCESS(status))
-        return status;
+        goto releaseAndExit;
 
     KdPrint((DRIVERNAME "Bus_SubmitReport: pending IRP found\n"));
 
@@ -628,6 +629,8 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     // Complete pending request
     WdfRequestComplete(usbRequest, status);
 
+releaseAndExit:
+    WdfSpinLockRelease(pdoData->PendingUsbInRequestsLock);
     return status;
 }
 

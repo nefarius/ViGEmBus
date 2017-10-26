@@ -88,8 +88,10 @@ NTSTATUS Bus_CreatePdo(
     WDFQUEUE                        defaultPdoQueue;
     UNICODE_STRING                  deviceDescription;
     VIGEM_BUS_INTERFACE             busInterface;
-
-
+    WDF_OBJECT_ATTRIBUTES           attributes;
+    WDF_IO_QUEUE_CONFIG             usbInQueueConfig;
+    WDF_IO_QUEUE_CONFIG             notificationsQueueConfig;
+    
     DECLARE_CONST_UNICODE_STRING(deviceLocation, L"Virtual Gamepad Emulation Bus");
     DECLARE_UNICODE_STRING_SIZE(buffer, MAX_INSTANCE_ID_LEN);
     // reserve space for device id
@@ -350,6 +352,46 @@ NTSTATUS Bus_CreatePdo(
     }
 
 #pragma endregion
+
+#pragma region Create Queues & Locks
+
+    // Create and assign queue for incoming interrupt transfer
+    WDF_IO_QUEUE_CONFIG_INIT(&usbInQueueConfig, WdfIoQueueDispatchManual);
+
+    status = WdfIoQueueCreate(Device, &usbInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &pdoData->PendingUsbInRequests);
+    if (!NT_SUCCESS(status))
+    {
+        KdPrint((DRIVERNAME "WdfIoQueueCreate failed 0x%x\n", status));
+        return status;
+    }
+
+    // Create lock for queue
+    status = WdfSpinLockCreate(&attributes, &pdoData->PendingUsbInRequestsLock);
+    if (!NT_SUCCESS(status))
+    {
+        KdPrint((DRIVERNAME "WdfSpinLockCreate failed 0x%x\n", status));
+        return status;
+    }
+
+    // Create and assign queue for user-land notification requests
+    WDF_IO_QUEUE_CONFIG_INIT(&notificationsQueueConfig, WdfIoQueueDispatchManual);
+
+    status = WdfIoQueueCreate(Device, &notificationsQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &pdoData->PendingNotificationRequests);
+    if (!NT_SUCCESS(status))
+    {
+        KdPrint((DRIVERNAME "WdfIoQueueCreate failed 0x%x\n", status));
+        return status;
+    }
+
+    // Create lock for queue
+    status = WdfSpinLockCreate(&attributes, &pdoData->PendingNotificationRequestsLock);
+    if (!NT_SUCCESS(status))
+    {
+        KdPrint((DRIVERNAME "WdfSpinLockCreate failed 0x%x\n", status));
+        return status;
+    }
+
+#pragma endregion 
 
 #pragma region Default I/O queue setup
 

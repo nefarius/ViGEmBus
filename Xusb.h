@@ -87,16 +87,6 @@ typedef struct _XUSB_DEVICE_DATA
     XUSB_INTERRUPT_IN_PACKET Packet;
 
     //
-    // Queue for incoming data interrupt transfer
-    //
-    WDFQUEUE PendingUsbInRequests;
-
-    //
-    // Lock for queue for incoming data interrupt transfer
-    //
-    WDFSPINLOCK PendingUsbInRequestsLock;
-
-    //
     // Queue for incoming control interrupt transfer
     //
     WDFQUEUE HoldingUsbInRequests;
@@ -105,16 +95,6 @@ typedef struct _XUSB_DEVICE_DATA
     // Lock for queue for incoming control interrupt transfer
     //
     WDFSPINLOCK HoldingUsbInRequestsLock;
-
-    //
-    // Queue for inverted calls
-    //
-    WDFQUEUE PendingNotificationRequests;
-
-    //
-    // Lock for queue for inverted calls
-    //
-    WDFSPINLOCK PendingNotificationRequestsLock;
 
 } XUSB_DEVICE_DATA, *PXUSB_DEVICE_DATA;
 

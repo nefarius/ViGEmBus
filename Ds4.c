@@ -123,24 +123,10 @@ NTSTATUS Ds4_PrepareHardware(WDFDEVICE Device)
 
 NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION Description)
 {
-    NTSTATUS status;
-
-    PDS4_DEVICE_DATA ds4 = Ds4GetData(Device);
+    NTSTATUS            status;
+    PDS4_DEVICE_DATA    ds4 = Ds4GetData(Device);
 
     KdPrint((DRIVERNAME "Initializing DS4 context...\n"));
-
-    // I/O Queue for pending IRPs
-    WDF_IO_QUEUE_CONFIG pendingUsbQueueConfig, notificationsQueueConfig;
-
-    // Create and assign queue for incoming interrupt transfer
-    WDF_IO_QUEUE_CONFIG_INIT(&pendingUsbQueueConfig, WdfIoQueueDispatchManual);
-
-    status = WdfIoQueueCreate(Device, &pendingUsbQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &ds4->PendingUsbInRequests);
-    if (!NT_SUCCESS(status))
-    {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate failed 0x%x\n", status));
-        return status;
-    }
 
     // Initialize periodic timer
     WDF_TIMER_CONFIG timerConfig;
@@ -158,16 +144,6 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     if (!NT_SUCCESS(status))
     {
         KdPrint((DRIVERNAME "WdfTimerCreate failed 0x%x\n", status));
-        return status;
-    }
-
-    // Create and assign queue for user-land notification requests
-    WDF_IO_QUEUE_CONFIG_INIT(&notificationsQueueConfig, WdfIoQueueDispatchManual);
-
-    status = WdfIoQueueCreate(Device, &notificationsQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &ds4->PendingNotificationRequests);
-    if (!NT_SUCCESS(status))
-    {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate failed 0x%x\n", status));
         return status;
     }
 
@@ -362,20 +338,21 @@ VOID Ds4_PendingUsbRequestsTimerFunc(
     _In_ WDFTIMER Timer
 )
 {
-    NTSTATUS status;
-    WDFREQUEST usbRequest;
-    WDFDEVICE hChild;
-    PDS4_DEVICE_DATA ds4Data;
-    PIRP pendingIrp;
-    PIO_STACK_LOCATION irpStack;
-
-    // KdPrint((DRIVERNAME "Ds4_PendingUsbRequestsTimerFunc: Timer elapsed\n"));
+    NTSTATUS                status;
+    WDFREQUEST              usbRequest;
+    WDFDEVICE               hChild;
+    PDS4_DEVICE_DATA        ds4Data;
+    PIRP                    pendingIrp;
+    PIO_STACK_LOCATION      irpStack;
+    PPDO_DEVICE_DATA        pdoData;
 
     hChild = WdfTimerGetParentObject(Timer);
+    pdoData = PdoGetData(hChild);
     ds4Data = Ds4GetData(hChild);
 
     // Get pending USB request
-    status = WdfIoQueueRetrieveNextRequest(ds4Data->PendingUsbInRequests, &usbRequest);
+    WdfSpinLockAcquire(pdoData->PendingUsbInRequestsLock);
+    status = WdfIoQueueRetrieveNextRequest(pdoData->PendingUsbInRequests, &usbRequest);
 
     if (NT_SUCCESS(status))
     {
@@ -399,5 +376,7 @@ VOID Ds4_PendingUsbRequestsTimerFunc(
         // Complete pending request
         WdfRequestComplete(usbRequest, status);
     }
+
+    WdfSpinLockRelease(pdoData->PendingUsbInRequestsLock);
 }
 

@@ -98,6 +98,26 @@ typedef struct _PDO_DEVICE_DATA
 
     VIGEM_BUS_INTERFACE BusInterface;
 
+    //
+    // Queue for incoming data interrupt transfer
+    //
+    WDFQUEUE PendingUsbInRequests;
+
+    //
+    // Lock for queue for incoming data interrupt transfer
+    //
+    WDFSPINLOCK PendingUsbInRequestsLock;
+
+    //
+    // Queue for inverted calls
+    //
+    WDFQUEUE PendingNotificationRequests;
+
+    //
+    // Lock for queue for inverted calls
+    //
+    WDFSPINLOCK PendingNotificationRequestsLock;
+
 } PDO_DEVICE_DATA, *PPDO_DEVICE_DATA;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(PDO_DEVICE_DATA, PdoGetData)

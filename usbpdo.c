@@ -507,9 +507,9 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                 /* This request is sent periodically and relies on data the "feeder"
                 * has to supply, so we queue this request and return with STATUS_PENDING.
                 * The request gets completed as soon as the "feeder" sent an update. */
-                WdfSpinLockAcquire(xusb->PendingUsbInRequestsLock);
-                status = WdfRequestForwardToIoQueue(Request, xusb->PendingUsbInRequests);
-                WdfSpinLockRelease(xusb->PendingUsbInRequestsLock);
+                WdfSpinLockAcquire(pdoData->PendingUsbInRequestsLock);
+                status = WdfRequestForwardToIoQueue(Request, pdoData->PendingUsbInRequests);
+                WdfSpinLockRelease(pdoData->PendingUsbInRequestsLock);
 
                 return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
             }
@@ -567,10 +567,9 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         }
 
         // Notify user-mode process that new data is available
-        WdfSpinLockAcquire(xusb->PendingNotificationRequestsLock);
-        status = WdfIoQueueRetrieveNextRequest(xusb->PendingNotificationRequests, &notifyRequest);
-        WdfSpinLockRelease(xusb->PendingNotificationRequestsLock);
-
+        WdfSpinLockAcquire(pdoData->PendingNotificationRequestsLock);
+        status = WdfIoQueueRetrieveNextRequest(pdoData->PendingNotificationRequests, &notifyRequest);
+        
         if (NT_SUCCESS(status))
         {
             PXUSB_REQUEST_NOTIFICATION notify = NULL;
@@ -594,6 +593,8 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
             }
         }
 
+        WdfSpinLockRelease(pdoData->PendingNotificationRequestsLock);
+
         break;
     }
     case DualShock4Wired:
@@ -609,7 +610,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
             /* This request is sent periodically and relies on data the "feeder"
                has to supply, so we queue this request and return with STATUS_PENDING.
                The request gets completed as soon as the "feeder" sent an update. */
-            status = WdfRequestForwardToIoQueue(Request, ds4Data->PendingUsbInRequests);
+            status = WdfRequestForwardToIoQueue(Request, pdoData->PendingUsbInRequests);
 
             return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
         }
@@ -620,7 +621,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
             DS4_OUTPUT_BUFFER_LENGTH);
 
         // Notify user-mode process that new data is available
-        status = WdfIoQueueRetrieveNextRequest(ds4Data->PendingNotificationRequests, &notifyRequest);
+        status = WdfIoQueueRetrieveNextRequest(pdoData->PendingNotificationRequests, &notifyRequest);
 
         if (NT_SUCCESS(status))
         {
@@ -699,8 +700,8 @@ NTSTATUS UsbPdo_AbortPipe(WDFDEVICE Device)
         }
 
         // Higher driver shutting down, emptying PDOs queues
-        WdfIoQueuePurge(xusb->PendingUsbInRequests, NULL, NULL);
-        WdfIoQueuePurge(xusb->PendingNotificationRequests, NULL, NULL);
+        WdfIoQueuePurge(pdoData->PendingUsbInRequests, NULL, NULL);
+        WdfIoQueuePurge(pdoData->PendingNotificationRequests, NULL, NULL);
 
         break;
     }
@@ -718,7 +719,7 @@ NTSTATUS UsbPdo_AbortPipe(WDFDEVICE Device)
 
         // Higher driver shutting down, emptying PDOs queues
         WdfTimerStop(ds4->PendingUsbInRequestsTimer, TRUE);
-        WdfIoQueuePurge(ds4->PendingUsbInRequests, NULL, NULL);
+        WdfIoQueuePurge(pdoData->PendingUsbInRequests, NULL, NULL);
 
         break;
     }

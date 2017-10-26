@@ -216,43 +216,7 @@ NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION
     xusb->Packet.Size = 0x14;
 
     // I/O Queue for pending IRPs
-    WDF_IO_QUEUE_CONFIG usbInQueueConfig, notificationsQueueConfig, holdingInQueueConfig;
-
-    // Create and assign queue for incoming interrupt transfer
-    WDF_IO_QUEUE_CONFIG_INIT(&usbInQueueConfig, WdfIoQueueDispatchManual);
-
-    status = WdfIoQueueCreate(Device, &usbInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &xusb->PendingUsbInRequests);
-    if (!NT_SUCCESS(status))
-    {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate failed 0x%x\n", status));
-        return status;
-    }
-
-    // Create lock for queue
-    status = WdfSpinLockCreate(&attributes, &xusb->PendingUsbInRequestsLock);
-    if (!NT_SUCCESS(status))
-    {
-        KdPrint((DRIVERNAME "WdfSpinLockCreate failed 0x%x\n", status));
-        return status;
-    }
-
-    // Create and assign queue for user-land notification requests
-    WDF_IO_QUEUE_CONFIG_INIT(&notificationsQueueConfig, WdfIoQueueDispatchManual);
-
-    status = WdfIoQueueCreate(Device, &notificationsQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &xusb->PendingNotificationRequests);
-    if (!NT_SUCCESS(status))
-    {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate failed 0x%x\n", status));
-        return status;
-    }
-
-    // Create lock for queue
-    status = WdfSpinLockCreate(&attributes, &xusb->PendingNotificationRequestsLock);
-    if (!NT_SUCCESS(status))
-    {
-        KdPrint((DRIVERNAME "WdfSpinLockCreate failed 0x%x\n", status));
-        return status;
-    }
+    WDF_IO_QUEUE_CONFIG holdingInQueueConfig;
 
     // Create and assign queue for unhandled interrupt requests
     WDF_IO_QUEUE_CONFIG_INIT(&holdingInQueueConfig, WdfIoQueueDispatchManual);

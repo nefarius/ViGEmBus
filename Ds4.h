@@ -67,19 +67,9 @@ typedef struct _DS4_DEVICE_DATA
     DS4_OUTPUT_REPORT OutputReport;
 
     //
-    // Queue for incoming interrupt transfer
-    //
-    WDFQUEUE PendingUsbInRequests;
-
-    //
     // Timer for dispatching interrupt transfer
     //
     WDFTIMER PendingUsbInRequestsTimer;
-
-    //
-    // Queue for inverted calls
-    //
-    WDFQUEUE PendingNotificationRequests;
 
     //
     // Auto-generated MAC address of the target device
@@ -90,6 +80,7 @@ typedef struct _DS4_DEVICE_DATA
     // Default MAC address of the host (not used)
     //
     MAC_ADDRESS HostMacAddress;
+
 } DS4_DEVICE_DATA, *PDS4_DEVICE_DATA;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DS4_DEVICE_DATA, Ds4GetData)
