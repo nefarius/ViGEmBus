@@ -224,7 +224,7 @@ NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION
     status = WdfIoQueueCreate(Device, &holdingInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &xusb->HoldingUsbInRequests);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate failed 0x%x\n", status));
+        KdPrint((DRIVERNAME "WdfIoQueueCreate (HoldingUsbInRequests) failed 0x%x\n", status));
         return status;
     }
 
@@ -232,7 +232,7 @@ NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION
     status = WdfSpinLockCreate(&attributes, &xusb->HoldingUsbInRequestsLock);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfSpinLockCreate failed 0x%x\n", status));
+        KdPrint((DRIVERNAME "WdfSpinLockCreate (HoldingUsbInRequestsLock) failed 0x%x\n", status));
         return status;
     }
 

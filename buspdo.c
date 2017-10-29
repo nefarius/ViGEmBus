@@ -355,22 +355,25 @@ NTSTATUS Bus_CreatePdo(
 
 #pragma region Create Queues & Locks
 
+    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    attributes.ParentObject = hChild;
+
     // Create and assign queue for incoming interrupt transfer
     WDF_IO_QUEUE_CONFIG_INIT(&usbInQueueConfig, WdfIoQueueDispatchManual);
 
     status = WdfIoQueueCreate(Device, &usbInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &pdoData->PendingUsbInRequests);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate failed 0x%x\n", status));
-        return status;
+        KdPrint((DRIVERNAME "WdfIoQueueCreate (PendingUsbInRequests) failed 0x%x\n", status));
+        goto endCreatePdo;
     }
-
+    
     // Create lock for queue
     status = WdfSpinLockCreate(&attributes, &pdoData->PendingUsbInRequestsLock);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfSpinLockCreate failed 0x%x\n", status));
-        return status;
+        KdPrint((DRIVERNAME "WdfSpinLockCreate (PendingUsbInRequestsLock) failed 0x%x\n", status));
+        goto endCreatePdo;
     }
 
     // Create and assign queue for user-land notification requests
@@ -379,16 +382,16 @@ NTSTATUS Bus_CreatePdo(
     status = WdfIoQueueCreate(Device, &notificationsQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &pdoData->PendingNotificationRequests);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate failed 0x%x\n", status));
-        return status;
+        KdPrint((DRIVERNAME "WdfIoQueueCreate (PendingNotificationRequests) failed 0x%x\n", status));
+        goto endCreatePdo;
     }
 
     // Create lock for queue
     status = WdfSpinLockCreate(&attributes, &pdoData->PendingNotificationRequestsLock);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfSpinLockCreate failed 0x%x\n", status));
-        return status;
+        KdPrint((DRIVERNAME "WdfSpinLockCreate (PendingNotificationRequestsLock) failed 0x%x\n", status));
+        goto endCreatePdo;
     }
 
 #pragma endregion 
@@ -443,6 +446,9 @@ NTSTATUS Bus_CreatePdo(
 #pragma endregion
 
     endCreatePdo:
+                KdPrint((DRIVERNAME "BUS_PDO_REPORT_STAGE_RESULT Stage: ViGEmPdoCreate, Serial: 0x%X, Status: 0x%X (%d)\n",
+                    Description->SerialNo, status, NT_SUCCESS(status)));
+
                 BUS_PDO_REPORT_STAGE_RESULT(busInterface, ViGEmPdoCreate, Description->SerialNo, status);
                 return status;
 }
