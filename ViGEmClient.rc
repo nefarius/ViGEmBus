@@ -50,8 +50,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,13,1,0
- PRODUCTVERSION 1,13,1,0
+ FILEVERSION 1,13,2,0
+ PRODUCTVERSION 1,13,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -68,12 +68,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Benjamin Höglinger-Stelzer"
             VALUE "FileDescription", "Virtual Gamepad Emulation User-Mode Library"
-VALUE "FileVersion", "1.13.1.0"
+VALUE "FileVersion", "1.13.2.0"
             VALUE "InternalName", "Virtual Gamepad Emulation User-Mode Library"
             VALUE "LegalCopyright", "Copyright (C) Benjamin Höglinger-Stelzer 2017"
             VALUE "OriginalFilename", "ViGEmCli.lib"
             VALUE "ProductName", "Virtual Gamepad Emulation User-Mode Library"
-VALUE "ProductVersion", "1.13.1.0"
+VALUE "ProductVersion", "1.13.2.0"
         END
     END
     BLOCK "VarFileInfo"
