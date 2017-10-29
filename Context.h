@@ -96,6 +96,9 @@ typedef struct _PDO_DEVICE_DATA
     // 
     USHORT ProductId;
 
+    //
+    // Interface for PDO to FDO communication
+    // 
     VIGEM_BUS_INTERFACE BusInterface;
 
     //
