@@ -107,19 +107,9 @@ typedef struct _PDO_DEVICE_DATA
     WDFQUEUE PendingUsbInRequests;
 
     //
-    // Lock for queue for incoming data interrupt transfer
-    //
-    WDFSPINLOCK PendingUsbInRequestsLock;
-
-    //
     // Queue for inverted calls
     //
     WDFQUEUE PendingNotificationRequests;
-
-    //
-    // Lock for queue for inverted calls
-    //
-    WDFSPINLOCK PendingNotificationRequestsLock;
 
 } PDO_DEVICE_DATA, *PPDO_DEVICE_DATA;
 

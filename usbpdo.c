@@ -507,9 +507,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                 /* This request is sent periodically and relies on data the "feeder"
                 * has to supply, so we queue this request and return with STATUS_PENDING.
                 * The request gets completed as soon as the "feeder" sent an update. */
-                WdfSpinLockAcquire(pdoData->PendingUsbInRequestsLock);
                 status = WdfRequestForwardToIoQueue(Request, pdoData->PendingUsbInRequests);
-                WdfSpinLockRelease(pdoData->PendingUsbInRequestsLock);
 
                 return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
             }
@@ -567,7 +565,6 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         }
 
         // Notify user-mode process that new data is available
-        WdfSpinLockAcquire(pdoData->PendingNotificationRequestsLock);
         status = WdfIoQueueRetrieveNextRequest(pdoData->PendingNotificationRequests, &notifyRequest);
         
         if (NT_SUCCESS(status))
@@ -592,8 +589,6 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                 KdPrint((DRIVERNAME "WdfRequestRetrieveOutputBuffer failed with status 0x%X\n", status));
             }
         }
-
-        WdfSpinLockRelease(pdoData->PendingNotificationRequestsLock);
 
         break;
     }

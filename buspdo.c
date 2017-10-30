@@ -367,14 +367,6 @@ NTSTATUS Bus_CreatePdo(
         KdPrint((DRIVERNAME "WdfIoQueueCreate (PendingUsbInRequests) failed 0x%x\n", status));
         goto endCreatePdo;
     }
-    
-    // Create lock for queue
-    status = WdfSpinLockCreate(&attributes, &pdoData->PendingUsbInRequestsLock);
-    if (!NT_SUCCESS(status))
-    {
-        KdPrint((DRIVERNAME "WdfSpinLockCreate (PendingUsbInRequestsLock) failed 0x%x\n", status));
-        goto endCreatePdo;
-    }
 
     // Create and assign queue for user-land notification requests
     WDF_IO_QUEUE_CONFIG_INIT(&notificationsQueueConfig, WdfIoQueueDispatchManual);
@@ -383,14 +375,6 @@ NTSTATUS Bus_CreatePdo(
     if (!NT_SUCCESS(status))
     {
         KdPrint((DRIVERNAME "WdfIoQueueCreate (PendingNotificationRequests) failed 0x%x\n", status));
-        goto endCreatePdo;
-    }
-
-    // Create lock for queue
-    status = WdfSpinLockCreate(&attributes, &pdoData->PendingNotificationRequestsLock);
-    if (!NT_SUCCESS(status))
-    {
-        KdPrint((DRIVERNAME "WdfSpinLockCreate (PendingNotificationRequestsLock) failed 0x%x\n", status));
         goto endCreatePdo;
     }
 

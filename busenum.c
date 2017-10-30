@@ -361,9 +361,7 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
 
         if (xusbData == NULL) break;
 
-        WdfSpinLockAcquire(pdoData->PendingNotificationRequestsLock);
         status = WdfRequestForwardToIoQueue(Request, pdoData->PendingNotificationRequests);
-        WdfSpinLockRelease(pdoData->PendingNotificationRequestsLock);
 
         break;
     case DualShock4Wired:
@@ -372,9 +370,7 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
 
         if (ds4Data == NULL) break;
 
-        WdfSpinLockAcquire(pdoData->PendingNotificationRequestsLock);
         status = WdfRequestForwardToIoQueue(Request, pdoData->PendingNotificationRequests);
-        WdfSpinLockRelease(pdoData->PendingNotificationRequestsLock);
 
         break;
     default:
@@ -496,13 +492,11 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
 
     KdPrint((DRIVERNAME "Bus_SubmitReport: received new report\n"));
 
-    WdfSpinLockAcquire(pdoData->PendingUsbInRequestsLock);
-
     // Get pending USB request
     switch (pdoData->TargetType)
     {
     case Xbox360Wired:
-        
+
         status = WdfIoQueueRetrieveNextRequest(pdoData->PendingUsbInRequests, &usbRequest);
 
         break;
@@ -530,7 +524,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
             if (!NT_SUCCESS(status))
             {
                 KdPrint((DRIVERNAME "WdfMemoryCreate failed with status 0x%X\n", status));
-                goto releaseAndExit;
+                goto endSubmitReport;
             }
 
             // Copy interrupt buffer to memory object
@@ -538,7 +532,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
             if (!NT_SUCCESS(status))
             {
                 KdPrint((DRIVERNAME "WdfMemoryCopyFromBuffer failed with status 0x%X\n", status));
-                goto releaseAndExit;
+                goto endSubmitReport;
             }
 
             // Add memory object to collection
@@ -546,7 +540,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
             if (!NT_SUCCESS(status))
             {
                 KdPrint((DRIVERNAME "WdfCollectionAdd failed with status 0x%X\n", status));
-                goto releaseAndExit;
+                goto endSubmitReport;
             }
 
             // Check if all packets have been received
@@ -559,7 +553,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
                 WdfTimerStart(xgip->XboxgipSysInitTimer, XGIP_SYS_INIT_PERIOD);
             }
 
-            goto releaseAndExit;
+            goto endSubmitReport;
         }
 
         status = WdfIoQueueRetrieveNextRequest(XgipGetData(hChild)->PendingUsbInRequests, &usbRequest);
@@ -568,11 +562,11 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     default:
 
         status = STATUS_NOT_SUPPORTED;
-        goto releaseAndExit;
+        goto endSubmitReport;
     }
 
     if (!NT_SUCCESS(status))
-        goto releaseAndExit;
+        goto endSubmitReport;
 
     KdPrint((DRIVERNAME "Bus_SubmitReport: pending IRP found\n"));
 
@@ -604,7 +598,9 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
         /* Copy report to cache and transfer buffer
          * Skip first byte as it contains the never changing report id */
         RtlCopyBytes(Ds4GetData(hChild)->Report + 1, &((PDS4_SUBMIT_REPORT)Report)->Report, sizeof(DS4_REPORT));
-        RtlCopyBytes(Buffer, Ds4GetData(hChild)->Report, DS4_REPORT_SIZE);
+
+        if (Buffer)
+            RtlCopyBytes(Buffer, Ds4GetData(hChild)->Report, DS4_REPORT_SIZE);
 
         break;
     case XboxOneWired:
@@ -634,8 +630,7 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     // Complete pending request
     WdfRequestComplete(usbRequest, status);
 
-releaseAndExit:
-    WdfSpinLockRelease(pdoData->PendingUsbInRequestsLock);
+endSubmitReport:
     return status;
 }
 

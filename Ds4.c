@@ -351,13 +351,10 @@ VOID Ds4_PendingUsbRequestsTimerFunc(
     ds4Data = Ds4GetData(hChild);
 
     // Get pending USB request
-    WdfSpinLockAcquire(pdoData->PendingUsbInRequestsLock);
     status = WdfIoQueueRetrieveNextRequest(pdoData->PendingUsbInRequests, &usbRequest);
 
     if (NT_SUCCESS(status))
     {
-        // KdPrint((DRIVERNAME "Ds4_PendingUsbRequestsTimerFunc: pending IRP found\n"));
-
         // Get pending IRP
         pendingIrp = WdfRequestWdmGetIrp(usbRequest);
         irpStack = IoGetCurrentIrpStackLocation(pendingIrp);
@@ -371,12 +368,11 @@ VOID Ds4_PendingUsbRequestsTimerFunc(
         urb->UrbBulkOrInterruptTransfer.TransferBufferLength = DS4_REPORT_SIZE;
 
         // Copy cached report to transfer buffer 
-        RtlCopyBytes(Buffer, ds4Data->Report, DS4_REPORT_SIZE);
+        if (Buffer)
+            RtlCopyBytes(Buffer, ds4Data->Report, DS4_REPORT_SIZE);
 
         // Complete pending request
         WdfRequestComplete(usbRequest, status);
     }
-
-    WdfSpinLockRelease(pdoData->PendingUsbInRequestsLock);
 }
 
