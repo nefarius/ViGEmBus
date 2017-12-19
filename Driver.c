@@ -109,21 +109,6 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
 #pragma endregion
 
-#pragma region Assign object name
-
-    //
-    // TODO: this will fail if more than one bus device is present on the system.
-    // Is this still necessary? If not, remove and work only with GUIDs!
-    // 
-
-    status = WdfDeviceInitAssignName(DeviceInit, &VigemNtDeviceName);
-    if (!NT_SUCCESS(status)) {
-        KdPrint((DRIVERNAME "WdfDeviceInitAssignName failed with status 0x%x\n", status));
-        return status;
-    }
-
-#pragma endregion
-
 #pragma region Create FDO
 
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&fdoAttributes, FDO_DEVICE_DATA);
@@ -208,19 +193,6 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
     if (!NT_SUCCESS(status)) {
         KdPrint((DRIVERNAME "WdfDeviceAddQueryInterface failed 0x%0x\n", status));
         return(status);
-    }
-
-#pragma endregion 
-
-#pragma region Create symbolic link
-
-    status = WdfDeviceCreateSymbolicLink(
-        device,
-        &VigemDosDeviceName
-    );
-    if (!NT_SUCCESS(status)) {
-        KdPrint((DRIVERNAME "WdfDeviceCreateSymbolicLink failed with status 0x%x\n", status));
-        return status;
     }
 
 #pragma endregion
