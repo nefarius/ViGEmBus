@@ -34,8 +34,6 @@ DEFINE_GUID(GUID_DEVCLASS_VIGEM_RAWPDO,
 
 #pragma once
 
-DECLARE_GLOBAL_CONST_UNICODE_STRING(VigemNtDeviceName, L"\\Device\\ViGEmBus");
-DECLARE_GLOBAL_CONST_UNICODE_STRING(VigemDosDeviceName, L"\\DosDevices\\ViGEmBus");
 
 //
 // Describes the current stage a PDO completed
