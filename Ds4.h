@@ -39,7 +39,11 @@ SOFTWARE.
 #define HID_REPORT_ID_4                                 0x14
 
 #define DS4_DESCRIPTOR_SIZE	                            0x0029
+#if defined(_X86_)
+#define DS4_CONFIGURATION_SIZE                          0x0050
+#else
 #define DS4_CONFIGURATION_SIZE                          0x0070
+#endif
 #define DS4_HID_REPORT_DESCRIPTOR_SIZE                  0x01D3
 
 #define DS4_MANUFACTURER_NAME_LENGTH                    0x38

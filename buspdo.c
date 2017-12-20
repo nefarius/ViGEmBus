@@ -91,7 +91,7 @@ NTSTATUS Bus_CreatePdo(
     WDF_OBJECT_ATTRIBUTES           attributes;
     WDF_IO_QUEUE_CONFIG             usbInQueueConfig;
     WDF_IO_QUEUE_CONFIG             notificationsQueueConfig;
-    
+
     DECLARE_CONST_UNICODE_STRING(deviceLocation, L"Virtual Gamepad Emulation Bus");
     DECLARE_UNICODE_STRING_SIZE(buffer, MAX_INSTANCE_ID_LEN);
     // reserve space for device id
@@ -587,6 +587,11 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
                 status = UsbPdo_GetConfigurationDescriptorType(urb, pdoData);
 
+                if (!NT_SUCCESS(status))
+                {
+                    BUS_PDO_REPORT_STAGE_RESULT(pdoData->BusInterface, ViGEmPdoInternalIoControl, pdoData->SerialNo, status);
+                }
+
                 break;
 
             case USB_STRING_DESCRIPTOR_TYPE:
@@ -594,6 +599,11 @@ VOID Pdo_EvtIoInternalDeviceControl(
                 KdPrint((DRIVERNAME ">> >> >> USB_STRING_DESCRIPTOR_TYPE\n"));
 
                 status = UsbPdo_GetStringDescriptorType(urb, pdoData);
+
+                if (!NT_SUCCESS(status))
+                {
+                    BUS_PDO_REPORT_STAGE_RESULT(pdoData->BusInterface, ViGEmPdoInternalIoControl, pdoData->SerialNo, status);
+                }
 
                 break;
             case USB_INTERFACE_DESCRIPTOR_TYPE:
