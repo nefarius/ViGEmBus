@@ -211,6 +211,7 @@ typedef struct _XUSB_REQUEST_NOTIFICATION
     // Index number of the slot/LED that XUSB.sys has assigned.
     // 
     UCHAR LedNumber;
+
 } XUSB_REQUEST_NOTIFICATION, *PXUSB_REQUEST_NOTIFICATION;
 
 //
@@ -246,6 +247,7 @@ typedef struct _XUSB_SUBMIT_REPORT
     // Report to submit to the target device.
     // 
     XUSB_REPORT Report;
+
 } XUSB_SUBMIT_REPORT, *PXUSB_SUBMIT_REPORT;
 
 //
@@ -373,6 +375,7 @@ typedef struct _XGIP_REPORT
     SHORT ThumbLY;
     SHORT ThumbRX;
     SHORT ThumbRY;
+
 } XGIP_REPORT, *PXGIP_REPORT;
 
 //
@@ -394,6 +397,7 @@ typedef struct _XGIP_SUBMIT_REPORT
     // HID Input report
     // 
     XGIP_REPORT Report;
+
 } XGIP_SUBMIT_REPORT, *PXGIP_SUBMIT_REPORT;
 
 //
