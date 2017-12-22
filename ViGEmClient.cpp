@@ -147,7 +147,7 @@ VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem)
             FILE_SHARE_READ | FILE_SHARE_WRITE,
             nullptr,
             OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,
+            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_NO_BUFFERING | FILE_FLAG_WRITE_THROUGH | FILE_FLAG_OVERLAPPED,
             nullptr);
 
         // check bus open result
