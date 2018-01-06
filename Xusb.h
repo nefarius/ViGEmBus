@@ -91,11 +91,6 @@ typedef struct _XUSB_DEVICE_DATA
     //
     WDFQUEUE HoldingUsbInRequests;
 
-    //
-    // Lock for queue for incoming control interrupt transfer
-    //
-    WDFSPINLOCK HoldingUsbInRequestsLock;
-
 } XUSB_DEVICE_DATA, *PXUSB_DEVICE_DATA;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(XUSB_DEVICE_DATA, XusbGetData)

@@ -228,14 +228,6 @@ NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION
         return status;
     }
 
-    // Create lock for queue
-    status = WdfSpinLockCreate(&attributes, &xusb->HoldingUsbInRequestsLock);
-    if (!NT_SUCCESS(status))
-    {
-        KdPrint((DRIVERNAME "WdfSpinLockCreate (HoldingUsbInRequestsLock) failed 0x%x\n", status));
-        return status;
-    }
-
     return STATUS_SUCCESS;
 }
 

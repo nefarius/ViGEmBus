@@ -514,9 +514,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 
             if (XUSB_IS_CONTROL_PIPE(pTransfer))
             {
-                WdfSpinLockAcquire(xusb->HoldingUsbInRequestsLock);
                 status = WdfRequestForwardToIoQueue(Request, xusb->HoldingUsbInRequests);
-                WdfSpinLockRelease(xusb->HoldingUsbInRequestsLock);
 
                 return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
             }
