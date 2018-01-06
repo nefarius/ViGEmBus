@@ -565,7 +565,9 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
         goto endSubmitReport;
     }
 
-    if (!NT_SUCCESS(status))
+    if (status == STATUS_PENDING)
+        goto endSubmitReport;
+    else if (!NT_SUCCESS(status))
         goto endSubmitReport;
 
     KdPrint((DRIVERNAME "Bus_SubmitReport: pending IRP found\n"));
