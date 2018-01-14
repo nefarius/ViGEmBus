@@ -504,16 +504,79 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 
             if (XUSB_IS_DATA_PIPE(pTransfer))
             {
-                /* This request is sent periodically and relies on data the "feeder"
-                * has to supply, so we queue this request and return with STATUS_PENDING.
-                * The request gets completed as soon as the "feeder" sent an update. */
-                status = WdfRequestForwardToIoQueue(Request, pdoData->PendingUsbInRequests);
+                //
+                // Send "boot sequence" first, then the actual inputs
+                // 
+                switch (xusb->InterruptInitStage)
+                {
+                case 0:
+                    xusb->InterruptInitStage++;
+                    pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
+                    COPY_BYTE_ARRAY(pTransfer->TransferBuffer, P99_PROTECT({
+                        0x01, 0x03, 0x0E
+                        }));
+                    return STATUS_SUCCESS;
+                case 1:
+                    xusb->InterruptInitStage++;
+                    pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
+                    COPY_BYTE_ARRAY(pTransfer->TransferBuffer, P99_PROTECT({
+                        0x02, 0x03, 0x00
+                        }));
+                    return STATUS_SUCCESS;
+                case 2:
+                    xusb->InterruptInitStage++;
+                    pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
+                    COPY_BYTE_ARRAY(pTransfer->TransferBuffer, P99_PROTECT({
+                        0x03, 0x03, 0x03
+                        }));
+                    return STATUS_SUCCESS;
+                case 3:
+                    xusb->InterruptInitStage++;
+                    pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
+                    COPY_BYTE_ARRAY(pTransfer->TransferBuffer, P99_PROTECT({
+                        0x08, 0x03, 0x00
+                        }));
+                    return STATUS_SUCCESS;
+                case 4:
+                    xusb->InterruptInitStage++;
+                    pTransfer->TransferBufferLength = sizeof(XUSB_INTERRUPT_IN_PACKET);
+                    COPY_BYTE_ARRAY(pTransfer->TransferBuffer, P99_PROTECT({
+                        0x00, 0x14, 0x00, 0x00, 0x00, 0x00, 0xe4, 0xf2,
+                        0xb3, 0xf8, 0x49, 0xf3, 0xb0, 0xfc, 0x00, 0x00,
+                        0x00, 0x00, 0x00, 0x00
+                        }));
+                    return STATUS_SUCCESS;
+                case 5:
+                    xusb->InterruptInitStage++;
+                    pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
+                    COPY_BYTE_ARRAY(pTransfer->TransferBuffer, P99_PROTECT({
+                        0x01, 0x03, 0x03
+                        }));
+                    return STATUS_SUCCESS;
+                default:
+                    /* This request is sent periodically and relies on data the "feeder"
+                    * has to supply, so we queue this request and return with STATUS_PENDING.
+                    * The request gets completed as soon as the "feeder" sent an update. */
+                    status = WdfRequestForwardToIoQueue(Request, pdoData->PendingUsbInRequests);
 
-                return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
+                    return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
+                }
             }
 
             if (XUSB_IS_CONTROL_PIPE(pTransfer))
             {
+                if (!xusb->ReportedCapabilities && pTransfer->TransferBufferLength >= XUSB_INIT_STAGE_SIZE)
+                {
+                    pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
+                    COPY_BYTE_ARRAY(pTransfer->TransferBuffer, P99_PROTECT({
+                        0x05, 0x03, 0x00
+                        }));
+
+                    xusb->ReportedCapabilities = TRUE;
+
+                    return STATUS_SUCCESS;
+                }
+
                 status = WdfRequestForwardToIoQueue(Request, xusb->HoldingUsbInRequests);
 
                 return (NT_SUCCESS(status)) ? STATUS_PENDING : status;

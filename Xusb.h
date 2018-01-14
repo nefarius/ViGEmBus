@@ -52,6 +52,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_XUSB_UNKNOWN_2,
 #define XUSB_RUMBLE_SIZE                0x08
 #define XUSB_LEDSET_SIZE                0x03
 #define XUSB_LEDNUM_SIZE                0x01
+#define XUSB_INIT_STAGE_SIZE            0x03
 
 #define XUSB_IS_DATA_PIPE(_x_)          ((BOOLEAN)(_x_->PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0081))
 #define XUSB_IS_CONTROL_PIPE(_x_)       ((BOOLEAN)(_x_->PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0083))
@@ -90,6 +91,16 @@ typedef struct _XUSB_DEVICE_DATA
     // Queue for incoming control interrupt transfer
     //
     WDFQUEUE HoldingUsbInRequests;
+
+    //
+    // Required for XInputGetCapabilities to work
+    // 
+    BOOLEAN ReportedCapabilities;
+
+    //
+    // Required for XInputGetCapabilities to work
+    // 
+    ULONG InterruptInitStage;
 
 } XUSB_DEVICE_DATA, *PXUSB_DEVICE_DATA;
 

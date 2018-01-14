@@ -71,6 +71,13 @@ SOFTWARE.
 //
 #define HID_GET_REPORT_TYPE(_req_) ((_req_->Value >> 8) & 0xFF)
 
+//
+// Some insane macro-magic =3
+// 
+#define P99_PROTECT(...) __VA_ARGS__
+#define COPY_BYTE_ARRAY(_dst_, _bytes_)   do {BYTE b[] = _bytes_; \
+                                            RtlCopyMemory(_dst_, b, RTL_NUMBER_OF_V1(b)); } while (0)
+
 #pragma endregion
 
 

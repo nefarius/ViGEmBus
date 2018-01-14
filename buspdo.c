@@ -530,8 +530,35 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
             KdPrint((DRIVERNAME ">> >> URB_FUNCTION_CONTROL_TRANSFER\n"));
 
-            // Control transfer can safely be ignored
-            status = STATUS_SUCCESS;
+            switch (urb->UrbControlTransfer.SetupPacket[6])
+            {
+            case 0x04:
+                //
+                // Xenon magic
+                // 
+                COPY_BYTE_ARRAY(urb->UrbControlTransfer.TransferBuffer, P99_PROTECT({
+                    0x31, 0x3F, 0xCF, 0xDC
+                    }));
+                status = STATUS_SUCCESS;
+                break;
+            case 0x14:
+                //
+                // This is some weird USB 1.0 condition and _must fail_
+                // 
+                urb->UrbControlTransfer.Hdr.Status = USBD_STATUS_STALL_PID;
+                status = STATUS_UNSUCCESSFUL;
+                break;
+            case 0x08:
+                //
+                // This is some weird USB 1.0 condition and _must fail_
+                // 
+                urb->UrbControlTransfer.Hdr.Status = USBD_STATUS_STALL_PID;
+                status = STATUS_UNSUCCESSFUL;
+                break;
+            default:
+                status = STATUS_SUCCESS;
+                break;
+            }
 
             break;
 
