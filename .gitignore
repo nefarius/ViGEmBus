@@ -3,3 +3,11 @@
 ################################################################################
 
 /.vs/ViGEmBus/v15
+/build/bin/Release
+/build/obj/Release
+/lib/x64
+/packages
+/sys/x64/Release
+/x64/Release
+/x64/Release (dynamic)
+/x64/Release (static)
