@@ -2,3 +2,11 @@ version: 1.15.{build}
 image: Visual Studio 2017
 build_script:
 - ps: .\build.ps1 -configuration release
+artifacts:
+- path: x64\Release\ViGEmBus
+  name: ViGEmBus_x64
+- path: Release\ViGEmBus
+  name: ViGEmBus_x86
+deploy:
+- provider: Environment
+  name: BUILDBOT
