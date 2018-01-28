@@ -1,0 +1,78 @@
+;
+; ViGEmBus.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System
+ClassGuid={4D36E97D-E325-11CE-BFC1-08002BE10318}
+Provider=%ManufacturerName%
+CatalogFile=ViGEmBus.cat
+DriverVer= ;
+
+[DestinationDirs]
+DefaultDestDir = 12
+ViGEmBus_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+ViGEmBus.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%ViGEmBus.DeviceDesc%=ViGEmBus_Device, Root\ViGEmBus
+
+[ViGEmBus_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+ViGEmBus.sys
+
+;-------------- Service installation
+[ViGEmBus_Device.NT.Services]
+AddService = ViGEmBus,%SPSVCINST_ASSOCSERVICE%, ViGEmBus_Service_Inst
+
+; -------------- ViGEmBus driver install sections
+[ViGEmBus_Service_Inst]
+DisplayName    = %ViGEmBus.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\ViGEmBus.sys
+
+;
+;--- ViGEmBus_Device Coinstaller installation ------
+;
+
+[ViGEmBus_Device.NT.CoInstallers]
+AddReg=ViGEmBus_Device_CoInstaller_AddReg
+CopyFiles=ViGEmBus_Device_CoInstaller_CopyFiles
+
+[ViGEmBus_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[ViGEmBus_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[ViGEmBus_Device.NT.Wdf]
+KmdfService =  ViGEmBus, ViGEmBus_wdfsect
+[ViGEmBus_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="Benjamin Höglinger-Stelzer"
+DiskName = "ViGEmBus Installation Disk"
+ViGEmBus.DeviceDesc = "Virtual Gamepad Emulation Bus"
+ViGEmBus.SVCDESC = "Virtual Gamepad Emulation Service"
