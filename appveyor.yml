@@ -4,9 +4,9 @@ build_script:
 - ps: .\build.ps1 -configuration release
 artifacts:
 - path: x64\Release\ViGEmBus
-  name: ViGEmBus_x64
+  name: ViGEmBus_unsigned_x64
 - path: Release\ViGEmBus
-  name: ViGEmBus_x86
+  name: ViGEmBus_unsigned_x86
 deploy:
 - provider: Environment
   name: BUILDBOT
