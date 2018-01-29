@@ -3,9 +3,9 @@ image: Visual Studio 2017
 build_script:
 - ps: .\build.ps1 -configuration release
 artifacts:
-- path: x64\Release\ViGEmBus
+- path: bin\x64\ViGEmBus
   name: ViGEmBus_unsigned_x64
-- path: Release\ViGEmBus
+- path: bin\x86\ViGEmBus
   name: ViGEmBus_unsigned_x86
 deploy:
 - provider: Environment
