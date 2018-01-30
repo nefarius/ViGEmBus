@@ -5,11 +5,11 @@ build_script:
 after_build:
 - ps: |
     Invoke-WebRequest "https://github.com/electron/rcedit/releases/download/v1.0.0/rcedit-x64.exe" -OutFile rcedit.exe
-    .\rcedit.exe bin\x64\ViGEmBus\ViGEmBus.sys --set-file-version "{version}"
-    .\rcedit.exe bin\x64\ViGEmBus\ViGEmBus.sys --set-product-version "{version}"
+    .\rcedit.exe bin\x64\ViGEmBus\ViGEmBus.sys --set-file-version "$env:APPVEYOR_BUILD_VERSION"
+    .\rcedit.exe bin\x64\ViGEmBus\ViGEmBus.sys --set-product-version "$env:APPVEYOR_BUILD_VERSION"
     Invoke-WebRequest "https://github.com/electron/rcedit/releases/download/v1.0.0/rcedit-x86.exe" -OutFile rcedit.exe
-    .\rcedit.exe bin\x86\ViGEmBus\ViGEmBus.sys --set-file-version "{version}"
-    .\rcedit.exe bin\x86\ViGEmBus\ViGEmBus.sys --set-product-version "{version}"
+    .\rcedit.exe bin\x86\ViGEmBus\ViGEmBus.sys --set-file-version "$env:APPVEYOR_BUILD_VERSION"
+    .\rcedit.exe bin\x86\ViGEmBus\ViGEmBus.sys --set-product-version "$env:APPVEYOR_BUILD_VERSION"
 artifacts:
 - path: bin\x64\ViGEmBus
   name: ViGEmBus_unsigned_x64
