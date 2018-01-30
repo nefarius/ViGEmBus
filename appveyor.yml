@@ -2,6 +2,9 @@ version: 1.15.{build}
 image: Visual Studio 2017
 build_script:
 - ps: .\build.ps1 -configuration release
+after_build:
+- ps: |
+    Write-Warning "Test :)"
 artifacts:
 - path: bin\x64\ViGEmBus
   name: ViGEmBus_unsigned_x64
