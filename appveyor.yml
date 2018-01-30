@@ -4,7 +4,12 @@ build_script:
 - ps: .\build.ps1 -configuration release
 after_build:
 - ps: |
-    Write-Warning "Test :)"
+    Invoke-WebRequest "https://github.com/electron/rcedit/releases/download/v1.0.0/rcedit-x64.exe" -OutFile rcedit.exe
+    rcedit bin\x64\ViGEmBus\ViGEmBus.sys --set-file-version "{version}"
+    rcedit bin\x64\ViGEmBus\ViGEmBus.sys --set-product-version "{version}"
+    Invoke-WebRequest "https://github.com/electron/rcedit/releases/download/v1.0.0/rcedit-x86.exe" -OutFile rcedit.exe
+    rcedit bin\x86\ViGEmBus\ViGEmBus.sys --set-file-version "{version}"
+    rcedit bin\x86\ViGEmBus\ViGEmBus.sys --set-product-version "{version}"
 artifacts:
 - path: bin\x64\ViGEmBus
   name: ViGEmBus_unsigned_x64
