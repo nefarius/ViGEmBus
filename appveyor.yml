@@ -4,16 +4,18 @@ build_script:
 - ps: .\build.ps1 -configuration release
 after_build:
 - ps: |
-    Invoke-WebRequest "https://github.com/electron/rcedit/releases/download/v1.0.0/rcedit-x64.exe" -OutFile rcedit.exe
-    .\rcedit.exe bin\x64\ViGEmBus\ViGEmBus.sys --set-file-version "$env:APPVEYOR_BUILD_VERSION"
-    .\rcedit.exe bin\x64\ViGEmBus\ViGEmBus.sys --set-product-version "$env:APPVEYOR_BUILD_VERSION"
-    Invoke-WebRequest "https://github.com/electron/rcedit/releases/download/v1.0.0/rcedit-x86.exe" -OutFile rcedit.exe
-    .\rcedit.exe bin\x86\ViGEmBus\ViGEmBus.sys --set-file-version "$env:APPVEYOR_BUILD_VERSION"
-    .\rcedit.exe bin\x86\ViGEmBus\ViGEmBus.sys --set-product-version "$env:APPVEYOR_BUILD_VERSION"
+    Invoke-WebRequest "https://github.com/pavel-a/ddverpatch/files/1215010/verpatch-1.0.15.1-x86-codeplex.zip" -OutFile verpatch-1.0.15.1-x86-codeplex.zip
+    Expand-Archive verpatch-1.0.15.1-x86-codeplex.zip -DestinationPath .
+    .\verpatch.exe .\bin\x64\ViGEmBus\ViGEmBus.sys "$env:APPVEYOR_BUILD_VERSION"
+    .\verpatch.exe .\bin\x64\ViGEmBus\ViGEmBus.sys /pv "$env:APPVEYOR_BUILD_VERSION"
+    .\verpatch.exe .\bin\x86\ViGEmBus\ViGEmBus.sys "$env:APPVEYOR_BUILD_VERSION"
+    .\verpatch.exe .\bin\x86\ViGEmBus\ViGEmBus.sys /pv "$env:APPVEYOR_BUILD_VERSION"
+    makecab.exe /d SourceDir=bin\x64 /d CabinetNameTemplate=ViGEmBus_x64.cab /f ViGEmBus.ddf
+    makecab.exe /d SourceDir=bin\x86 /d CabinetNameTemplate=ViGEmBus_x86.cab /f ViGEmBus.ddf
 artifacts:
-- path: bin\x64\ViGEmBus
+- path: disk1\ViGEmBus_x64.cab
   name: ViGEmBus_unsigned_x64
-- path: bin\x86\ViGEmBus
+- path: disk1\ViGEmBus_x86.cab
   name: ViGEmBus_unsigned_x86
 deploy:
 - provider: Environment

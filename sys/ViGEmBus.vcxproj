@@ -68,6 +68,7 @@
     <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR>
     <KMDF_VERSION_MINOR>9</KMDF_VERSION_MINOR>
     <ALLOW_DATE_TIME>1</ALLOW_DATE_TIME>
+    <SignMode>Off</SignMode>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <TargetVersion>Windows7</TargetVersion>
@@ -90,6 +91,7 @@
     <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR>
     <KMDF_VERSION_MINOR>9</KMDF_VERSION_MINOR>
     <ALLOW_DATE_TIME>1</ALLOW_DATE_TIME>
+    <SignMode>Off</SignMode>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <TargetVersion>Windows7</TargetVersion>
