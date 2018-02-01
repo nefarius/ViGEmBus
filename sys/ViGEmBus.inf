@@ -16,21 +16,27 @@ ViGEmBus_Device_CoInstaller_CopyFiles = 11
 
 ; ================= Class section =====================
 
-[SourceDisksNames]
-1 = %DiskName%,,,""
+[SourceDisksNames.amd64]
+1 = %DiskName%,,,"\x64"
+
+[SourceDisksNames.x86]
+1 = %DiskName%,,,"\x86"
 
 [SourceDisksFiles]
-ViGEmBus.sys  = 1,,
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1
+ViGEmBus.sys = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll = 1
 
 ;*****************************************
 ; Install Section
 ;*****************************************
 
 [Manufacturer]
-%ManufacturerName%=Standard,NT$ARCH$
+%ManufacturerName%=Standard,NTamd64,NTx86
 
-[Standard.NT$ARCH$]
+[Standard.NTamd64]
+%ViGEmBus.DeviceDesc%=ViGEmBus_Device, Root\ViGEmBus
+
+[Standard.NTx86]
 %ViGEmBus.DeviceDesc%=ViGEmBus_Device, Root\ViGEmBus
 
 [ViGEmBus_Device.NT]
