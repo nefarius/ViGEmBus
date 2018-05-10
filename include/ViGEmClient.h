@@ -453,7 +453,9 @@ VIGEM_API BOOL vigem_target_is_attached(PVIGEM_TARGET target);
 /**
  * \fn  VIGEM_API ULONG vigem_target_x360_get_user_index(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
  *
- * \brief   Vigem target x coordinate 360 get user index.
+ * \brief   Returns the user index of the emulated Xenon device. This value correspondents to the
+ *          (zero-based) index number representing the player number via LED present on a
+ *          physical controller and is compatible to the dwUserIndex propery of the XInput* APIs.
  *
  * \author  Benjamin "Nefarius" Höglinger
  * \date    10.05.2018
