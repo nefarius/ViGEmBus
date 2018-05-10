@@ -700,6 +700,22 @@ VOID Pdo_EvtIoInternalDeviceControl(
             // success to the parent bus.
             // 
             BUS_PDO_REPORT_STAGE_RESULT(pdoData->BusInterface, ViGEmPdoInternalIoControl, pdoData->SerialNo, status);
+            
+            //
+            // The DS4 is basically ready to operate at this stage
+            // 
+            if (pdoData->TargetType == DualShock4Wired)
+            {
+                //
+                // Report back to FDO that we are ready to operate
+                // 
+                BUS_PDO_REPORT_STAGE_RESULT(
+                    pdoData->BusInterface,
+                    ViGEmPdoInitFinished,
+                    pdoData->SerialNo,
+                    STATUS_SUCCESS
+                );
+            }
 
             break;
 

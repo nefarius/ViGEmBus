@@ -635,7 +635,48 @@ BOOL vigem_target_is_attached(PVIGEM_TARGET target)
     return (target->State == VIGEM_TARGET_CONNECTED);
 }
 
-ULONG vigem_target_x360_get_user_index(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
+VIGEM_ERROR vigem_target_x360_get_user_index(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PULONG index)
 {
-    return VIGEM_API ULONG();
+    if (vigem->hBusDevice == nullptr)
+    {
+        return VIGEM_ERROR_BUS_NOT_FOUND;
+    }
+
+    if (target->SerialNo == 0 || target->Type != Xbox360Wired)
+    {
+        return VIGEM_ERROR_INVALID_TARGET;
+    }
+
+    DWORD transfered = 0;
+    OVERLAPPED lOverlapped = { 0 };
+    lOverlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+
+    XUSB_GET_USER_INDEX gui;
+    XUSB_GET_USER_INDEX_INIT(&gui, target->SerialNo);
+
+    DeviceIoControl(
+        vigem->hBusDevice,
+        IOCTL_XUSB_GET_USER_INDEX,
+        &gui,
+        gui.Size,
+        &gui,
+        gui.Size,
+        &transfered,
+        &lOverlapped
+    );
+
+    if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transfered, TRUE) == 0)
+    {
+        if (GetLastError() == ERROR_ACCESS_DENIED)
+        {
+            CloseHandle(lOverlapped.hEvent);
+            return VIGEM_ERROR_INVALID_TARGET;
+        }
+    }
+
+    CloseHandle(lOverlapped.hEvent);
+
+    *index = gui.UserIndex;
+
+    return VIGEM_ERROR_NONE;
 }

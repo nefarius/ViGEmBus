@@ -50,6 +50,7 @@ VOID Bus_EvtIoDeviceControl(
     PXGIP_SUBMIT_REPORT         xgipSubmit = NULL;
     PXGIP_SUBMIT_INTERRUPT      xgipInterrupt = NULL;
     PVIGEM_CHECK_VERSION        pCheckVersion = NULL;
+    PXUSB_GET_USER_INDEX        pXusbGetUserIndex = NULL;
 
     Device = WdfIoQueueGetDevice(Queue);
 
@@ -276,6 +277,45 @@ VOID Bus_EvtIoDeviceControl(
 
         break;
 #pragma endregion 
+
+#pragma region IOCTL_XUSB_GET_USER_INDEX
+    case IOCTL_XUSB_GET_USER_INDEX:
+
+        KdPrint((DRIVERNAME "IOCTL_XUSB_GET_USER_INDEX"));
+
+        // Don't accept the request if the output buffer can't hold the results
+        if (OutputBufferLength < sizeof(XUSB_GET_USER_INDEX))
+        {
+            KdPrint((DRIVERNAME "IOCTL_XUSB_GET_USER_INDEX: output buffer too small: %ul\n", OutputBufferLength));
+            break;
+        }
+
+        status = WdfRequestRetrieveInputBuffer(
+            Request, 
+            sizeof(XUSB_GET_USER_INDEX), 
+            (PVOID)&pXusbGetUserIndex, 
+            &length);
+
+        if (!NT_SUCCESS(status))
+        {
+            KdPrint((DRIVERNAME "WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
+            break;
+        }
+
+        if ((sizeof(XUSB_GET_USER_INDEX) == pXusbGetUserIndex->Size) && (length == InputBufferLength))
+        {
+            // This request only supports a single PDO at a time
+            if (pXusbGetUserIndex->SerialNo == 0)
+            {
+                status = STATUS_INVALID_PARAMETER;
+                break;
+            }
+
+            status = Xusb_GetUserIndex(Device, pXusbGetUserIndex);
+        }
+
+        break;
+#pragma endregion
 
     default:
         KdPrint((DRIVERNAME "UNKNOWN IOCTL CODE 0x%x\n", IoControlCode));

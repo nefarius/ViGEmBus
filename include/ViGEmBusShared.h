@@ -265,6 +265,39 @@ VOID FORCEINLINE XUSB_SUBMIT_REPORT_INIT(
     Report->SerialNo = SerialNo;
 }
 
+typedef struct _XUSB_GET_USER_INDEX
+{
+    //
+    // sizeof(struct _XUSB_GET_USER_INDEX)
+    // 
+    ULONG Size;
+
+    //
+    // Serial number of target device.
+    // 
+    ULONG SerialNo;
+
+    //
+    // User index of target device.
+    // 
+    OUT ULONG UserIndex;
+
+} XUSB_GET_USER_INDEX, *PXUSB_GET_USER_INDEX;
+
+//
+// Initializes XUSB_GET_USER_INDEX structure.
+// 
+VOID FORCEINLINE XUSB_GET_USER_INDEX_INIT(
+    _Out_ PXUSB_GET_USER_INDEX GetRequest,
+    _In_ ULONG SerialNo
+)
+{
+    RtlZeroMemory(GetRequest, sizeof(XUSB_GET_USER_INDEX));
+
+    GetRequest->Size = sizeof(XUSB_GET_USER_INDEX);
+    GetRequest->SerialNo = SerialNo;
+}
+
 #pragma endregion
 
 #pragma region DualShock 4 section

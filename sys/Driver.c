@@ -411,7 +411,7 @@ Bus_PdoStageResult(
     //
     // If any stage fails or is last stage, get associated request and complete it
     // 
-    if (!NT_SUCCESS(Status) || Stage == ViGEmPdoInternalIoControl)
+    if (!NT_SUCCESS(Status) || Stage == ViGEmPdoInitFinished)
     {
         WdfSpinLockAcquire(pFdoData->PendingPluginRequestsLock);
 

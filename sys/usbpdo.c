@@ -604,6 +604,16 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                 if (Buffer[2] == 0x05) xusb->LedNumber = 3;
 
                 KdPrint((DRIVERNAME "-- LED Number: %d\n", xusb->LedNumber));
+
+                //
+                // Report back to FDO that we are ready to operate
+                // 
+                BUS_PDO_REPORT_STAGE_RESULT(
+                    pdoData->BusInterface, 
+                    ViGEmPdoInitFinished, 
+                    pdoData->SerialNo, 
+                    STATUS_SUCCESS
+                );
             }
         }
 

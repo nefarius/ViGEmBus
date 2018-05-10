@@ -504,3 +504,41 @@ VOID Xusb_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
     pInfo->InterfaceHandle = (USBD_INTERFACE_HANDLE)0xFFFF0000;
 }
 
+NTSTATUS Xusb_GetUserIndex(WDFDEVICE Device, PXUSB_GET_USER_INDEX Request)
+{
+    NTSTATUS                    status = STATUS_INVALID_PARAMETER;
+    WDFDEVICE                   hChild;
+    PPDO_DEVICE_DATA            pdoData;
+    PXUSB_DEVICE_DATA           xusbData;
+
+
+    KdPrint((DRIVERNAME "Entered Bus_QueueNotification\n"));
+
+    hChild = Bus_GetPdo(Device, Request->SerialNo);
+
+    // Validate child
+    if (hChild == NULL)
+    {
+        KdPrint((DRIVERNAME "Bus_QueueNotification: PDO with serial %d not found\n", Request->SerialNo));
+        return STATUS_NO_SUCH_DEVICE;
+    }
+
+    // Check common context
+    pdoData = PdoGetData(hChild);
+    if (pdoData == NULL)
+    {
+        KdPrint((DRIVERNAME "Bus_QueueNotification: PDO context not found\n"));
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    // Check if caller owns this PDO
+    if (!IS_OWNER(pdoData))
+    {
+        KdPrint((DRIVERNAME "Bus_QueueNotification: PID mismatch: %d != %d\n", pdoData->OwnerProcessId, CURRENT_PROCESS_ID()));
+        return STATUS_ACCESS_DENIED;
+    }
+
+    Request->UserIndex = (ULONG)XusbGetData(hChild)->LedNumber;
+
+    return status;
+}
