@@ -634,3 +634,8 @@ BOOL vigem_target_is_attached(PVIGEM_TARGET target)
 {
     return (target->State == VIGEM_TARGET_CONNECTED);
 }
+
+ULONG vigem_target_x360_get_user_index(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
+{
+    return VIGEM_API ULONG();
+}

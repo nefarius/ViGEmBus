@@ -18,3 +18,7 @@
 /Release (static)
 /build/bin/Debug
 /build/obj/Debug
+/bin
+/sys/RCb21300
+/sys/RCa21300
+*.user

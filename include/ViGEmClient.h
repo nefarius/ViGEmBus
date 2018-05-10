@@ -450,6 +450,21 @@ VIGEM_API VIGEM_TARGET_TYPE vigem_target_get_type(PVIGEM_TARGET target);
  */
 VIGEM_API BOOL vigem_target_is_attached(PVIGEM_TARGET target);
 
+/**
+ * \fn  VIGEM_API ULONG vigem_target_x360_get_user_index(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
+ *
+ * \brief   Vigem target x coordinate 360 get user index.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    10.05.2018
+ *
+ * \param   vigem   The driver connection object.
+ * \param   target  The target device object.
+ *
+ * \return  The user index of the Xenon device.
+ */
+VIGEM_API ULONG vigem_target_x360_get_user_index(PVIGEM_CLIENT vigem, PVIGEM_TARGET target);
+
 #ifdef __cplusplus
 }
 #endif
