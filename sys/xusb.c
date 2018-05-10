@@ -509,7 +509,6 @@ NTSTATUS Xusb_GetUserIndex(WDFDEVICE Device, PXUSB_GET_USER_INDEX Request)
     NTSTATUS                    status = STATUS_INVALID_PARAMETER;
     WDFDEVICE                   hChild;
     PPDO_DEVICE_DATA            pdoData;
-    PXUSB_DEVICE_DATA           xusbData;
 
 
     KdPrint((DRIVERNAME "Entered Bus_QueueNotification\n"));
