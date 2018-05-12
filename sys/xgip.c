@@ -105,7 +105,7 @@ NTSTATUS Xgip_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfDeviceAddQueryInterface failed status 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XGIP, "WdfDeviceAddQueryInterface failed with status %!STATUS!", status);
         return status;
     }
 
@@ -382,7 +382,7 @@ VOID Xgip_SysInitTimerFunc(
             urb->UrbBulkOrInterruptTransfer.TransferBufferLength = (ULONG)size;
             RtlCopyBytes(urb->UrbBulkOrInterruptTransfer.TransferBuffer, Buffer, size);
 
-            KdPrint((DRIVERNAME "[%X] Buffer length: %d\n", 
+            KdPrint((DRIVERNAME "[%X] Buffer length: %d\n",
                 ((PUCHAR)urb->UrbBulkOrInterruptTransfer.TransferBuffer)[0],
                 urb->UrbBulkOrInterruptTransfer.TransferBufferLength));
 
