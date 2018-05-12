@@ -101,7 +101,7 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
     PAGED_CODE();
 
-    KdPrint((DRIVERNAME "Bus_EvtDeviceAdd: 0x%p\n", Driver));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
     WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
     // More than one process may talk to the bus at the same time
@@ -137,16 +137,19 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "Error creating device 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DRIVER,
+            "WdfDeviceCreate failed with status %!STATUS!",
+            status);
         return status;
     }
-
-    KdPrint((DRIVERNAME "Created FDO: 0x%X\n", device));
 
     pFDOData = FdoGetData(device);
     if (pFDOData == NULL)
     {
-        KdPrint((DRIVERNAME "Error creating device context\n"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DRIVER,
+            "FdoGetData failed");
         return STATUS_UNSUCCESSFUL;
     }
 
@@ -163,7 +166,10 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
     status = WdfCollectionCreate(&collectionAttributes, &pFDOData->PendingPluginRequests);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfCollectionCreate failed with status 0x%X\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DRIVER,
+            "WdfCollectionCreate failed with status %!STATUS!",
+            status);
         return STATUS_UNSUCCESSFUL;
     }
 
@@ -173,7 +179,10 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
     status = WdfSpinLockCreate(&collectionAttributes, &pFDOData->PendingPluginRequestsLock);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfSpinLockCreate failed with status 0x%X\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DRIVER,
+            "WdfSpinLockCreate failed with status %!STATUS!",
+            status);
         return STATUS_UNSUCCESSFUL;
     }
 
@@ -211,7 +220,10 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
         &queryInterfaceConfig);
 
     if (!NT_SUCCESS(status)) {
-        KdPrint((DRIVERNAME "WdfDeviceAddQueryInterface failed 0x%0x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DRIVER,
+            "WdfDeviceAddQueryInterface failed with status %!STATUS!",
+            status);
         return(status);
     }
 
@@ -231,7 +243,10 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate failed status 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DRIVER,
+            "WdfIoQueueCreate failed with status %!STATUS!",
+            status);
         return status;
     }
 
@@ -243,7 +258,10 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfDeviceCreateDeviceInterface failed status 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DRIVER,
+            "WdfDeviceCreateDeviceInterface failed with status %!STATUS!",
+            status);
         return status;
     }
 
