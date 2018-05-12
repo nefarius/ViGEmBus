@@ -25,6 +25,7 @@ SOFTWARE.
 
 #include "busenum.h"
 #include <hidclass.h>
+#include "ds4.tmh"
 
 NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription)
 {

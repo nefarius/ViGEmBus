@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 #include "busenum.h"
+#include "queue.tmh"
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (PAGE, Bus_EvtIoDefault)

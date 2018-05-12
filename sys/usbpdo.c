@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 #include "busenum.h"
+#include "usbpdo.tmh"
 
 
 //

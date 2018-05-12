@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 #include "busenum.h"
+#include "xgip.tmh"
 
 NTSTATUS Xgip_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription)
 {

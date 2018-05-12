@@ -25,6 +25,7 @@ SOFTWARE.
 
 #include <ntifs.h>
 #include "busenum.h"
+#include "util.tmh"
 
 
 VOID ReverseByteArray(PUCHAR Array, INT Length)

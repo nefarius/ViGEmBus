@@ -26,6 +26,7 @@ SOFTWARE.
 #include "busenum.h"
 #include <wdmsec.h>
 #include <usbioctl.h>
+#include "buspdo.tmh"
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(PAGE, Bus_CreatePdo)

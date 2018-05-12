@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 #include "busenum.h"
+#include "xusb.tmh"
 
 NTSTATUS Xusb_PreparePdo(
     PWDFDEVICE_INIT DeviceInit,
