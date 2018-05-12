@@ -355,14 +355,14 @@ VOID Xgip_SysInitTimerFunc(
     // Is TRUE when collection is filled up
     if (xgip->XboxgipSysInitReady)
     {
-        KdPrint((DRIVERNAME "XBOXGIP ready, completing requests...\n"));
+        TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XGIP, "XBOXGIP ready, completing requests...");
 
         // Get pending IN request
         status = WdfIoQueueRetrieveNextRequest(xgip->PendingUsbInRequests, &usbRequest);
 
         if (NT_SUCCESS(status))
         {
-            KdPrint((DRIVERNAME "Request found\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XGIP, "Request found");
 
             // Get top memory object
             mem = (WDFMEMORY)WdfCollectionGetFirstItem(xgip->XboxgipSysInitCollection);
@@ -382,9 +382,9 @@ VOID Xgip_SysInitTimerFunc(
             urb->UrbBulkOrInterruptTransfer.TransferBufferLength = (ULONG)size;
             RtlCopyBytes(urb->UrbBulkOrInterruptTransfer.TransferBuffer, Buffer, size);
 
-            KdPrint((DRIVERNAME "[%X] Buffer length: %d\n",
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_XGIP, "[%X] Buffer length: %d",
                 ((PUCHAR)urb->UrbBulkOrInterruptTransfer.TransferBuffer)[0],
-                urb->UrbBulkOrInterruptTransfer.TransferBufferLength));
+                urb->UrbBulkOrInterruptTransfer.TransferBufferLength);
 
             // Complete pending request
             WdfRequestComplete(usbRequest, status);
@@ -397,7 +397,7 @@ VOID Xgip_SysInitTimerFunc(
         // Stop timer when collection is purged
         if (WdfCollectionGetCount(xgip->XboxgipSysInitCollection) == 0)
         {
-            KdPrint((DRIVERNAME "Collection finished\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XGIP, "Collection finished");
 
             WdfTimerStop(xgip->XboxgipSysInitTimer, FALSE);
         }
