@@ -1260,7 +1260,10 @@ NTSTATUS UsbPdo_GetDescriptorFromInterface(PURB urb, PPDO_DEVICE_DATA pCommon)
 
     struct _URB_CONTROL_DESCRIPTOR_REQUEST* pRequest = &urb->UrbControlDescriptorRequest;
 
-    KdPrint((DRIVERNAME ">> >> >> _URB_CONTROL_DESCRIPTOR_REQUEST: Buffer Length %d\n", pRequest->TransferBufferLength));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> _URB_CONTROL_DESCRIPTOR_REQUEST: Buffer Length %d",
+        pRequest->TransferBufferLength);
 
     switch (pCommon->TargetType)
     {
