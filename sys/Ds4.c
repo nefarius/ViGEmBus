@@ -428,6 +428,8 @@ VOID Ds4_PendingUsbRequestsTimerFunc(
     PIO_STACK_LOCATION      irpStack;
     PPDO_DEVICE_DATA        pdoData;
 
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_DS4, "%!FUNC! Entry");
+
     hChild = WdfTimerGetParentObject(Timer);
     pdoData = PdoGetData(hChild);
     ds4Data = Ds4GetData(hChild);
@@ -456,5 +458,7 @@ VOID Ds4_PendingUsbRequestsTimerFunc(
         // Complete pending request
         WdfRequestComplete(usbRequest, status);
     }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
