@@ -334,7 +334,6 @@ NTSTATUS UsbPdo_SelectConfiguration(PURB urb, PPDO_DEVICE_DATA pCommon)
 
     pInfo = &urb->UrbSelectConfiguration.Interface;
 
-    KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: TotalLength %d\n", urb->UrbHeader.Length));
     TraceEvents(TRACE_LEVEL_VERBOSE,
         TRACE_USBPDO,
         ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: TotalLength %d",
@@ -406,16 +405,20 @@ NTSTATUS UsbPdo_SelectInterface(PURB urb, PPDO_DEVICE_DATA pCommon)
 {
     PUSBD_INTERFACE_INFORMATION pInfo = &urb->UrbSelectInterface.Interface;
 
-    KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_INTERFACE: Length %d, Interface %d, Alternate %d, Pipes %d\n",
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> URB_FUNCTION_SELECT_INTERFACE: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
         (int)pInfo->AlternateSetting,
-        pInfo->NumberOfPipes));
+        pInfo->NumberOfPipes);
 
-    KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_INTERFACE: Class %d, SubClass %d, Protocol %d\n",
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> URB_FUNCTION_SELECT_INTERFACE: Class %d, SubClass %d, Protocol %d",
         (int)pInfo->Class,
         (int)pInfo->SubClass,
-        (int)pInfo->Protocol));
+        (int)pInfo->Protocol);
 
     switch (pCommon->TargetType)
     {
@@ -487,7 +490,10 @@ NTSTATUS UsbPdo_SelectInterface(PURB urb, PPDO_DEVICE_DATA pCommon)
     }
     case DualShock4Wired:
     {
-        KdPrint((DRIVERNAME "Warning: not implemented\n"));
+        TraceEvents(TRACE_LEVEL_WARNING,
+            TRACE_USBPDO,
+            "Not implemented");
+
         break;
     }
     default:
