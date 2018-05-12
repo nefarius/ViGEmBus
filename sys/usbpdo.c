@@ -335,10 +335,16 @@ NTSTATUS UsbPdo_SelectConfiguration(PURB urb, PPDO_DEVICE_DATA pCommon)
     pInfo = &urb->UrbSelectConfiguration.Interface;
 
     KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: TotalLength %d\n", urb->UrbHeader.Length));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: TotalLength %d",
+        urb->UrbHeader.Length);
 
     if (urb->UrbHeader.Length == sizeof(struct _URB_SELECT_CONFIGURATION))
     {
-        KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: NULL ConfigurationDescriptor\n"));
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_USBPDO,
+            ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: NULL ConfigurationDescriptor");
         return STATUS_SUCCESS;
     }
 
@@ -348,7 +354,9 @@ NTSTATUS UsbPdo_SelectConfiguration(PURB urb, PPDO_DEVICE_DATA pCommon)
 
         if (urb->UrbHeader.Length < XUSB_CONFIGURATION_SIZE)
         {
-            KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor\n"));
+            TraceEvents(TRACE_LEVEL_WARNING,
+                TRACE_USBPDO,
+                ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor\n");
             return STATUS_INVALID_PARAMETER;
         }
 
@@ -360,7 +368,9 @@ NTSTATUS UsbPdo_SelectConfiguration(PURB urb, PPDO_DEVICE_DATA pCommon)
 
         if (urb->UrbHeader.Length < DS4_CONFIGURATION_SIZE)
         {
-            KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor\n"));
+            TraceEvents(TRACE_LEVEL_WARNING,
+                TRACE_USBPDO,
+                ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor");
             return STATUS_INVALID_PARAMETER;
         }
 
@@ -372,7 +382,9 @@ NTSTATUS UsbPdo_SelectConfiguration(PURB urb, PPDO_DEVICE_DATA pCommon)
 
         if (urb->UrbHeader.Length < XGIP_CONFIGURATION_SIZE)
         {
-            KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor\n"));
+            TraceEvents(TRACE_LEVEL_WARNING,
+                TRACE_USBPDO,
+                ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor");
             return STATUS_INVALID_PARAMETER;
         }
 
