@@ -102,7 +102,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (status 0x%x)\n",
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (status 0x%x)\n",
             GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data1,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data2,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data3,
@@ -114,7 +114,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
             GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[5],
             GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[6],
             GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[7],
-            status));
+            status);
 
         return status;
     }
@@ -126,7 +126,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (status 0x%x)\n",
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (status 0x%x)\n",
             GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data1,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data2,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data3,
@@ -138,7 +138,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
             GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[5],
             GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[6],
             GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[7],
-            status));
+            status);
 
         return status;
     }
@@ -150,7 +150,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (status 0x%x)\n",
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (status 0x%x)\n",
             GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data1,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data2,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data3,
@@ -162,7 +162,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
             GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[5],
             GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[6],
             GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[7],
-            status));
+            status);
 
         return status;
     }
@@ -190,7 +190,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfDeviceAddQueryInterface failed status 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "WdfDeviceAddQueryInterface failed status 0x%x\n", status);
         return status;
     }
 
