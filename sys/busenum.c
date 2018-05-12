@@ -350,8 +350,8 @@ NTSTATUS Bus_UnPlugDevice(
         // Error or no more children, end loop
         if (!NT_SUCCESS(status) || status == STATUS_NO_MORE_ENTRIES)
         {
-            TraceEvents(TRACE_LEVEL_VERBOSE, 
-                TRACE_BUSENUM, 
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSENUM,
                 "WdfChildListRetrieveNextDevice returned with status %!STATUS!",
                 status);
             break;
@@ -415,6 +415,8 @@ NTSTATUS Bus_UnPlugDevice(
 // 
 NTSTATUS Bus_XusbSubmitReport(WDFDEVICE Device, ULONG SerialNo, PXUSB_SUBMIT_REPORT Report, BOOLEAN FromInterface)
 {
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Entry");
+
     return Bus_SubmitReport(Device, SerialNo, Report, FromInterface);
 }
 
@@ -430,14 +432,17 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
     PDS4_DEVICE_DATA            ds4Data;
 
 
-    KdPrint((DRIVERNAME "Entered Bus_QueueNotification\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Entry");
 
     hChild = Bus_GetPdo(Device, SerialNo);
 
     // Validate child
     if (hChild == NULL)
     {
-        KdPrint((DRIVERNAME "Bus_QueueNotification: PDO with serial %d not found\n", SerialNo));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "Bus_GetPdo: PDO with serial %d not found",
+            SerialNo);
         return STATUS_NO_SUCH_DEVICE;
     }
 
@@ -445,14 +450,20 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
     pdoData = PdoGetData(hChild);
     if (pdoData == NULL)
     {
-        KdPrint((DRIVERNAME "Bus_QueueNotification: PDO context not found\n"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "PdoGetData failed");
         return STATUS_INVALID_PARAMETER;
     }
 
     // Check if caller owns this PDO
     if (!IS_OWNER(pdoData))
     {
-        KdPrint((DRIVERNAME "Bus_QueueNotification: PID mismatch: %d != %d\n", pdoData->OwnerProcessId, CURRENT_PROCESS_ID()));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "PDO & Request ownership mismatch: %d != %d",
+            pdoData->OwnerProcessId,
+            CURRENT_PROCESS_ID());
         return STATUS_ACCESS_DENIED;
     }
 
@@ -463,7 +474,13 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
 
         xusbData = XusbGetData(hChild);
 
-        if (xusbData == NULL) break;
+        if (xusbData == NULL)
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSENUM,
+                "XusbGetData failed");
+            break;
+        }
 
         status = WdfRequestForwardToIoQueue(Request, pdoData->PendingNotificationRequests);
 
@@ -472,22 +489,40 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
 
         ds4Data = Ds4GetData(hChild);
 
-        if (ds4Data == NULL) break;
+        if (ds4Data == NULL)
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSENUM,
+                "Ds4GetData failed");
+            break;
+        }
 
         status = WdfRequestForwardToIoQueue(Request, pdoData->PendingNotificationRequests);
 
         break;
     default:
         status = STATUS_NOT_SUPPORTED;
+        TraceEvents(TRACE_LEVEL_WARNING,
+            TRACE_BUSENUM,
+            "Unknown target type: %d (%!STATUS!)",
+            pdoData->TargetType,
+            status);
         break;
     }
 
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfRequestForwardToIoQueue failed with status 0x%X\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfRequestForwardToIoQueue failed with status %!STATUS!",
+            status);
     }
 
-    return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
+    status = (NT_SUCCESS(status)) ? STATUS_PENDING : status;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Exit with status %!STATUS!", status);
+
+    return status;
 }
 
 //
