@@ -517,7 +517,9 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 
     if (pdoData == NULL)
     {
-        KdPrint((DRIVERNAME ">> >> >> Invalid common context\n"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_USBPDO,
+            ">> >> >> PdoGetData failed");
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -530,7 +532,10 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         // Check context
         if (xusb == NULL)
         {
-            KdPrint((DRIVERNAME "No XUSB context found on device %p\n", Device));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_USBPDO,
+                "No XUSB context found on device %p\n",
+                Device);
 
             return STATUS_UNSUCCESSFUL;
         }
@@ -538,7 +543,9 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         // Data coming FROM us TO higher driver
         if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN)
         {
-            KdPrint((DRIVERNAME ">> >> >> Incoming request, queuing...\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                ">> >> >> Incoming request, queuing...");
 
             if (XUSB_IS_DATA_PIPE(pTransfer))
             {
@@ -622,16 +629,21 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         }
 
         // Data coming FROM the higher driver TO us
-        KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d\n",
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_USBPDO,
+            ">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d\n",
             pTransfer->PipeHandle,
             pTransfer->TransferFlags,
-            pTransfer->TransferBufferLength));
+            pTransfer->TransferBufferLength);
 
         if (pTransfer->TransferBufferLength == XUSB_LEDSET_SIZE) // Led
         {
             PUCHAR Buffer = pTransfer->TransferBuffer;
 
-            KdPrint((DRIVERNAME "-- LED Buffer: %02X %02X %02X\n", Buffer[0], Buffer[1], Buffer[2]));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                "-- LED Buffer: %02X %02X %02X\n", 
+                Buffer[0], Buffer[1], Buffer[2]);
 
             // extract LED byte to get controller slot
             if (Buffer[0] == 0x01 && Buffer[1] == 0x03 && Buffer[2] >= 0x02)
@@ -641,7 +653,10 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                 if (Buffer[2] == 0x04) xusb->LedNumber = 2;
                 if (Buffer[2] == 0x05) xusb->LedNumber = 3;
 
-                KdPrint((DRIVERNAME "-- LED Number: %d\n", xusb->LedNumber));
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_USBPDO,
+                    "-- LED Number: %d\n", 
+                    xusb->LedNumber);
             }
         }
 
@@ -650,7 +665,9 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         {
             PUCHAR Buffer = pTransfer->TransferBuffer;
 
-            KdPrint((DRIVERNAME "-- Rumble Buffer: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                "-- Rumble Buffer: %02X %02X %02X %02X %02X %02X %02X %02X\n",
                 Buffer[0],
                 Buffer[1],
                 Buffer[2],
@@ -658,7 +675,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                 Buffer[4],
                 Buffer[5],
                 Buffer[6],
-                Buffer[7]));
+                Buffer[7]);
 
             RtlCopyBytes(xusb->Rumble, Buffer, pTransfer->TransferBufferLength);
         }
@@ -685,7 +702,10 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
             }
             else
             {
-                KdPrint((DRIVERNAME "WdfRequestRetrieveOutputBuffer failed with status 0x%X\n", status));
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_USBPDO,
+                    "WdfRequestRetrieveOutputBuffer failed with status %!STATUS!", 
+                    status);
             }
         }
 
@@ -699,7 +719,9 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN
             && pTransfer->PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0084)
         {
-            // KdPrint((DRIVERNAME ">> >> >> Incoming request, queuing...\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                ">> >> >> Incoming request, queuing...");
 
             /* This request is sent periodically and relies on data the "feeder"
                has to supply, so we queue this request and return with STATUS_PENDING.
@@ -734,7 +756,10 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
             }
             else
             {
-                KdPrint((DRIVERNAME "WdfRequestRetrieveOutputBuffer failed with status 0x%X\n", status));
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_USBPDO,
+                    "WdfRequestRetrieveOutputBuffer failed with status %!STATUS!",
+                    status);
             }
         }
 
