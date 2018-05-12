@@ -303,17 +303,25 @@ Bus_DeviceFileCreate(
 
     PAGED_CODE();
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
     pFileData = FileObjectGetData(FileObject);
+
     if (pFileData == NULL)
     {
-        KdPrint((DRIVERNAME "Bus_DeviceFileCreate: ERROR! File handle context not found\n"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DRIVER,
+            "FileObjectGetData failed to return file object from WDFFILEOBJECT 0x%p",
+            FileObject);
     }
     else
     {
         pFDOData = FdoGetData(Device);
         if (pFDOData == NULL)
         {
-            KdPrint((DRIVERNAME "Bus_DeviceFileCreate: ERROR! FDO context not found\n"));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_DRIVER,
+                "FdoGetData failed");
             status = STATUS_NO_SUCH_DEVICE;
         }
         else
@@ -324,11 +332,16 @@ Bus_DeviceFileCreate(
             pFileData->SessionId = sessionId;
             status = STATUS_SUCCESS;
 
-            KdPrint((DRIVERNAME "Bus_DeviceFileCreate: File id=%d. Device refcount=%d\n", (int)sessionId, (int)refCount));
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_DRIVER,
+                "File/session id = %d, device ref. count = %d",
+                (int)sessionId, (int)refCount);
         }
     }
 
     WdfRequestComplete(Request, status);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
 //
