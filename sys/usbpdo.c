@@ -642,7 +642,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 
             TraceEvents(TRACE_LEVEL_VERBOSE,
                 TRACE_USBPDO,
-                "-- LED Buffer: %02X %02X %02X\n", 
+                "-- LED Buffer: %02X %02X %02X\n",
                 Buffer[0], Buffer[1], Buffer[2]);
 
             // extract LED byte to get controller slot
@@ -655,7 +655,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 
                 TraceEvents(TRACE_LEVEL_INFORMATION,
                     TRACE_USBPDO,
-                    "-- LED Number: %d\n", 
+                    "-- LED Number: %d\n",
                     xusb->LedNumber);
             }
         }
@@ -704,7 +704,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
             {
                 TraceEvents(TRACE_LEVEL_ERROR,
                     TRACE_USBPDO,
-                    "WdfRequestRetrieveOutputBuffer failed with status %!STATUS!", 
+                    "WdfRequestRetrieveOutputBuffer failed with status %!STATUS!",
                     status);
             }
         }
@@ -813,7 +813,9 @@ NTSTATUS UsbPdo_AbortPipe(WDFDEVICE Device)
         // Check context
         if (ds4 == NULL)
         {
-            KdPrint((DRIVERNAME "No DS4 context found on device %p\n", Device));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_USBPDO,
+                "No DS4 context found on device %p\n", Device);
 
             return STATUS_UNSUCCESSFUL;
         }
