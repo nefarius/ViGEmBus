@@ -128,7 +128,7 @@ NTSTATUS Xgip_AssignPdoContext(WDFDEVICE Device)
 
     PXGIP_DEVICE_DATA xgip = XgipGetData(Device);
 
-    KdPrint((DRIVERNAME "Initializing XGIP context...\n"));
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XGIP, "Initializing XGIP context...");
 
     RtlZeroMemory(xgip, sizeof(XGIP_DEVICE_DATA));
 
@@ -145,7 +145,7 @@ NTSTATUS Xgip_AssignPdoContext(WDFDEVICE Device)
     status = WdfIoQueueCreate(Device, &pendingUsbQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &xgip->PendingUsbInRequests);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XGIP, "WdfIoQueueCreate failed with status %!STATUS!", status);
         return status;
     }
 
@@ -155,7 +155,7 @@ NTSTATUS Xgip_AssignPdoContext(WDFDEVICE Device)
     status = WdfIoQueueCreate(Device, &notificationsQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &xgip->PendingNotificationRequests);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XGIP, "WdfIoQueueCreate failed with status %!STATUS!", status);
         return status;
     }
 
@@ -167,7 +167,7 @@ NTSTATUS Xgip_AssignPdoContext(WDFDEVICE Device)
     status = WdfCollectionCreate(&collectionAttribs, &xgip->XboxgipSysInitCollection);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfCollectionCreate failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XGIP, "WdfCollectionCreate failed with status %!STATUS!", status);
         return status;
     }
 
@@ -186,7 +186,7 @@ NTSTATUS Xgip_AssignPdoContext(WDFDEVICE Device)
     status = WdfTimerCreate(&timerConfig, &timerAttribs, &xgip->XboxgipSysInitTimer);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfTimerCreate failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XGIP, "WdfTimerCreate failed with status %!STATUS!", status);
         return status;
     }
 
