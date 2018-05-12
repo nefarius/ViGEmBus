@@ -130,7 +130,7 @@ NTSTATUS Ds4_PrepareHardware(WDFDEVICE Device)
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
+            TRACE_DS4,
             "WdfDeviceAddQueryInterface failed with status %!STATUS!",
             status);
         return status;
@@ -166,8 +166,6 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     NTSTATUS            status;
     PDS4_DEVICE_DATA    ds4 = Ds4GetData(Device);
 
-    KdPrint((DRIVERNAME "Initializing DS4 context...\n"));
-
     // Initialize periodic timer
     WDF_TIMER_CONFIG timerConfig;
     WDF_TIMER_CONFIG_INIT_PERIODIC(&timerConfig, Ds4_PendingUsbRequestsTimerFunc, DS4_QUEUE_FLUSH_PERIOD);
@@ -183,7 +181,10 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     status = WdfTimerCreate(&timerConfig, &timerAttribs, &ds4->PendingUsbInRequestsTimer);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfTimerCreate failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfTimerCreate failed with status %!STATUS!",
+            status);
         return status;
     }
 
@@ -197,38 +198,71 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     status = WdfDriverOpenParametersRegistryKey(WdfGetDriver(), STANDARD_RIGHTS_ALL, WDF_NO_OBJECT_ATTRIBUTES, &keyParams);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfDriverOpenParametersRegistryKey failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfDriverOpenParametersRegistryKey failed with status %!STATUS!",
+            status);
         return status;
     }
 
     RtlUnicodeStringInit(&keyName, L"Targets");
 
-    status = WdfRegistryCreateKey(keyParams, &keyName,
-        KEY_ALL_ACCESS, REG_OPTION_NON_VOLATILE, NULL, WDF_NO_OBJECT_ATTRIBUTES, &keyTargets);
+    status = WdfRegistryCreateKey(
+        keyParams,
+        &keyName,
+        KEY_ALL_ACCESS,
+        REG_OPTION_NON_VOLATILE,
+        NULL,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &keyTargets
+    );
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfRegistryCreateKey failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfRegistryCreateKey failed with status %!STATUS!",
+            status);
         return status;
     }
 
     RtlUnicodeStringInit(&keyName, L"DualShock");
 
-    status = WdfRegistryCreateKey(keyTargets, &keyName,
-        KEY_ALL_ACCESS, REG_OPTION_NON_VOLATILE, NULL, WDF_NO_OBJECT_ATTRIBUTES, &keyDS);
+    status = WdfRegistryCreateKey(
+        keyTargets,
+        &keyName,
+        KEY_ALL_ACCESS,
+        REG_OPTION_NON_VOLATILE,
+        NULL,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &keyDS
+    );
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfRegistryCreateKey failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfRegistryCreateKey failed with status %!STATUS!",
+            status);
         return status;
     }
 
     DECLARE_UNICODE_STRING_SIZE(serialPath, 4);
     RtlUnicodeStringPrintf(&serialPath, L"%04d", Description->SerialNo);
 
-    status = WdfRegistryCreateKey(keyDS, &serialPath,
-        KEY_ALL_ACCESS, REG_OPTION_NON_VOLATILE, NULL, WDF_NO_OBJECT_ATTRIBUTES, &keySerial);
+    status = WdfRegistryCreateKey(
+        keyDS,
+        &serialPath,
+        KEY_ALL_ACCESS,
+        REG_OPTION_NON_VOLATILE,
+        NULL,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &keySerial
+    );
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfRegistryCreateKey failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfRegistryCreateKey failed with status %!STATUS!",
+            status);
         return status;
     }
 
@@ -236,13 +270,15 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
 
     status = WdfRegistryQueryValue(keySerial, &valueName, sizeof(MAC_ADDRESS), &ds4->TargetMacAddress, NULL, NULL);
 
-    KdPrint((DRIVERNAME "MAC-Address: %02X:%02X:%02X:%02X:%02X:%02X\n",
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_DS4,
+        "MAC-Address: %02X:%02X:%02X:%02X:%02X:%02X\n",
         ds4->TargetMacAddress.Vendor0,
         ds4->TargetMacAddress.Vendor1,
         ds4->TargetMacAddress.Vendor2,
         ds4->TargetMacAddress.Nic0,
         ds4->TargetMacAddress.Nic1,
-        ds4->TargetMacAddress.Nic2));
+        ds4->TargetMacAddress.Nic2);
 
     if (status == STATUS_OBJECT_NAME_NOT_FOUND)
     {
@@ -251,13 +287,19 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
         status = WdfRegistryAssignValue(keySerial, &valueName, REG_BINARY, sizeof(MAC_ADDRESS), (PVOID)&ds4->TargetMacAddress);
         if (!NT_SUCCESS(status))
         {
-            KdPrint((DRIVERNAME "WdfRegistryAssignValue failed 0x%x\n", status));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_DS4,
+                "WdfRegistryAssignValue failed with status %!STATUS!",
+                status);
             return status;
         }
     }
     else if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfRegistryQueryValue failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfRegistryQueryValue failed with status %!STATUS!",
+            status);
         return status;
     }
 
