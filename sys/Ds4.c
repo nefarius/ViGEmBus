@@ -35,14 +35,26 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
     // prepare device description
     status = RtlUnicodeStringInit(DeviceDescription, L"Virtual DualShock 4 Controller");
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "RtlUnicodeStringInit failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     // Set hardware IDs
     RtlUnicodeStringInit(&buffer, L"USB\\VID_054C&PID_05C4&REV_0100");
 
     status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfPdoInitAddHardwareID failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     RtlUnicodeStringCopy(DeviceId, &buffer);
 
@@ -50,26 +62,50 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
 
     status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfPdoInitAddHardwareID failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     // Set compatible IDs
     RtlUnicodeStringInit(&buffer, L"USB\\Class_03&SubClass_00&Prot_00");
 
     status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfPdoInitAddCompatibleID (#01) failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     RtlUnicodeStringInit(&buffer, L"USB\\Class_03&SubClass_00");
 
     status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfPdoInitAddCompatibleID (#02) failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     RtlUnicodeStringInit(&buffer, L"USB\\Class_03");
 
     status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfPdoInitAddCompatibleID (#03) failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     return STATUS_SUCCESS;
 }
