@@ -57,24 +57,33 @@ NTSTATUS Bus_PlugInDevice(
     PAGED_CODE();
 
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Entry");
+
     pFdoData = FdoGetData(Device);
 
     status = WdfRequestRetrieveInputBuffer(Request, sizeof(VIGEM_PLUGIN_TARGET), (PVOID)&plugIn, &length);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!", status);
         return status;
     }
 
     if ((sizeof(VIGEM_PLUGIN_TARGET) != plugIn->Size) || (length != plugIn->Size))
     {
-        KdPrint((DRIVERNAME "Input buffer size mismatch"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "sizeof(VIGEM_PLUGIN_TARGET) buffer size mismatch [%d != %d]",
+            sizeof(VIGEM_PLUGIN_TARGET), plugIn->Size);
         return STATUS_INVALID_PARAMETER;
     }
 
     if (plugIn->SerialNo == 0)
     {
-        KdPrint((DRIVERNAME "Serial no. 0 not allowed"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "Serial no. 0 not allowed");
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -83,14 +92,20 @@ NTSTATUS Bus_PlugInDevice(
     fileObject = WdfRequestGetFileObject(Request);
     if (fileObject == NULL)
     {
-        KdPrint((DRIVERNAME "File object associated with request is null"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfRequestGetFileObject failed to fetch WDFFILEOBJECT from request 0x%p",
+            Request);
         return STATUS_INVALID_PARAMETER;
     }
 
     pFileData = FileObjectGetData(fileObject);
     if (pFileData == NULL)
     {
-        KdPrint((DRIVERNAME "File object context associated with request is null"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "FileObjectGetData failed to get context data for 0x%p",
+            fileObject);
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -142,22 +157,49 @@ NTSTATUS Bus_PlugInDevice(
         description.ProductId = plugIn->ProductId;
     }
 
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSENUM,
+        "New PDO properties: serial = %d, type = %d, pid = %d, session = %d, internal = %d, vid = 0x%X, pid = 0x%X",
+        description.SerialNo,
+        description.TargetType,
+        description.OwnerProcessId,
+        description.SessionId,
+        description.OwnerIsDriver,
+        description.VendorId,
+        description.ProductId
+    );
+
     WdfSpinLockAcquire(pFdoData->PendingPluginRequestsLock);
 
-    KdPrint((DRIVERNAME "Items count: %d\n", WdfCollectionGetCount(pFdoData->PendingPluginRequests)));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSENUM,
+        "Current pending requests count: %d",
+        WdfCollectionGetCount(pFdoData->PendingPluginRequests));
 
     status = WdfChildListAddOrUpdateChildDescriptionAsPresent(WdfFdoGetDefaultChildList(Device), &description.Header, NULL);
 
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfChildListAddOrUpdateChildDescriptionAsPresent failed with 0x%X\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfChildListAddOrUpdateChildDescriptionAsPresent failed with status %!STATUS!",
+            status);
 
         goto pluginEnd;
     }
 
+    //
+    // The requested serial number is already in use
+    // 
     if (status == STATUS_OBJECT_NAME_EXISTS)
     {
         status = STATUS_INVALID_PARAMETER;
+
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "The described PDO already exists (%!STATUS!)",
+            status);
+
         goto pluginEnd;
     }
 
@@ -169,7 +211,10 @@ NTSTATUS Bus_PlugInDevice(
     status = WdfObjectAllocateContext(Request, &requestAttribs, (PVOID)&pReqData);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfCollectionAdd failed with 0x%X\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfObjectAllocateContext failed with status %!STATUS!",
+            status);
 
         goto pluginEnd;
     }
@@ -185,18 +230,32 @@ NTSTATUS Bus_PlugInDevice(
     status = WdfCollectionAdd(pFdoData->PendingPluginRequests, Request);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfCollectionAdd failed with 0x%X\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfCollectionAdd failed with status %!STATUS!",
+            status);
 
         goto pluginEnd;
     }
 
-    KdPrint((DRIVERNAME "Added item with serial: %d\n", plugIn->SerialNo));
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_BUSENUM,
+        "Added item with serial: %d",
+        plugIn->SerialNo);
 
     status = NT_SUCCESS(status) ? STATUS_PENDING : status;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_BUSENUM,
+        "Status before releasing lock: %!STATUS!",
+        status);
 
 pluginEnd:
 
     WdfSpinLockRelease(pFdoData->PendingPluginRequestsLock);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Exit with status %!STATUS!", status);
+
     return status;
 }
 
