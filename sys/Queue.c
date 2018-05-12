@@ -350,6 +350,11 @@ VOID Bus_EvtIoDeviceControl(
     TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_QUEUE, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
+//
+// Gets called upon driver-to-driver communication.
+// 
+// TODO: incomplete and unused currently
+// 
 VOID Bus_EvtIoInternalDeviceControl(
     _In_ WDFQUEUE   Queue,
     _In_ WDFREQUEST Request,
@@ -405,7 +410,9 @@ VOID Bus_EvtIoDefault(
     UNREFERENCED_PARAMETER(Queue);
     UNREFERENCED_PARAMETER(Request);
 
-    KdPrint((DRIVERNAME "Bus_EvtIoDefault called\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
 
     WdfRequestComplete(Request, STATUS_INVALID_DEVICE_REQUEST);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
 }
