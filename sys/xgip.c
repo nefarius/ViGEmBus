@@ -292,11 +292,11 @@ VOID Xgip_GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, PPDO_DEVIC
 
 VOID Xgip_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 {
-    KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d\n",
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_XGIP, ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
         (int)pInfo->AlternateSetting,
-        pInfo->NumberOfPipes));
+        pInfo->NumberOfPipes);
 
     pInfo->Class = 0xFF;
     pInfo->SubClass = 0x47;
@@ -322,11 +322,11 @@ VOID Xgip_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 
     pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-    KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d\n",
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_XGIP, ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
         (int)pInfo->AlternateSetting,
-        pInfo->NumberOfPipes));
+        pInfo->NumberOfPipes);
 
     pInfo->Class = 0xFF;
     pInfo->SubClass = 0x47;
