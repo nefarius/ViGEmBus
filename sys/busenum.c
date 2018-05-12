@@ -282,19 +282,25 @@ NTSTATUS Bus_UnPlugDevice(
 
     PAGED_CODE();
 
-    KdPrint((DRIVERNAME "Entered Bus_UnPlugDevice\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Entry");
 
     status = WdfRequestRetrieveInputBuffer(Request, sizeof(VIGEM_UNPLUG_TARGET), (PVOID)&unPlug, &length);
 
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "Bus_UnPlugDevice: WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+            status);
         return status;
     }
 
     if ((sizeof(VIGEM_UNPLUG_TARGET) != unPlug->Size) || (length != unPlug->Size))
     {
-        KdPrint((DRIVERNAME "Bus_UnPlugDevice: Input buffer size mismatch"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "sizeof(VIGEM_UNPLUG_TARGET) buffer size mismatch [%d != %d]",
+            sizeof(VIGEM_UNPLUG_TARGET), unPlug->Size);
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -306,17 +312,27 @@ NTSTATUS Bus_UnPlugDevice(
         fileObject = WdfRequestGetFileObject(Request);
         if (fileObject == NULL)
         {
-            KdPrint((DRIVERNAME "Bus_UnPlugDevice: File object associated with request is null"));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSENUM,
+                "WdfRequestGetFileObject failed to fetch WDFFILEOBJECT from request 0x%p",
+                Request);
             return STATUS_INVALID_PARAMETER;
         }
 
         pFileData = FileObjectGetData(fileObject);
         if (pFileData == NULL)
         {
-            KdPrint((DRIVERNAME "Bus_UnPlugDevice: File object context associated with request is null"));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSENUM,
+                "FileObjectGetData failed to get context data for 0x%p",
+                fileObject);
             return STATUS_INVALID_PARAMETER;
         }
     }
+
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSENUM,
+        "Starting child list traversal");
 
     list = WdfFdoGetDefaultChildList(Device);
 
@@ -334,20 +350,39 @@ NTSTATUS Bus_UnPlugDevice(
         // Error or no more children, end loop
         if (!NT_SUCCESS(status) || status == STATUS_NO_MORE_ENTRIES)
         {
+            TraceEvents(TRACE_LEVEL_VERBOSE, 
+                TRACE_BUSENUM, 
+                "WdfChildListRetrieveNextDevice returned with status %!STATUS!",
+                status);
             break;
         }
 
         // If unable to retrieve device
         if (childInfo.Status != WdfChildListRetrieveDeviceSuccess)
         {
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSENUM,
+                "childInfo.Status = %d",
+                childInfo.Status);
             continue;
         }
 
         // Child isn't the one we looked for, skip
         if (!unplugAll && description.SerialNo != unPlug->SerialNo)
         {
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSENUM,
+                "Seeking serial mismatch: %d != %d",
+                description.SerialNo,
+                unPlug->SerialNo);
             continue;
         }
+
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_BUSENUM,
+            "description.SessionId = %d, pFileData->SessionId = %d",
+            description.SessionId,
+            pFileData->SessionId);
 
         // Only unplug owned children
         if (IsInternal || description.SessionId == pFileData->SessionId)
@@ -356,12 +391,21 @@ NTSTATUS Bus_UnPlugDevice(
             status = WdfChildListUpdateChildDescriptionAsMissing(list, &description.Header);
             if (!NT_SUCCESS(status))
             {
-                KdPrint((DRIVERNAME "Bus_UnPlugDevice: WdfChildListUpdateChildDescriptionAsMissing failed with status 0x%X\n", status));
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_BUSENUM,
+                    "WdfChildListUpdateChildDescriptionAsMissing failed with status %!STATUS!",
+                    status);
             }
         }
     }
 
     WdfChildListEndIteration(list, &iterator);
+
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSENUM,
+        "Finished child list traversal");
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Exit with status %!STATUS!", STATUS_SUCCESS);
 
     return STATUS_SUCCESS;
 }
