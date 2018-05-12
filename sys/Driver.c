@@ -54,6 +54,11 @@ NTSTATUS DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING Registry
     //
     WPP_INIT_TRACING(DriverObject, RegistryPath);
 
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_DRIVER,
+        "Loading Virtual Gamepad Emulation Bus Driver [built: %s %s]", 
+        __DATE__, __TIME__);
+
     //
     // Register cleanup callback
     // 
