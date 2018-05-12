@@ -35,14 +35,26 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
     // prepare device description
     status = RtlUnicodeStringInit(DeviceDescription, L"Virtual DualShock 4 Controller");
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "RtlUnicodeStringInit failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     // Set hardware IDs
     RtlUnicodeStringInit(&buffer, L"USB\\VID_054C&PID_05C4&REV_0100");
 
     status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfPdoInitAddHardwareID failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     RtlUnicodeStringCopy(DeviceId, &buffer);
 
@@ -50,26 +62,50 @@ NTSTATUS Ds4_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PU
 
     status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfPdoInitAddHardwareID failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     // Set compatible IDs
     RtlUnicodeStringInit(&buffer, L"USB\\Class_03&SubClass_00&Prot_00");
 
     status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfPdoInitAddCompatibleID (#01) failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     RtlUnicodeStringInit(&buffer, L"USB\\Class_03&SubClass_00");
 
     status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfPdoInitAddCompatibleID (#02) failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     RtlUnicodeStringInit(&buffer, L"USB\\Class_03");
 
     status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfPdoInitAddCompatibleID (#03) failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     return STATUS_SUCCESS;
 }
@@ -93,7 +129,10 @@ NTSTATUS Ds4_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfDeviceAddQueryInterface failed status 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfDeviceAddQueryInterface failed with status %!STATUS!",
+            status);
         return status;
     }
 
@@ -127,8 +166,6 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     NTSTATUS            status;
     PDS4_DEVICE_DATA    ds4 = Ds4GetData(Device);
 
-    KdPrint((DRIVERNAME "Initializing DS4 context...\n"));
-
     // Initialize periodic timer
     WDF_TIMER_CONFIG timerConfig;
     WDF_TIMER_CONFIG_INIT_PERIODIC(&timerConfig, Ds4_PendingUsbRequestsTimerFunc, DS4_QUEUE_FLUSH_PERIOD);
@@ -144,7 +181,10 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     status = WdfTimerCreate(&timerConfig, &timerAttribs, &ds4->PendingUsbInRequestsTimer);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfTimerCreate failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfTimerCreate failed with status %!STATUS!",
+            status);
         return status;
     }
 
@@ -158,38 +198,71 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
     status = WdfDriverOpenParametersRegistryKey(WdfGetDriver(), STANDARD_RIGHTS_ALL, WDF_NO_OBJECT_ATTRIBUTES, &keyParams);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfDriverOpenParametersRegistryKey failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfDriverOpenParametersRegistryKey failed with status %!STATUS!",
+            status);
         return status;
     }
 
     RtlUnicodeStringInit(&keyName, L"Targets");
 
-    status = WdfRegistryCreateKey(keyParams, &keyName,
-        KEY_ALL_ACCESS, REG_OPTION_NON_VOLATILE, NULL, WDF_NO_OBJECT_ATTRIBUTES, &keyTargets);
+    status = WdfRegistryCreateKey(
+        keyParams,
+        &keyName,
+        KEY_ALL_ACCESS,
+        REG_OPTION_NON_VOLATILE,
+        NULL,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &keyTargets
+    );
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfRegistryCreateKey failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfRegistryCreateKey failed with status %!STATUS!",
+            status);
         return status;
     }
 
     RtlUnicodeStringInit(&keyName, L"DualShock");
 
-    status = WdfRegistryCreateKey(keyTargets, &keyName,
-        KEY_ALL_ACCESS, REG_OPTION_NON_VOLATILE, NULL, WDF_NO_OBJECT_ATTRIBUTES, &keyDS);
+    status = WdfRegistryCreateKey(
+        keyTargets,
+        &keyName,
+        KEY_ALL_ACCESS,
+        REG_OPTION_NON_VOLATILE,
+        NULL,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &keyDS
+    );
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfRegistryCreateKey failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfRegistryCreateKey failed with status %!STATUS!",
+            status);
         return status;
     }
 
     DECLARE_UNICODE_STRING_SIZE(serialPath, 4);
     RtlUnicodeStringPrintf(&serialPath, L"%04d", Description->SerialNo);
 
-    status = WdfRegistryCreateKey(keyDS, &serialPath,
-        KEY_ALL_ACCESS, REG_OPTION_NON_VOLATILE, NULL, WDF_NO_OBJECT_ATTRIBUTES, &keySerial);
+    status = WdfRegistryCreateKey(
+        keyDS,
+        &serialPath,
+        KEY_ALL_ACCESS,
+        REG_OPTION_NON_VOLATILE,
+        NULL,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &keySerial
+    );
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfRegistryCreateKey failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfRegistryCreateKey failed with status %!STATUS!",
+            status);
         return status;
     }
 
@@ -197,13 +270,15 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
 
     status = WdfRegistryQueryValue(keySerial, &valueName, sizeof(MAC_ADDRESS), &ds4->TargetMacAddress, NULL, NULL);
 
-    KdPrint((DRIVERNAME "MAC-Address: %02X:%02X:%02X:%02X:%02X:%02X\n",
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_DS4,
+        "MAC-Address: %02X:%02X:%02X:%02X:%02X:%02X\n",
         ds4->TargetMacAddress.Vendor0,
         ds4->TargetMacAddress.Vendor1,
         ds4->TargetMacAddress.Vendor2,
         ds4->TargetMacAddress.Nic0,
         ds4->TargetMacAddress.Nic1,
-        ds4->TargetMacAddress.Nic2));
+        ds4->TargetMacAddress.Nic2);
 
     if (status == STATUS_OBJECT_NAME_NOT_FOUND)
     {
@@ -212,13 +287,19 @@ NTSTATUS Ds4_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION 
         status = WdfRegistryAssignValue(keySerial, &valueName, REG_BINARY, sizeof(MAC_ADDRESS), (PVOID)&ds4->TargetMacAddress);
         if (!NT_SUCCESS(status))
         {
-            KdPrint((DRIVERNAME "WdfRegistryAssignValue failed 0x%x\n", status));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_DS4,
+                "WdfRegistryAssignValue failed with status %!STATUS!",
+                status);
             return status;
         }
     }
     else if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfRegistryQueryValue failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfRegistryQueryValue failed with status %!STATUS!",
+            status);
         return status;
     }
 
@@ -347,6 +428,8 @@ VOID Ds4_PendingUsbRequestsTimerFunc(
     PIO_STACK_LOCATION      irpStack;
     PPDO_DEVICE_DATA        pdoData;
 
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_DS4, "%!FUNC! Entry");
+
     hChild = WdfTimerGetParentObject(Timer);
     pdoData = PdoGetData(hChild);
     ds4Data = Ds4GetData(hChild);
@@ -375,5 +458,7 @@ VOID Ds4_PendingUsbRequestsTimerFunc(
         // Complete pending request
         WdfRequestComplete(usbRequest, status);
     }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "%!FUNC! Exit with status %!STATUS!", status);
 }
 

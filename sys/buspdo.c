@@ -902,6 +902,6 @@ VOID Pdo_EvtIoInternalDeviceControl(
         WdfRequestComplete(Request, status);
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
