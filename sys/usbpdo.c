@@ -34,7 +34,9 @@ BOOLEAN USB_BUSIFFN UsbPdo_IsDeviceHighSpeed(IN PVOID BusContext)
 {
     UNREFERENCED_PARAMETER(BusContext);
 
-    KdPrint((DRIVERNAME "UsbPdo_IsDeviceHighSpeed: TRUE\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_USBPDO,
+        "IsDeviceHighSpeed: TRUE");
 
     return TRUE;
 }
@@ -56,7 +58,10 @@ NTSTATUS USB_BUSIFFN UsbPdo_QueryBusInformation(
     UNREFERENCED_PARAMETER(BusInformationBufferLength);
     UNREFERENCED_PARAMETER(BusInformationActualLength);
 
-    KdPrint((DRIVERNAME "UsbPdo_QueryBusInformation: STATUS_UNSUCCESSFUL\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_USBPDO,
+        "QueryBusInformation: %!STATUS!", STATUS_UNSUCCESSFUL);
+
     return STATUS_UNSUCCESSFUL;
 }
 
@@ -68,7 +73,10 @@ NTSTATUS USB_BUSIFFN UsbPdo_SubmitIsoOutUrb(IN PVOID BusContext, IN PURB Urb)
     UNREFERENCED_PARAMETER(BusContext);
     UNREFERENCED_PARAMETER(Urb);
 
-    KdPrint((DRIVERNAME "UsbPdo_SubmitIsoOutUrb: STATUS_UNSUCCESSFUL\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_USBPDO,
+        "SubmitIsoOutUrb: %!STATUS!", STATUS_UNSUCCESSFUL);
+
     return STATUS_UNSUCCESSFUL;
 }
 
@@ -80,7 +88,10 @@ NTSTATUS USB_BUSIFFN UsbPdo_QueryBusTime(IN PVOID BusContext, IN OUT PULONG Curr
     UNREFERENCED_PARAMETER(BusContext);
     UNREFERENCED_PARAMETER(CurrentUsbFrame);
 
-    KdPrint((DRIVERNAME "UsbPdo_QueryBusTime: STATUS_UNSUCCESSFUL\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_USBPDO,
+        "QueryBusTime: %!STATUS!", STATUS_UNSUCCESSFUL);
+
     return STATUS_UNSUCCESSFUL;
 }
 
@@ -95,7 +106,9 @@ VOID USB_BUSIFFN UsbPdo_GetUSBDIVersion(
 {
     UNREFERENCED_PARAMETER(BusContext);
 
-    KdPrint((DRIVERNAME "UsbPdo_GetUSBDIVersion: 0x500, 0x200\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_USBPDO,
+        "GetUSBDIVersion: 0x500, 0x200");
 
     if (VersionInformation != NULL)
     {
@@ -241,7 +254,10 @@ NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
         }
         case 1:
         {
-            KdPrint((DRIVERNAME "LanguageId = 0x%X\n", urb->UrbControlDescriptorRequest.LanguageId));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                "LanguageId = 0x%X",
+                urb->UrbControlDescriptorRequest.LanguageId);
 
             if (urb->UrbControlDescriptorRequest.TransferBufferLength < DS4_MANUFACTURER_NAME_LENGTH)
             {
@@ -269,7 +285,10 @@ NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
         }
         case 2:
         {
-            KdPrint((DRIVERNAME "LanguageId = 0x%X\n", urb->UrbControlDescriptorRequest.LanguageId));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                "LanguageId = 0x%X",
+                urb->UrbControlDescriptorRequest.LanguageId);
 
             if (urb->UrbControlDescriptorRequest.TransferBufferLength < DS4_PRODUCT_NAME_LENGTH)
             {
@@ -628,7 +647,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 
         // Notify user-mode process that new data is available
         status = WdfIoQueueRetrieveNextRequest(pdoData->PendingNotificationRequests, &notifyRequest);
-        
+
         if (NT_SUCCESS(status))
         {
             PXUSB_REQUEST_NOTIFICATION notify = NULL;
