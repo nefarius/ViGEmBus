@@ -32,6 +32,7 @@ SOFTWARE.
 #pragma alloc_text (PAGE, Bus_EvtDeviceAdd)
 #pragma alloc_text (PAGE, Bus_DeviceFileCreate)
 #pragma alloc_text (PAGE, Bus_FileClose)
+#pragma alloc_text (PAGE, Bus_EvtDriverContextCleanup)
 #pragma alloc_text (PAGE, Bus_PdoStageResult)
 #endif
 
