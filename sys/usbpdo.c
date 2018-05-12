@@ -843,13 +843,17 @@ NTSTATUS UsbPdo_ClassInterface(PURB urb, WDFDEVICE Device, PPDO_DEVICE_DATA pCom
 {
     struct _URB_CONTROL_VENDOR_OR_CLASS_REQUEST* pRequest = &urb->UrbControlVendorClassRequest;
 
-    KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_CLASS_INTERFACE\n"));
-    KdPrint((DRIVERNAME ">> >> >> TransferFlags = 0x%X, Request = 0x%X, Value = 0x%X, Index = 0x%X, BufLen = %d\n",
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> URB_FUNCTION_CLASS_INTERFACE");
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> TransferFlags = 0x%X, Request = 0x%X, Value = 0x%X, Index = 0x%X, BufLen = %d",
         pRequest->TransferFlags,
         pRequest->Request,
         pRequest->Value,
         pRequest->Index,
-        pRequest->TransferBufferLength));
+        pRequest->TransferBufferLength);
 
     switch (pCommon->TargetType)
     {
@@ -864,7 +868,10 @@ NTSTATUS UsbPdo_ClassInterface(PURB urb, WDFDEVICE Device, PPDO_DEVICE_DATA pCom
             UCHAR reportId = HID_GET_REPORT_ID(pRequest);
             UCHAR reportType = HID_GET_REPORT_TYPE(pRequest);
 
-            KdPrint((DRIVERNAME ">> >> >> >> GET_REPORT(%d): %d\n", reportType, reportId));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                ">> >> >> >> GET_REPORT(%d): %d",
+                reportType, reportId);
 
             switch (reportType)
             {
@@ -948,7 +955,10 @@ NTSTATUS UsbPdo_ClassInterface(PURB urb, WDFDEVICE Device, PPDO_DEVICE_DATA pCom
             UCHAR reportId = HID_GET_REPORT_ID(pRequest);
             UCHAR reportType = HID_GET_REPORT_TYPE(pRequest);
 
-            KdPrint((DRIVERNAME ">> >> >> >> SET_REPORT(%d): %d\n", reportType, reportId));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                ">> >> >> >> SET_REPORT(%d): %d",
+                reportType, reportId);
 
             switch (reportType)
             {
