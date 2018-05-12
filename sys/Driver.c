@@ -25,6 +25,7 @@ SOFTWARE.
 
 #include "busenum.h"
 #include <wdmguid.h>
+#include "driver.tmh"
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (INIT, DriverEntry)
@@ -40,18 +41,31 @@ SOFTWARE.
 // 
 NTSTATUS DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING RegistryPath)
 {
-    WDF_DRIVER_CONFIG config;
-    NTSTATUS status;
-    WDFDRIVER driver;
+    WDF_DRIVER_CONFIG       config;
+    NTSTATUS                status;
+    WDFDRIVER               driver;
+    WDF_OBJECT_ATTRIBUTES   attributes;
 
     KdPrint((DRIVERNAME "Virtual Gamepad Emulation Bus Driver [built: %s %s]\n", __DATE__, __TIME__));
 
+    //
+    // Initialize WPP Tracing
+    //
+    WPP_INIT_TRACING(DriverObject, RegistryPath);
+
+    //
+    // Register cleanup callback
+    // 
+    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    attributes.EvtCleanupCallback = Bus_EvtDriverContextCleanup;
+
     WDF_DRIVER_CONFIG_INIT(&config, Bus_EvtDeviceAdd);
 
-    status = WdfDriverCreate(DriverObject, RegistryPath, WDF_NO_OBJECT_ATTRIBUTES, &config, &driver);
+    status = WdfDriverCreate(DriverObject, RegistryPath, &attributes, &config, &driver);
 
     if (!NT_SUCCESS(status))
     {
+        WPP_CLEANUP(DriverObject);
         KdPrint((DRIVERNAME "WdfDriverCreate failed with status 0x%x\n", status));
     }
 
@@ -380,6 +394,38 @@ Bus_FileClose(
     }
 
     WdfChildListEndIteration(list, &iterator);
+}
+
+VOID
+Bus_EvtDriverContextCleanup(
+    _In_ WDFOBJECT DriverObject
+    )
+/*++
+Routine Description:
+
+    Free all the resources allocated in DriverEntry.
+
+Arguments:
+
+    DriverObject - handle to a WDF Driver object.
+
+Return Value:
+
+    VOID.
+
+--*/
+{
+    UNREFERENCED_PARAMETER(DriverObject);
+
+    PAGED_CODE ();
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+    //
+    // Stop WPP Tracing
+    //
+    WPP_CLEANUP( WdfDriverWdmGetDriverObject( (WDFDRIVER) DriverObject) );
+
 }
 
 //

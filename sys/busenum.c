@@ -26,6 +26,7 @@ SOFTWARE.
 #include "busenum.h"
 #include <wdmguid.h>
 #include <usb.h>
+#include "busenum.tmh"
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (PAGE, Bus_PlugInDevice)
