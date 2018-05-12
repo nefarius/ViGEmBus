@@ -102,7 +102,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (status 0x%x)",
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (Failed with status %!STATUS!)",
             GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data1,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data2,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data3,
@@ -126,7 +126,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (status 0x%x)",
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (Failed with status %!STATUS!)",
             GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data1,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data2,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data3,
@@ -150,7 +150,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (status 0x%x)",
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (Failed with status %!STATUS!)",
             GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data1,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data2,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data3,
@@ -190,7 +190,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "WdfDeviceAddQueryInterface failed status 0x%x", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "WdfDeviceAddQueryInterface failed with status %!STATUS!", status);
         return status;
     }
 
