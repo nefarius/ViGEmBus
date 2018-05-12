@@ -205,7 +205,7 @@ NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION
     WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
     attributes.ParentObject = Device;
 
-    KdPrint((DRIVERNAME "Initializing XUSB context...\n"));
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XUSB, "Initializing XUSB context...\n");
 
     PXUSB_DEVICE_DATA xusb = XusbGetData(Device);
 
@@ -225,7 +225,7 @@ NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION
     status = WdfIoQueueCreate(Device, &holdingInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &xusb->HoldingUsbInRequests);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate (HoldingUsbInRequests) failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "WdfIoQueueCreate (HoldingUsbInRequests) failed 0x%x\n", status);
         return status;
     }
 
