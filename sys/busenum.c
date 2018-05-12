@@ -530,16 +530,22 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
 // 
 NTSTATUS Bus_Ds4SubmitReport(WDFDEVICE Device, ULONG SerialNo, PDS4_SUBMIT_REPORT Report, BOOLEAN FromInterface)
 {
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Entry");
+
     return Bus_SubmitReport(Device, SerialNo, Report, FromInterface);
 }
 
 NTSTATUS Bus_XgipSubmitReport(WDFDEVICE Device, ULONG SerialNo, PXGIP_SUBMIT_REPORT Report, BOOLEAN FromInterface)
 {
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Entry");
+
     return Bus_SubmitReport(Device, SerialNo, Report, FromInterface);
 }
 
 NTSTATUS Bus_XgipSubmitInterrupt(WDFDEVICE Device, ULONG SerialNo, PXGIP_SUBMIT_INTERRUPT Report, BOOLEAN FromInterface)
 {
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Entry");
+
     return Bus_SubmitReport(Device, SerialNo, Report, FromInterface);
 }
 
@@ -571,14 +577,17 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     BOOLEAN                     changed;
 
 
-    KdPrint((DRIVERNAME "Entered Bus_SubmitReport\n"));
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Entry");
 
     hChild = Bus_GetPdo(Device, SerialNo);
 
     // Validate child
     if (hChild == NULL)
     {
-        KdPrint((DRIVERNAME "Bus_SubmitReport: PDO with serial %d not found\n", SerialNo));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "Bus_GetPdo: PDO with serial %d not found",
+            SerialNo);
         return STATUS_NO_SUCH_DEVICE;
     }
 
@@ -586,14 +595,20 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     pdoData = PdoGetData(hChild);
     if (pdoData == NULL)
     {
-        KdPrint((DRIVERNAME "Bus_SubmitReport: PDO context not found\n"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "PdoGetData failed");
         return STATUS_INVALID_PARAMETER;
     }
 
     // Check if caller owns this PDO
     if (!FromInterface && !IS_OWNER(pdoData))
     {
-        KdPrint((DRIVERNAME "Bus_SubmitReport: PID mismatch: %d != %d\n", pdoData->OwnerProcessId, CURRENT_PROCESS_ID()));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "PDO & Request ownership mismatch: %d != %d",
+            pdoData->OwnerProcessId,
+            CURRENT_PROCESS_ID());
         return STATUS_ACCESS_DENIED;
     }
 
@@ -627,9 +642,17 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
 
     // Don't waste pending IRP if input hasn't changed
     if (!changed)
+    {
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_BUSENUM,
+            "Input report hasn't changed since last update, aborting with %!STATUS!",
+            status);
         return status;
+    }
 
-    KdPrint((DRIVERNAME "Bus_SubmitReport: received new report\n"));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSENUM,
+        "Received new report, processing");
 
     // Get pending USB request
     switch (pdoData->TargetType)
@@ -701,6 +724,13 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     default:
 
         status = STATUS_NOT_SUPPORTED;
+
+        TraceEvents(TRACE_LEVEL_WARNING,
+            TRACE_BUSENUM,
+            "Unknown target type: %d (%!STATUS!)",
+            pdoData->TargetType,
+            status);
+
         goto endSubmitReport;
     }
 
@@ -709,7 +739,9 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     else if (!NT_SUCCESS(status))
         goto endSubmitReport;
 
-    KdPrint((DRIVERNAME "Bus_SubmitReport: pending IRP found\n"));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSENUM,
+        "Processing pending IRP");
 
     // Get pending IRP
     pendingIrp = WdfRequestWdmGetIrp(usbRequest);
@@ -772,6 +804,9 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     WdfRequestComplete(usbRequest, status);
 
 endSubmitReport:
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Exit with status %!STATUS!", status);
+
     return status;
 }
 
