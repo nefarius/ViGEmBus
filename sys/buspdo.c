@@ -538,7 +538,7 @@ NTSTATUS Bus_EvtDevicePrepareHardware(
     UNREFERENCED_PARAMETER(ResourcesRaw);
     UNREFERENCED_PARAMETER(ResourcesTranslated);
 
-    KdPrint((DRIVERNAME "Bus_EvtDevicePrepareHardware: 0x%p\n", Device));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Entry");
 
     pdoData = PdoGetData(Device);
 
@@ -567,7 +567,14 @@ NTSTATUS Bus_EvtDevicePrepareHardware(
         break;
     }
 
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_BUSPDO,
+        "BUS_PDO_REPORT_STAGE_RESULT Stage: ViGEmPdoCreate  [serial: %d, status: %!STATUS!]",
+        pdoData->SerialNo, status);
+
     BUS_PDO_REPORT_STAGE_RESULT(pdoData->BusInterface, ViGEmPdoPrepareHardware, pdoData->SerialNo, status);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
 
     return status;
 }
