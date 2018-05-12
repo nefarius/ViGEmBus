@@ -23,3 +23,5 @@
 /sys/RCa21300
 *.user
 /.vs/config
+/sys/x64/Debug
+/x64

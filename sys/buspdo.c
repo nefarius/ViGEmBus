@@ -614,11 +614,6 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
                 status = UsbPdo_GetConfigurationDescriptorType(urb, pdoData);
 
-                if (!NT_SUCCESS(status))
-                {
-                    BUS_PDO_REPORT_STAGE_RESULT(pdoData->BusInterface, ViGEmPdoInternalIoControl, pdoData->SerialNo, status);
-                }
-
                 break;
 
             case USB_STRING_DESCRIPTOR_TYPE:
@@ -626,11 +621,6 @@ VOID Pdo_EvtIoInternalDeviceControl(
                 KdPrint((DRIVERNAME ">> >> >> USB_STRING_DESCRIPTOR_TYPE\n"));
 
                 status = UsbPdo_GetStringDescriptorType(urb, pdoData);
-
-                if (!NT_SUCCESS(status))
-                {
-                    BUS_PDO_REPORT_STAGE_RESULT(pdoData->BusInterface, ViGEmPdoInternalIoControl, pdoData->SerialNo, status);
-                }
 
                 break;
             case USB_INTERFACE_DESCRIPTOR_TYPE:
@@ -661,13 +651,6 @@ VOID Pdo_EvtIoInternalDeviceControl(
             // Defaults always succeed
             status = STATUS_SUCCESS;
 
-            //
-            // This IOCTL code is a nice indicator that the virtual XUSB device is 
-            // "powered up" and ready to get interacted with so we can report 
-            // success to the parent bus.
-            // 
-            BUS_PDO_REPORT_STAGE_RESULT(pdoData->BusInterface, ViGEmPdoInternalIoControl, pdoData->SerialNo, status);
-
             break;
 
         case URB_FUNCTION_ABORT_PIPE:
@@ -675,8 +658,6 @@ VOID Pdo_EvtIoInternalDeviceControl(
             KdPrint((DRIVERNAME ">> >> URB_FUNCTION_ABORT_PIPE\n"));
 
             status = UsbPdo_AbortPipe(hDevice);
-
-            BUS_PDO_REPORT_STAGE_RESULT(pdoData->BusInterface, ViGEmPdoInternalIoControl, pdoData->SerialNo, status);
 
             break;
 
@@ -694,13 +675,6 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
             status = UsbPdo_GetDescriptorFromInterface(urb, pdoData);
 
-            //
-            // This IOCTL code is a nice indicator that the virtual HIDUSB device is 
-            // "powered up" and ready to get interacted with so we can report 
-            // success to the parent bus.
-            // 
-            BUS_PDO_REPORT_STAGE_RESULT(pdoData->BusInterface, ViGEmPdoInternalIoControl, pdoData->SerialNo, status);
-            
             //
             // The DS4 is basically ready to operate at this stage
             // 
