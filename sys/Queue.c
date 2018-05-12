@@ -157,7 +157,7 @@ VOID Bus_EvtIoDeviceControl(
             TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_QUEUE,
                 "Output buffer %d too small, require at least %d",
-                OutputBufferLength, sizeof(XUSB_REQUEST_NOTIFICATION));
+                (int)OutputBufferLength, (int)sizeof(XUSB_REQUEST_NOTIFICATION));
             break;
         }
 
@@ -241,7 +241,7 @@ VOID Bus_EvtIoDeviceControl(
             TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_QUEUE,
                 "Output buffer %d too small, require at least %d",
-                OutputBufferLength, sizeof(DS4_REQUEST_NOTIFICATION));
+                (int)OutputBufferLength, (int)sizeof(DS4_REQUEST_NOTIFICATION));
             break;
         }
 
