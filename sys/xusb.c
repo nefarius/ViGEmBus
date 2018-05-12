@@ -225,7 +225,7 @@ NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION
     status = WdfIoQueueCreate(Device, &holdingInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &xusb->HoldingUsbInRequests);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "WdfIoQueueCreate (HoldingUsbInRequests) failed 0x%x", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "WdfIoQueueCreate (HoldingUsbInRequests) failed with status %!STATUS!", status);
         return status;
     }
 
