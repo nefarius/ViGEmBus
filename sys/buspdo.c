@@ -102,7 +102,7 @@ NTSTATUS Bus_CreatePdo(
     PAGED_CODE();
 
 
-    KdPrint((DRIVERNAME "Entered Bus_CreatePdo\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
     //
     // Get the FDO interface ASAP to report progress to bus
@@ -115,7 +115,10 @@ NTSTATUS Bus_CreatePdo(
         NULL);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfFdoQueryForInterface failed status 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfFdoQueryForInterface failed with status %!STATUS!",
+            status);
         return status;
     }
 
@@ -129,7 +132,10 @@ NTSTATUS Bus_CreatePdo(
     status = WdfPdoInitAssignRawDevice(DeviceInit, &GUID_DEVCLASS_VIGEM_RAWPDO);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfPdoInitAssignRawDevice failed status 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfPdoInitAssignRawDevice failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
     }
 
@@ -138,7 +144,10 @@ NTSTATUS Bus_CreatePdo(
     status = WdfDeviceInitAssignSDDLString(DeviceInit, &SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RWX_RES_RWX);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfDeviceInitAssignSDDLString failed status 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfDeviceInitAssignSDDLString failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
     }
 
@@ -192,30 +201,60 @@ NTSTATUS Bus_CreatePdo(
 
     default:
 
-        KdPrint((DRIVERNAME "Unsupported target type\n"));
         status = STATUS_INVALID_PARAMETER;
+
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "Unknown target type: %d (%!STATUS!)",
+            Description->TargetType,
+            status);
+
         goto endCreatePdo;
     }
 
     // set device id
     status = WdfPdoInitAssignDeviceID(DeviceInit, &deviceId);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfPdoInitAssignDeviceID failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
+    }
 
     // prepare instance id
     status = RtlUnicodeStringPrintf(&buffer, L"%02d", Description->SerialNo);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "RtlUnicodeStringPrintf failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
+    }
 
     // set instance id
     status = WdfPdoInitAssignInstanceID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfPdoInitAssignInstanceID failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
+    }
 
     // set device description (for English operating systems)
     status = WdfPdoInitAddDeviceText(DeviceInit, &deviceDescription, &deviceLocation, 0x409);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfPdoInitAddDeviceText failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
+    }
 
     // default locale is English
     // TODO: add more locales
@@ -243,9 +282,18 @@ NTSTATUS Bus_CreatePdo(
 
     status = WdfDeviceCreate(&DeviceInit, &pdoAttributes, &hChild);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfDeviceCreate failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
+    }
 
-    KdPrint((DRIVERNAME "Created PDO: 0x%X\n", hChild));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSPDO,
+        "Created PDO 0x%p",
+        hChild);
 
     switch (Description->TargetType)
     {
@@ -258,7 +306,10 @@ NTSTATUS Bus_CreatePdo(
         status = WdfObjectAllocateContext(hChild, &pdoAttributes, (PVOID)&xusbData);
         if (!NT_SUCCESS(status))
         {
-            KdPrint((DRIVERNAME "WdfObjectAllocateContext failed status 0x%x\n", status));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSPDO,
+                "WdfObjectAllocateContext failed with status %!STATUS!",
+                status);
             goto endCreatePdo;
         }
 
@@ -272,7 +323,10 @@ NTSTATUS Bus_CreatePdo(
         status = WdfObjectAllocateContext(hChild, &pdoAttributes, (PVOID)&ds4Data);
         if (!NT_SUCCESS(status))
         {
-            KdPrint((DRIVERNAME "WdfObjectAllocateContext failed status 0x%x\n", status));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSPDO,
+                "WdfObjectAllocateContext failed with status %!STATUS!",
+                status);
             goto endCreatePdo;
         }
 
@@ -286,7 +340,10 @@ NTSTATUS Bus_CreatePdo(
         status = WdfObjectAllocateContext(hChild, &pdoAttributes, (PVOID)&xgipData);
         if (!NT_SUCCESS(status))
         {
-            KdPrint((DRIVERNAME "WdfObjectAllocateContext failed status 0x%x\n", status));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSPDO,
+                "WdfObjectAllocateContext failed with status %!STATUS!",
+                status);
             goto endCreatePdo;
         }
 
@@ -303,7 +360,10 @@ NTSTATUS Bus_CreatePdo(
     status = WdfDeviceCreateDeviceInterface(Device, (LPGUID)&GUID_DEVINTERFACE_USB_DEVICE, NULL);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfDeviceCreateDeviceInterface failed status 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfDeviceCreateDeviceInterface failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
     }
 
@@ -320,6 +380,15 @@ NTSTATUS Bus_CreatePdo(
     pdoData->OwnerProcessId = Description->OwnerProcessId;
     pdoData->VendorId = Description->VendorId;
     pdoData->ProductId = Description->ProductId;
+
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSPDO,
+        "PDO Context properties: serial = %d, type = %d, pid = %d, vid = 0x%04X, pid = 0x%04X",
+        pdoData->SerialNo,
+        pdoData->TargetType,
+        pdoData->OwnerProcessId,
+        pdoData->VendorId,
+        pdoData->ProductId);
 
     // Initialize additional contexts (if available)
     switch (Description->TargetType)
@@ -365,7 +434,10 @@ NTSTATUS Bus_CreatePdo(
     status = WdfIoQueueCreate(Device, &usbInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &pdoData->PendingUsbInRequests);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate (PendingUsbInRequests) failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfIoQueueCreate (PendingUsbInRequests) failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
     }
 
@@ -375,7 +447,10 @@ NTSTATUS Bus_CreatePdo(
     status = WdfIoQueueCreate(Device, &notificationsQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &pdoData->PendingNotificationRequests);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate (PendingNotificationRequests) failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfIoQueueCreate (PendingNotificationRequests) failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
     }
 
@@ -390,7 +465,10 @@ NTSTATUS Bus_CreatePdo(
     status = WdfIoQueueCreate(hChild, &defaultPdoQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &defaultPdoQueue);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfIoQueueCreate (Default) failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
     }
 
@@ -431,10 +509,15 @@ NTSTATUS Bus_CreatePdo(
 #pragma endregion
 
     endCreatePdo:
-                KdPrint((DRIVERNAME "BUS_PDO_REPORT_STAGE_RESULT Stage: ViGEmPdoCreate, Serial: 0x%X, Status: 0x%X (%d)\n",
-                    Description->SerialNo, status, NT_SUCCESS(status)));
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_BUSPDO,
+                    "BUS_PDO_REPORT_STAGE_RESULT Stage: ViGEmPdoCreate  [serial: %d, status: %!STATUS!]",
+                    Description->SerialNo, status);
 
                 BUS_PDO_REPORT_STAGE_RESULT(busInterface, ViGEmPdoCreate, Description->SerialNo, status);
+
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
+
                 return status;
 }
 

@@ -159,7 +159,7 @@ NTSTATUS Bus_PlugInDevice(
 
     TraceEvents(TRACE_LEVEL_VERBOSE,
         TRACE_BUSENUM,
-        "New PDO properties: serial = %d, type = %d, pid = %d, session = %d, internal = %d, vid = 0x%X, pid = 0x%X",
+        "New PDO properties: serial = %d, type = %d, pid = %d, session = %d, internal = %d, vid = 0x%04X, pid = 0x%04X",
         description.SerialNo,
         description.TargetType,
         description.OwnerProcessId,
