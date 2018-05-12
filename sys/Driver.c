@@ -56,7 +56,7 @@ NTSTATUS DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING Registry
 
     TraceEvents(TRACE_LEVEL_INFORMATION,
         TRACE_DRIVER,
-        "Loading Virtual Gamepad Emulation Bus Driver [built: %s %s]", 
+        "Loading Virtual Gamepad Emulation Bus Driver [built: %s %s]",
         __DATE__, __TIME__);
 
     //
@@ -366,13 +366,17 @@ Bus_FileClose(
 
     PAGED_CODE();
 
-    KdPrint((DRIVERNAME "Bus_FileClose called\n"));
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
     // Check common context
     pFileData = FileObjectGetData(FileObject);
     if (pFileData == NULL)
     {
-        KdPrint((DRIVERNAME "Bus_FileClose: ERROR! File handle context not found\n"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DRIVER,
+            "FileObjectGetData failed to return file object from WDFFILEOBJECT 0x%p",
+            FileObject);
         return;
     }
 
@@ -381,14 +385,19 @@ Bus_FileClose(
     pFDOData = FdoGetData(device);
     if (pFDOData == NULL)
     {
-        KdPrint((DRIVERNAME "Bus_FileClose: ERROR! FDO context not found\n"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DRIVER,
+            "FdoGetData failed");
         status = STATUS_NO_SUCH_DEVICE;
     }
     else
     {
         refCount = InterlockedDecrement(&pFDOData->InterfaceReferenceCounter);
 
-        KdPrint((DRIVERNAME "Bus_FileClose: Device refcount=%d\n", (int)refCount));
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_DRIVER,
+            "Device ref. count = %d",
+            (int)refCount);
     }
 
     list = WdfFdoGetDefaultChildList(device);
@@ -408,37 +417,48 @@ Bus_FileClose(
             break;
         }
 
-        KdPrint((DRIVERNAME "Bus_FileClose enumerate: status=%d devicePID=%d currentPID=%d fileSessionId=%d deviceSessionId=%d ownerIsDriver=%d\n",
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_DRIVER,
+            "PDO properties: status = %!STATUS!, pdoPID = %d, curPID = %d, pdoSID = %d, curSID = %d, internal = %d",
             (int)childInfo.Status,
             (int)description.OwnerProcessId,
             (int)CURRENT_PROCESS_ID(),
-            (int)pFileData->SessionId,
             (int)description.SessionId,
-            (int)description.OwnerIsDriver));
+            (int)pFileData->SessionId,
+            (int)description.OwnerIsDriver
+        );
 
         // Only unplug devices with matching session id
         if (childInfo.Status == WdfChildListRetrieveDeviceSuccess
             && description.SessionId == pFileData->SessionId
             && !description.OwnerIsDriver)
         {
-            KdPrint((DRIVERNAME "Bus_FileClose unplugging\n"));
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_DRIVER,
+                "Unplugging device with serial %d",
+                description.SerialNo);
 
             // "Unplug" child
             status = WdfChildListUpdateChildDescriptionAsMissing(list, &description.Header);
             if (!NT_SUCCESS(status))
             {
-                KdPrint((DRIVERNAME "WdfChildListUpdateChildDescriptionAsMissing failed with status 0x%X\n", status));
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_DRIVER,
+                    "WdfChildListUpdateChildDescriptionAsMissing failed with status %!STATUS!",
+                    status);
             }
         }
     }
 
     WdfChildListEndIteration(list, &iterator);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
 VOID
 Bus_EvtDriverContextCleanup(
     _In_ WDFOBJECT DriverObject
-    )
+)
 /*++
 Routine Description:
 
@@ -456,14 +476,14 @@ Return Value:
 {
     UNREFERENCED_PARAMETER(DriverObject);
 
-    PAGED_CODE ();
+    PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
     //
     // Stop WPP Tracing
     //
-    WPP_CLEANUP( WdfDriverWdmGetDriverObject( (WDFDRIVER) DriverObject) );
+    WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
 
 }
 
