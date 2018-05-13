@@ -626,19 +626,19 @@ Bus_PlugInRequestCleanUpEvtTimerFunc(
             "PDO (serial = %d) age: %llu",
             pPluginData->Serial, ellapsed);
 
-        //if (Serial == curSerial)
-        //{
-        //    WdfRequestComplete(curRequest, Status);
-        //
-        //    WdfCollectionRemove(pFdoData->PendingPluginRequests, curRequest);
-        //
-        //    TraceEvents(TRACE_LEVEL_INFORMATION,
-        //        TRACE_DRIVER,
-        //        "Removed item with serial: %d",
-        //        curSerial);
-        //
-        //    break;
-        //}
+        if (ellapsed > 500)
+        {
+            WdfRequestComplete(curRequest, STATUS_SUCCESS);
+
+            WdfCollectionRemove(pFdoData->PendingPluginRequests, curRequest);
+
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_DRIVER,
+                "Removed item with serial: %d",
+                pPluginData->Serial);
+
+            break;
+        }
     }
     WdfSpinLockRelease(pFdoData->PendingPluginRequestsLock);
 }
