@@ -587,8 +587,59 @@ Bus_PlugInRequestCleanUpEvtTimerFunc(
     WDFTIMER  Timer
 )
 {
-    UNREFERENCED_PARAMETER(Timer);
+    ULONG                       i;
+    PFDO_DEVICE_DATA            pFdoData;
+    WDFREQUEST                  curRequest;
+    ULONG                       items;
+    WDFDEVICE                   device;
+    PFDO_PLUGIN_REQUEST_DATA    pPluginData;
+    LONGLONG                    freq;
+    LARGE_INTEGER               pcNow;
+    LONGLONG                    ellapsed;
+
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+    device = WdfTimerGetParentObject(Timer);
+    pFdoData = FdoGetData(device);
+
+    WdfSpinLockAcquire(pFdoData->PendingPluginRequestsLock);
+
+    items = WdfCollectionGetCount(pFdoData->PendingPluginRequests);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_DRIVER,
+        "Items count: %d",
+        items);
+
+    for (i = 0; i < items; i++)
+    {
+        curRequest = WdfCollectionGetItem(pFdoData->PendingPluginRequests, i);
+        pPluginData = PluginRequestGetData(curRequest);
+
+        freq = pPluginData->Frequency.QuadPart / 1000;
+        pcNow = KeQueryPerformanceCounter(NULL);
+        ellapsed = (pcNow.QuadPart - pPluginData->Timestamp.QuadPart) / freq;
+        
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_DRIVER,
+            "PDO (serial = %d) age: %llu",
+            pPluginData->Serial, ellapsed);
+
+        //if (Serial == curSerial)
+        //{
+        //    WdfRequestComplete(curRequest, Status);
+        //
+        //    WdfCollectionRemove(pFdoData->PendingPluginRequests, curRequest);
+        //
+        //    TraceEvents(TRACE_LEVEL_INFORMATION,
+        //        TRACE_DRIVER,
+        //        "Removed item with serial: %d",
+        //        curSerial);
+        //
+        //    break;
+        //}
+    }
+    WdfSpinLockRelease(pFdoData->PendingPluginRequestsLock);
 }
 

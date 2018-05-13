@@ -181,7 +181,7 @@ typedef struct _FDO_PLUGIN_REQUEST_DATA
     //
     // High resolution timestamp taken when this request got moved to pending state
     // 
-    LONGLONG Timestamp;
+    LARGE_INTEGER Timestamp;
 
     //
     // Performance counter system frequency taken upon fetching timestamp

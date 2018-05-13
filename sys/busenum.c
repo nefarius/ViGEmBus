@@ -227,7 +227,7 @@ NTSTATUS Bus_PlugInDevice(
     //
     // Timestamp the request to track its age
     // 
-    pReqData->Timestamp = KeQueryPerformanceCounter(&pReqData->Frequency).QuadPart;
+    pReqData->Timestamp = KeQueryPerformanceCounter(&pReqData->Frequency);
 
     //
     // Keep track of pending request in collection
