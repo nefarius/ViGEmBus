@@ -102,6 +102,8 @@ EVT_WDF_TIMER Xgip_SysInitTimerFunc;
 
 EVT_WDF_OBJECT_CONTEXT_CLEANUP Bus_EvtDriverContextCleanup;
 
+EVT_WDF_TIMER Bus_PlugInRequestCleanUpEvtTimerFunc;
+
 #pragma endregion
 
 #pragma region Bus enumeration-specific functions

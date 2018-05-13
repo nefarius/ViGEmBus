@@ -93,9 +93,11 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
     WDF_OBJECT_ATTRIBUTES       fdoAttributes;
     WDF_OBJECT_ATTRIBUTES       fileHandleAttributes;
     WDF_OBJECT_ATTRIBUTES       collectionAttributes;
+    WDF_OBJECT_ATTRIBUTES       timerAttributes;
     PFDO_DEVICE_DATA            pFDOData;
     VIGEM_BUS_INTERFACE         busInterface;
     PINTERFACE                  interfaceHeader;
+    WDF_TIMER_CONFIG            reqTimerCfg;
 
     UNREFERENCED_PARAMETER(Driver);
 
@@ -185,6 +187,25 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
             status);
         return STATUS_UNSUCCESSFUL;
     }
+
+#pragma endregion
+
+#pragma region Create timer for sweeping up orphaned requests
+
+    WDF_TIMER_CONFIG_INIT_PERIODIC(&reqTimerCfg, Bus_PlugInRequestCleanUpEvtTimerFunc, 500);
+    WDF_OBJECT_ATTRIBUTES_INIT(&timerAttributes);
+    timerAttributes.ParentObject = device;
+
+    status = WdfTimerCreate(&reqTimerCfg, &timerAttributes, &pFDOData->PendingPluginRequestsCleanupTimer);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DRIVER,
+            "WdfTimerCreate failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    WdfTimerStart(pFDOData->PendingPluginRequestsCleanupTimer, WDF_REL_TIMEOUT_IN_SEC(1));
 
 #pragma endregion
 
@@ -559,3 +580,15 @@ Bus_PdoStageResult(
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 }
+
+_Use_decl_annotations_
+VOID
+Bus_PlugInRequestCleanUpEvtTimerFunc(
+    WDFTIMER  Timer
+)
+{
+    UNREFERENCED_PARAMETER(Timer);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+}
+

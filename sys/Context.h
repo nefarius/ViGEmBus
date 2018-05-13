@@ -143,6 +143,11 @@ typedef struct _FDO_DEVICE_DATA
     // 
     WDFSPINLOCK PendingPluginRequestsLock;
 
+    //
+    // Periodic timer sweeping up orphaned requests
+    // 
+    WDFTIMER PendingPluginRequestsCleanupTimer;
+
 } FDO_DEVICE_DATA, *PFDO_DEVICE_DATA;
 
 #define FDO_FIRST_SESSION_ID 100
