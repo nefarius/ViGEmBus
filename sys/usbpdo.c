@@ -358,7 +358,7 @@ NTSTATUS UsbPdo_SelectConfiguration(PURB urb, PPDO_DEVICE_DATA pCommon)
         {
             TraceEvents(TRACE_LEVEL_WARNING,
                 TRACE_USBPDO,
-                ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor\n");
+                ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor");
             return STATUS_INVALID_PARAMETER;
         }
 
@@ -537,7 +537,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         {
             TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_USBPDO,
-                "No XUSB context found on device %p\n",
+                "No XUSB context found on device %p",
                 Device);
 
             return STATUS_UNSUCCESSFUL;
@@ -634,7 +634,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         // Data coming FROM the higher driver TO us
         TraceEvents(TRACE_LEVEL_VERBOSE,
             TRACE_USBPDO,
-            ">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d\n",
+            ">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d",
             pTransfer->PipeHandle,
             pTransfer->TransferFlags,
             pTransfer->TransferBufferLength);
@@ -645,7 +645,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 
             TraceEvents(TRACE_LEVEL_VERBOSE,
                 TRACE_USBPDO,
-                "-- LED Buffer: %02X %02X %02X\n",
+                "-- LED Buffer: %02X %02X %02X",
                 Buffer[0], Buffer[1], Buffer[2]);
 
             // extract LED byte to get controller slot
@@ -658,7 +658,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 
                 TraceEvents(TRACE_LEVEL_INFORMATION,
                     TRACE_USBPDO,
-                    "-- LED Number: %d\n",
+                    "-- LED Number: %d",
                     xusb->LedNumber);
             }
         }
@@ -670,7 +670,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 
             TraceEvents(TRACE_LEVEL_VERBOSE,
                 TRACE_USBPDO,
-                "-- Rumble Buffer: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+                "-- Rumble Buffer: %02X %02X %02X %02X %02X %02X %02X %02X",
                 Buffer[0],
                 Buffer[1],
                 Buffer[2],
@@ -775,7 +775,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         // Data coming FROM us TO higher driver
         if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN)
         {
-            KdPrint((DRIVERNAME ">> >> >> Incoming request, queuing...\n"));
+            KdPrint((DRIVERNAME ">> >> >> Incoming request, queuing..."));
 
             /* This request is sent periodically and relies on data the "feeder"
             has to supply, so we queue this request and return with STATUS_PENDING.
@@ -786,7 +786,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         }
 
         // Data coming FROM the higher driver TO us
-        KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d\n",
+        KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d",
             pTransfer->PipeHandle,
             pTransfer->TransferFlags,
             pTransfer->TransferBufferLength));
@@ -818,7 +818,7 @@ NTSTATUS UsbPdo_AbortPipe(WDFDEVICE Device)
         {
             TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_USBPDO,
-                "No DS4 context found on device %p\n", Device);
+                "No DS4 context found on device %p", Device);
 
             return STATUS_UNSUCCESSFUL;
         }
