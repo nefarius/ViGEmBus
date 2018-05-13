@@ -39,7 +39,13 @@ NTSTATUS Xusb_PreparePdo(
     // prepare device description
     status = RtlUnicodeStringInit(DeviceDescription, L"Virtual Xbox 360 Controller");
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "RtlUnicodeStringInit failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     // Set hardware ID
     RtlUnicodeStringPrintf(&buffer, L"USB\\VID_%04X&PID_%04X", VendorId, ProductId);
@@ -48,32 +54,63 @@ NTSTATUS Xusb_PreparePdo(
 
     status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfPdoInitAddHardwareID failed with status %!STATUS!",
+            status);
         return status;
+    }
+
 
     // Set compatible IDs
     RtlUnicodeStringInit(&buffer, L"USB\\MS_COMP_XUSB10");
 
     status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfPdoInitAddCompatibleID #1 failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     RtlUnicodeStringInit(&buffer, L"USB\\Class_FF&SubClass_5D&Prot_01");
 
     status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfPdoInitAddCompatibleID #2 failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     RtlUnicodeStringInit(&buffer, L"USB\\Class_FF&SubClass_5D");
 
     status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfPdoInitAddCompatibleID #3 failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     RtlUnicodeStringInit(&buffer, L"USB\\Class_FF");
 
     status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfPdoInitAddCompatibleID #4 failed with status %!STATUS!",
+            status);
         return status;
+    }
 
     return STATUS_SUCCESS;
 }
@@ -102,8 +139,8 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, 
-            TRACE_XUSB, 
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
             "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
             "(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
             GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data1,
@@ -129,8 +166,8 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, 
-            TRACE_XUSB, 
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
             "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
             "(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
             GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data1,
@@ -156,8 +193,8 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, 
-            TRACE_XUSB, 
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
             "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
             "(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
             GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data1,
@@ -199,9 +236,9 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, 
-            TRACE_XUSB, 
-            "WdfDeviceAddQueryInterface failed with status %!STATUS!", 
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfDeviceAddQueryInterface failed with status %!STATUS!",
             status);
         return status;
     }
@@ -237,9 +274,9 @@ NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION
     status = WdfIoQueueCreate(Device, &holdingInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &xusb->HoldingUsbInRequests);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, 
+        TraceEvents(TRACE_LEVEL_ERROR,
             TRACE_XUSB,
-            "WdfIoQueueCreate (HoldingUsbInRequests) failed with status %!STATUS!", 
+            "WdfIoQueueCreate (HoldingUsbInRequests) failed with status %!STATUS!",
             status);
         return status;
     }
@@ -409,8 +446,8 @@ VOID Xusb_GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, PPDO_DEVIC
 
 VOID Xusb_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 {
-    TraceEvents(TRACE_LEVEL_VERBOSE, 
-        TRACE_XUSB, 
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_XUSB,
         ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
@@ -441,8 +478,8 @@ VOID Xusb_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 
     pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-    TraceEvents(TRACE_LEVEL_VERBOSE, 
-        TRACE_XUSB, 
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_XUSB,
         ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
@@ -489,8 +526,8 @@ VOID Xusb_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 
     pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-    TraceEvents(TRACE_LEVEL_VERBOSE, 
-        TRACE_XUSB, 
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_XUSB,
         ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
@@ -513,8 +550,8 @@ VOID Xusb_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 
     pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-    TraceEvents(TRACE_LEVEL_VERBOSE, 
-        TRACE_XUSB, 
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_XUSB,
         ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
