@@ -648,5 +648,7 @@ Bus_PlugInRequestCleanUpEvtTimerFunc(
         }
     }
     WdfSpinLockRelease(pFdoData->PendingPluginRequestsLock);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 }
 
