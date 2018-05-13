@@ -225,6 +225,11 @@ NTSTATUS Bus_PlugInDevice(
     pReqData->Serial = plugIn->SerialNo;
 
     //
+    // Timestamp the request to track its age
+    // 
+    pReqData->Timestamp = KeQueryPerformanceCounter(&pReqData->Frequency).QuadPart;
+
+    //
     // Keep track of pending request in collection
     // 
     status = WdfCollectionAdd(pFdoData->PendingPluginRequests, Request);

@@ -173,6 +173,16 @@ typedef struct _FDO_PLUGIN_REQUEST_DATA
     // 
     ULONG Serial;
 
+    //
+    // High resolution timestamp taken when this request got moved to pending state
+    // 
+    LONGLONG Timestamp;
+
+    //
+    // Performance counter system frequency taken upon fetching timestamp
+    // 
+    LARGE_INTEGER Frequency;
+
 } FDO_PLUGIN_REQUEST_DATA, *PFDO_PLUGIN_REQUEST_DATA;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(FDO_PLUGIN_REQUEST_DATA, PluginRequestGetData)
