@@ -102,7 +102,10 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (Failed with status %!STATUS!)",
+        TraceEvents(TRACE_LEVEL_ERROR, 
+            TRACE_XUSB, 
+            "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
+            "(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
             GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data1,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data2,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data3,
@@ -126,7 +129,10 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (Failed with status %!STATUS!)",
+        TraceEvents(TRACE_LEVEL_ERROR, 
+            TRACE_XUSB, 
+            "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
+            "(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
             GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data1,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data2,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data3,
@@ -150,7 +156,10 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X (Failed with status %!STATUS!)",
+        TraceEvents(TRACE_LEVEL_ERROR, 
+            TRACE_XUSB, 
+            "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
+            "(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
             GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data1,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data2,
             GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data3,
@@ -190,7 +199,10 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "WdfDeviceAddQueryInterface failed with status %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, 
+            TRACE_XUSB, 
+            "WdfDeviceAddQueryInterface failed with status %!STATUS!", 
+            status);
         return status;
     }
 
@@ -225,7 +237,10 @@ NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION
     status = WdfIoQueueCreate(Device, &holdingInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &xusb->HoldingUsbInRequests);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_XUSB, "WdfIoQueueCreate (HoldingUsbInRequests) failed with status %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, 
+            TRACE_XUSB,
+            "WdfIoQueueCreate (HoldingUsbInRequests) failed with status %!STATUS!", 
+            status);
         return status;
     }
 
@@ -394,7 +409,9 @@ VOID Xusb_GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, PPDO_DEVIC
 
 VOID Xusb_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_XUSB, ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
+    TraceEvents(TRACE_LEVEL_VERBOSE, 
+        TRACE_XUSB, 
+        ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
         (int)pInfo->AlternateSetting,
@@ -424,7 +441,9 @@ VOID Xusb_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 
     pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_XUSB, ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
+    TraceEvents(TRACE_LEVEL_VERBOSE, 
+        TRACE_XUSB, 
+        ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
         (int)pInfo->AlternateSetting,
@@ -470,7 +489,9 @@ VOID Xusb_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 
     pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_XUSB, ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
+    TraceEvents(TRACE_LEVEL_VERBOSE, 
+        TRACE_XUSB, 
+        ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
         (int)pInfo->AlternateSetting,
@@ -492,7 +513,9 @@ VOID Xusb_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 
     pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_XUSB, ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
+    TraceEvents(TRACE_LEVEL_VERBOSE, 
+        TRACE_XUSB, 
+        ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
         (int)pInfo->AlternateSetting,
