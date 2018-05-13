@@ -32,6 +32,9 @@ typedef struct _PDO_IDENTIFICATION_DESCRIPTION
 {
     WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER Header; // should contain this header
 
+    //
+    // Unique serial number of the device on the bus
+    // 
     ULONG SerialNo;
 
     // 
@@ -165,6 +168,9 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(FDO_FILE_DATA, FileObjectGetData)
 // 
 typedef struct _FDO_PLUGIN_REQUEST_DATA
 {
+    //
+    // Unique serial number of the device on the bus
+    // 
     ULONG Serial;
 
 } FDO_PLUGIN_REQUEST_DATA, *PFDO_PLUGIN_REQUEST_DATA;
