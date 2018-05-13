@@ -32,6 +32,9 @@ typedef struct _PDO_IDENTIFICATION_DESCRIPTION
 {
     WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER Header; // should contain this header
 
+    //
+    // Unique serial number of the device on the bus
+    // 
     ULONG SerialNo;
 
     // 
@@ -140,6 +143,11 @@ typedef struct _FDO_DEVICE_DATA
     // 
     WDFSPINLOCK PendingPluginRequestsLock;
 
+    //
+    // Periodic timer sweeping up orphaned requests
+    // 
+    WDFTIMER PendingPluginRequestsCleanupTimer;
+
 } FDO_DEVICE_DATA, *PFDO_DEVICE_DATA;
 
 #define FDO_FIRST_SESSION_ID 100
@@ -165,7 +173,20 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(FDO_FILE_DATA, FileObjectGetData)
 // 
 typedef struct _FDO_PLUGIN_REQUEST_DATA
 {
+    //
+    // Unique serial number of the device on the bus
+    // 
     ULONG Serial;
+
+    //
+    // High resolution timestamp taken when this request got moved to pending state
+    // 
+    LARGE_INTEGER Timestamp;
+
+    //
+    // Performance counter system frequency taken upon fetching timestamp
+    // 
+    LARGE_INTEGER Frequency;
 
 } FDO_PLUGIN_REQUEST_DATA, *PFDO_PLUGIN_REQUEST_DATA;
 

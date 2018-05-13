@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 #include "busenum.h"
+#include "usbpdo.tmh"
 
 
 //
@@ -33,7 +34,9 @@ BOOLEAN USB_BUSIFFN UsbPdo_IsDeviceHighSpeed(IN PVOID BusContext)
 {
     UNREFERENCED_PARAMETER(BusContext);
 
-    KdPrint((DRIVERNAME "UsbPdo_IsDeviceHighSpeed: TRUE\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_USBPDO,
+        "IsDeviceHighSpeed: TRUE");
 
     return TRUE;
 }
@@ -55,7 +58,10 @@ NTSTATUS USB_BUSIFFN UsbPdo_QueryBusInformation(
     UNREFERENCED_PARAMETER(BusInformationBufferLength);
     UNREFERENCED_PARAMETER(BusInformationActualLength);
 
-    KdPrint((DRIVERNAME "UsbPdo_QueryBusInformation: STATUS_UNSUCCESSFUL\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_USBPDO,
+        "QueryBusInformation: %!STATUS!", STATUS_UNSUCCESSFUL);
+
     return STATUS_UNSUCCESSFUL;
 }
 
@@ -67,7 +73,10 @@ NTSTATUS USB_BUSIFFN UsbPdo_SubmitIsoOutUrb(IN PVOID BusContext, IN PURB Urb)
     UNREFERENCED_PARAMETER(BusContext);
     UNREFERENCED_PARAMETER(Urb);
 
-    KdPrint((DRIVERNAME "UsbPdo_SubmitIsoOutUrb: STATUS_UNSUCCESSFUL\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_USBPDO,
+        "SubmitIsoOutUrb: %!STATUS!", STATUS_UNSUCCESSFUL);
+
     return STATUS_UNSUCCESSFUL;
 }
 
@@ -79,7 +88,10 @@ NTSTATUS USB_BUSIFFN UsbPdo_QueryBusTime(IN PVOID BusContext, IN OUT PULONG Curr
     UNREFERENCED_PARAMETER(BusContext);
     UNREFERENCED_PARAMETER(CurrentUsbFrame);
 
-    KdPrint((DRIVERNAME "UsbPdo_QueryBusTime: STATUS_UNSUCCESSFUL\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_USBPDO,
+        "QueryBusTime: %!STATUS!", STATUS_UNSUCCESSFUL);
+
     return STATUS_UNSUCCESSFUL;
 }
 
@@ -94,7 +106,9 @@ VOID USB_BUSIFFN UsbPdo_GetUSBDIVersion(
 {
     UNREFERENCED_PARAMETER(BusContext);
 
-    KdPrint((DRIVERNAME "UsbPdo_GetUSBDIVersion: 0x500, 0x200\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_USBPDO,
+        "GetUSBDIVersion: 0x500, 0x200");
 
     if (VersionInformation != NULL)
     {
@@ -217,7 +231,10 @@ NTSTATUS UsbPdo_GetConfigurationDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommo
 // 
 NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
 {
-    KdPrint((DRIVERNAME "Index = %d\n", urb->UrbControlDescriptorRequest.Index));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        "Index = %d",
+        urb->UrbControlDescriptorRequest.Index);
 
     switch (pCommon->TargetType)
     {
@@ -240,7 +257,10 @@ NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
         }
         case 1:
         {
-            KdPrint((DRIVERNAME "LanguageId = 0x%X\n", urb->UrbControlDescriptorRequest.LanguageId));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                "LanguageId = 0x%X",
+                urb->UrbControlDescriptorRequest.LanguageId);
 
             if (urb->UrbControlDescriptorRequest.TransferBufferLength < DS4_MANUFACTURER_NAME_LENGTH)
             {
@@ -268,7 +288,10 @@ NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
         }
         case 2:
         {
-            KdPrint((DRIVERNAME "LanguageId = 0x%X\n", urb->UrbControlDescriptorRequest.LanguageId));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                "LanguageId = 0x%X",
+                urb->UrbControlDescriptorRequest.LanguageId);
 
             if (urb->UrbControlDescriptorRequest.TransferBufferLength < DS4_PRODUCT_NAME_LENGTH)
             {
@@ -314,11 +337,16 @@ NTSTATUS UsbPdo_SelectConfiguration(PURB urb, PPDO_DEVICE_DATA pCommon)
 
     pInfo = &urb->UrbSelectConfiguration.Interface;
 
-    KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: TotalLength %d\n", urb->UrbHeader.Length));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: TotalLength %d",
+        urb->UrbHeader.Length);
 
     if (urb->UrbHeader.Length == sizeof(struct _URB_SELECT_CONFIGURATION))
     {
-        KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: NULL ConfigurationDescriptor\n"));
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_USBPDO,
+            ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: NULL ConfigurationDescriptor");
         return STATUS_SUCCESS;
     }
 
@@ -328,7 +356,9 @@ NTSTATUS UsbPdo_SelectConfiguration(PURB urb, PPDO_DEVICE_DATA pCommon)
 
         if (urb->UrbHeader.Length < XUSB_CONFIGURATION_SIZE)
         {
-            KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor\n"));
+            TraceEvents(TRACE_LEVEL_WARNING,
+                TRACE_USBPDO,
+                ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor");
             return STATUS_INVALID_PARAMETER;
         }
 
@@ -340,7 +370,9 @@ NTSTATUS UsbPdo_SelectConfiguration(PURB urb, PPDO_DEVICE_DATA pCommon)
 
         if (urb->UrbHeader.Length < DS4_CONFIGURATION_SIZE)
         {
-            KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor\n"));
+            TraceEvents(TRACE_LEVEL_WARNING,
+                TRACE_USBPDO,
+                ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor");
             return STATUS_INVALID_PARAMETER;
         }
 
@@ -352,7 +384,9 @@ NTSTATUS UsbPdo_SelectConfiguration(PURB urb, PPDO_DEVICE_DATA pCommon)
 
         if (urb->UrbHeader.Length < XGIP_CONFIGURATION_SIZE)
         {
-            KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor\n"));
+            TraceEvents(TRACE_LEVEL_WARNING,
+                TRACE_USBPDO,
+                ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor");
             return STATUS_INVALID_PARAMETER;
         }
 
@@ -374,16 +408,20 @@ NTSTATUS UsbPdo_SelectInterface(PURB urb, PPDO_DEVICE_DATA pCommon)
 {
     PUSBD_INTERFACE_INFORMATION pInfo = &urb->UrbSelectInterface.Interface;
 
-    KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_INTERFACE: Length %d, Interface %d, Alternate %d, Pipes %d\n",
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> URB_FUNCTION_SELECT_INTERFACE: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
         (int)pInfo->AlternateSetting,
-        pInfo->NumberOfPipes));
+        pInfo->NumberOfPipes);
 
-    KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_INTERFACE: Class %d, SubClass %d, Protocol %d\n",
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> URB_FUNCTION_SELECT_INTERFACE: Class %d, SubClass %d, Protocol %d",
         (int)pInfo->Class,
         (int)pInfo->SubClass,
-        (int)pInfo->Protocol));
+        (int)pInfo->Protocol);
 
     switch (pCommon->TargetType)
     {
@@ -455,7 +493,10 @@ NTSTATUS UsbPdo_SelectInterface(PURB urb, PPDO_DEVICE_DATA pCommon)
     }
     case DualShock4Wired:
     {
-        KdPrint((DRIVERNAME "Warning: not implemented\n"));
+        TraceEvents(TRACE_LEVEL_WARNING,
+            TRACE_USBPDO,
+            "Not implemented");
+
         break;
     }
     default:
@@ -479,7 +520,9 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
 
     if (pdoData == NULL)
     {
-        KdPrint((DRIVERNAME ">> >> >> Invalid common context\n"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_USBPDO,
+            ">> >> >> PdoGetData failed");
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -492,7 +535,10 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         // Check context
         if (xusb == NULL)
         {
-            KdPrint((DRIVERNAME "No XUSB context found on device %p\n", Device));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_USBPDO,
+                "No XUSB context found on device %p",
+                Device);
 
             return STATUS_UNSUCCESSFUL;
         }
@@ -500,7 +546,9 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         // Data coming FROM us TO higher driver
         if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN)
         {
-            KdPrint((DRIVERNAME ">> >> >> Incoming request, queuing...\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                ">> >> >> Incoming request, queuing...");
 
             if (XUSB_IS_DATA_PIPE(pTransfer))
             {
@@ -584,16 +632,21 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         }
 
         // Data coming FROM the higher driver TO us
-        KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d\n",
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_USBPDO,
+            ">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d",
             pTransfer->PipeHandle,
             pTransfer->TransferFlags,
-            pTransfer->TransferBufferLength));
+            pTransfer->TransferBufferLength);
 
         if (pTransfer->TransferBufferLength == XUSB_LEDSET_SIZE) // Led
         {
             PUCHAR Buffer = pTransfer->TransferBuffer;
 
-            KdPrint((DRIVERNAME "-- LED Buffer: %02X %02X %02X\n", Buffer[0], Buffer[1], Buffer[2]));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                "-- LED Buffer: %02X %02X %02X",
+                Buffer[0], Buffer[1], Buffer[2]);
 
             // extract LED byte to get controller slot
             if (Buffer[0] == 0x01 && Buffer[1] == 0x03 && Buffer[2] >= 0x02)
@@ -603,8 +656,10 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                 if (Buffer[2] == 0x04) xusb->LedNumber = 2;
                 if (Buffer[2] == 0x05) xusb->LedNumber = 3;
 
-                KdPrint((DRIVERNAME "-- LED Number: %d\n", xusb->LedNumber));
-
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_USBPDO,
+                    "-- LED Number: %d",
+                    xusb->LedNumber);
                 //
                 // Report back to FDO that we are ready to operate
                 // 
@@ -622,7 +677,9 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         {
             PUCHAR Buffer = pTransfer->TransferBuffer;
 
-            KdPrint((DRIVERNAME "-- Rumble Buffer: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                "-- Rumble Buffer: %02X %02X %02X %02X %02X %02X %02X %02X",
                 Buffer[0],
                 Buffer[1],
                 Buffer[2],
@@ -630,14 +687,14 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                 Buffer[4],
                 Buffer[5],
                 Buffer[6],
-                Buffer[7]));
+                Buffer[7]);
 
             RtlCopyBytes(xusb->Rumble, Buffer, pTransfer->TransferBufferLength);
         }
 
         // Notify user-mode process that new data is available
         status = WdfIoQueueRetrieveNextRequest(pdoData->PendingNotificationRequests, &notifyRequest);
-        
+
         if (NT_SUCCESS(status))
         {
             PXUSB_REQUEST_NOTIFICATION notify = NULL;
@@ -657,7 +714,10 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
             }
             else
             {
-                KdPrint((DRIVERNAME "WdfRequestRetrieveOutputBuffer failed with status 0x%X\n", status));
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_USBPDO,
+                    "WdfRequestRetrieveOutputBuffer failed with status %!STATUS!",
+                    status);
             }
         }
 
@@ -671,7 +731,9 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN
             && pTransfer->PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0084)
         {
-            // KdPrint((DRIVERNAME ">> >> >> Incoming request, queuing...\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                ">> >> >> Incoming request, queuing...");
 
             /* This request is sent periodically and relies on data the "feeder"
                has to supply, so we queue this request and return with STATUS_PENDING.
@@ -706,7 +768,10 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
             }
             else
             {
-                KdPrint((DRIVERNAME "WdfRequestRetrieveOutputBuffer failed with status 0x%X\n", status));
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_USBPDO,
+                    "WdfRequestRetrieveOutputBuffer failed with status %!STATUS!",
+                    status);
             }
         }
 
@@ -719,7 +784,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         // Data coming FROM us TO higher driver
         if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN)
         {
-            KdPrint((DRIVERNAME ">> >> >> Incoming request, queuing...\n"));
+            KdPrint((DRIVERNAME ">> >> >> Incoming request, queuing..."));
 
             /* This request is sent periodically and relies on data the "feeder"
             has to supply, so we queue this request and return with STATUS_PENDING.
@@ -730,7 +795,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
         }
 
         // Data coming FROM the higher driver TO us
-        KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d\n",
+        KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d",
             pTransfer->PipeHandle,
             pTransfer->TransferFlags,
             pTransfer->TransferBufferLength));
@@ -760,7 +825,9 @@ NTSTATUS UsbPdo_AbortPipe(WDFDEVICE Device)
         // Check context
         if (ds4 == NULL)
         {
-            KdPrint((DRIVERNAME "No DS4 context found on device %p\n", Device));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_USBPDO,
+                "No DS4 context found on device %p", Device);
 
             return STATUS_UNSUCCESSFUL;
         }
@@ -788,13 +855,17 @@ NTSTATUS UsbPdo_ClassInterface(PURB urb, WDFDEVICE Device, PPDO_DEVICE_DATA pCom
 {
     struct _URB_CONTROL_VENDOR_OR_CLASS_REQUEST* pRequest = &urb->UrbControlVendorClassRequest;
 
-    KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_CLASS_INTERFACE\n"));
-    KdPrint((DRIVERNAME ">> >> >> TransferFlags = 0x%X, Request = 0x%X, Value = 0x%X, Index = 0x%X, BufLen = %d\n",
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> URB_FUNCTION_CLASS_INTERFACE");
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> TransferFlags = 0x%X, Request = 0x%X, Value = 0x%X, Index = 0x%X, BufLen = %d",
         pRequest->TransferFlags,
         pRequest->Request,
         pRequest->Value,
         pRequest->Index,
-        pRequest->TransferBufferLength));
+        pRequest->TransferBufferLength);
 
     switch (pCommon->TargetType)
     {
@@ -809,7 +880,10 @@ NTSTATUS UsbPdo_ClassInterface(PURB urb, WDFDEVICE Device, PPDO_DEVICE_DATA pCom
             UCHAR reportId = HID_GET_REPORT_ID(pRequest);
             UCHAR reportType = HID_GET_REPORT_TYPE(pRequest);
 
-            KdPrint((DRIVERNAME ">> >> >> >> GET_REPORT(%d): %d\n", reportType, reportId));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                ">> >> >> >> GET_REPORT(%d): %d",
+                reportType, reportId);
 
             switch (reportType)
             {
@@ -893,7 +967,10 @@ NTSTATUS UsbPdo_ClassInterface(PURB urb, WDFDEVICE Device, PPDO_DEVICE_DATA pCom
             UCHAR reportId = HID_GET_REPORT_ID(pRequest);
             UCHAR reportType = HID_GET_REPORT_TYPE(pRequest);
 
-            KdPrint((DRIVERNAME ">> >> >> >> SET_REPORT(%d): %d\n", reportType, reportId));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_USBPDO,
+                ">> >> >> >> SET_REPORT(%d): %d",
+                reportType, reportId);
 
             switch (reportType)
             {
@@ -1195,7 +1272,10 @@ NTSTATUS UsbPdo_GetDescriptorFromInterface(PURB urb, PPDO_DEVICE_DATA pCommon)
 
     struct _URB_CONTROL_DESCRIPTOR_REQUEST* pRequest = &urb->UrbControlDescriptorRequest;
 
-    KdPrint((DRIVERNAME ">> >> >> _URB_CONTROL_DESCRIPTOR_REQUEST: Buffer Length %d\n", pRequest->TransferBufferLength));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> _URB_CONTROL_DESCRIPTOR_REQUEST: Buffer Length %d",
+        pRequest->TransferBufferLength);
 
     switch (pCommon->TargetType)
     {

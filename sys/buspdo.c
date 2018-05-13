@@ -26,6 +26,7 @@ SOFTWARE.
 #include "busenum.h"
 #include <wdmsec.h>
 #include <usbioctl.h>
+#include "buspdo.tmh"
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(PAGE, Bus_CreatePdo)
@@ -101,7 +102,7 @@ NTSTATUS Bus_CreatePdo(
     PAGED_CODE();
 
 
-    KdPrint((DRIVERNAME "Entered Bus_CreatePdo\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
     //
     // Get the FDO interface ASAP to report progress to bus
@@ -114,7 +115,10 @@ NTSTATUS Bus_CreatePdo(
         NULL);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfFdoQueryForInterface failed status 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfFdoQueryForInterface failed with status %!STATUS!",
+            status);
         return status;
     }
 
@@ -128,7 +132,10 @@ NTSTATUS Bus_CreatePdo(
     status = WdfPdoInitAssignRawDevice(DeviceInit, &GUID_DEVCLASS_VIGEM_RAWPDO);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfPdoInitAssignRawDevice failed status 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfPdoInitAssignRawDevice failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
     }
 
@@ -137,7 +144,10 @@ NTSTATUS Bus_CreatePdo(
     status = WdfDeviceInitAssignSDDLString(DeviceInit, &SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RWX_RES_RWX);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfDeviceInitAssignSDDLString failed status 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfDeviceInitAssignSDDLString failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
     }
 
@@ -191,30 +201,60 @@ NTSTATUS Bus_CreatePdo(
 
     default:
 
-        KdPrint((DRIVERNAME "Unsupported target type\n"));
         status = STATUS_INVALID_PARAMETER;
+
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "Unknown target type: %d (%!STATUS!)",
+            Description->TargetType,
+            status);
+
         goto endCreatePdo;
     }
 
     // set device id
     status = WdfPdoInitAssignDeviceID(DeviceInit, &deviceId);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfPdoInitAssignDeviceID failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
+    }
 
     // prepare instance id
     status = RtlUnicodeStringPrintf(&buffer, L"%02d", Description->SerialNo);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "RtlUnicodeStringPrintf failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
+    }
 
     // set instance id
     status = WdfPdoInitAssignInstanceID(DeviceInit, &buffer);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfPdoInitAssignInstanceID failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
+    }
 
     // set device description (for English operating systems)
     status = WdfPdoInitAddDeviceText(DeviceInit, &deviceDescription, &deviceLocation, 0x409);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfPdoInitAddDeviceText failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
+    }
 
     // default locale is English
     // TODO: add more locales
@@ -242,9 +282,18 @@ NTSTATUS Bus_CreatePdo(
 
     status = WdfDeviceCreate(&DeviceInit, &pdoAttributes, &hChild);
     if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfDeviceCreate failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
+    }
 
-    KdPrint((DRIVERNAME "Created PDO: 0x%X\n", hChild));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSPDO,
+        "Created PDO 0x%p",
+        hChild);
 
     switch (Description->TargetType)
     {
@@ -257,7 +306,10 @@ NTSTATUS Bus_CreatePdo(
         status = WdfObjectAllocateContext(hChild, &pdoAttributes, (PVOID)&xusbData);
         if (!NT_SUCCESS(status))
         {
-            KdPrint((DRIVERNAME "WdfObjectAllocateContext failed status 0x%x\n", status));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSPDO,
+                "WdfObjectAllocateContext failed with status %!STATUS!",
+                status);
             goto endCreatePdo;
         }
 
@@ -271,7 +323,10 @@ NTSTATUS Bus_CreatePdo(
         status = WdfObjectAllocateContext(hChild, &pdoAttributes, (PVOID)&ds4Data);
         if (!NT_SUCCESS(status))
         {
-            KdPrint((DRIVERNAME "WdfObjectAllocateContext failed status 0x%x\n", status));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSPDO,
+                "WdfObjectAllocateContext failed with status %!STATUS!",
+                status);
             goto endCreatePdo;
         }
 
@@ -285,7 +340,10 @@ NTSTATUS Bus_CreatePdo(
         status = WdfObjectAllocateContext(hChild, &pdoAttributes, (PVOID)&xgipData);
         if (!NT_SUCCESS(status))
         {
-            KdPrint((DRIVERNAME "WdfObjectAllocateContext failed status 0x%x\n", status));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSPDO,
+                "WdfObjectAllocateContext failed with status %!STATUS!",
+                status);
             goto endCreatePdo;
         }
 
@@ -302,7 +360,10 @@ NTSTATUS Bus_CreatePdo(
     status = WdfDeviceCreateDeviceInterface(Device, (LPGUID)&GUID_DEVINTERFACE_USB_DEVICE, NULL);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfDeviceCreateDeviceInterface failed status 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfDeviceCreateDeviceInterface failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
     }
 
@@ -319,6 +380,15 @@ NTSTATUS Bus_CreatePdo(
     pdoData->OwnerProcessId = Description->OwnerProcessId;
     pdoData->VendorId = Description->VendorId;
     pdoData->ProductId = Description->ProductId;
+
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSPDO,
+        "PDO Context properties: serial = %d, type = %d, pid = %d, vid = 0x%04X, pid = 0x%04X",
+        pdoData->SerialNo,
+        pdoData->TargetType,
+        pdoData->OwnerProcessId,
+        pdoData->VendorId,
+        pdoData->ProductId);
 
     // Initialize additional contexts (if available)
     switch (Description->TargetType)
@@ -347,7 +417,11 @@ NTSTATUS Bus_CreatePdo(
 
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "Couldn't initialize additional contexts\n"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "Couldn't initialize additional contexts: %!STATUS!",
+            status);
+
         goto endCreatePdo;
     }
 
@@ -364,7 +438,10 @@ NTSTATUS Bus_CreatePdo(
     status = WdfIoQueueCreate(Device, &usbInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &pdoData->PendingUsbInRequests);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate (PendingUsbInRequests) failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfIoQueueCreate (PendingUsbInRequests) failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
     }
 
@@ -374,7 +451,10 @@ NTSTATUS Bus_CreatePdo(
     status = WdfIoQueueCreate(Device, &notificationsQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &pdoData->PendingNotificationRequests);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate (PendingNotificationRequests) failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfIoQueueCreate (PendingNotificationRequests) failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
     }
 
@@ -389,7 +469,10 @@ NTSTATUS Bus_CreatePdo(
     status = WdfIoQueueCreate(hChild, &defaultPdoQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &defaultPdoQueue);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfIoQueueCreate failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "WdfIoQueueCreate (Default) failed with status %!STATUS!",
+            status);
         goto endCreatePdo;
     }
 
@@ -430,10 +513,15 @@ NTSTATUS Bus_CreatePdo(
 #pragma endregion
 
     endCreatePdo:
-                KdPrint((DRIVERNAME "BUS_PDO_REPORT_STAGE_RESULT Stage: ViGEmPdoCreate, Serial: 0x%X, Status: 0x%X (%d)\n",
-                    Description->SerialNo, status, NT_SUCCESS(status)));
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_BUSPDO,
+                    "BUS_PDO_REPORT_STAGE_RESULT Stage: ViGEmPdoCreate  [serial: %d, status: %!STATUS!]",
+                    Description->SerialNo, status);
 
                 BUS_PDO_REPORT_STAGE_RESULT(busInterface, ViGEmPdoCreate, Description->SerialNo, status);
+
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
+
                 return status;
 }
 
@@ -454,7 +542,7 @@ NTSTATUS Bus_EvtDevicePrepareHardware(
     UNREFERENCED_PARAMETER(ResourcesRaw);
     UNREFERENCED_PARAMETER(ResourcesTranslated);
 
-    KdPrint((DRIVERNAME "Bus_EvtDevicePrepareHardware: 0x%p\n", Device));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Entry");
 
     pdoData = PdoGetData(Device);
 
@@ -483,7 +571,14 @@ NTSTATUS Bus_EvtDevicePrepareHardware(
         break;
     }
 
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_BUSPDO,
+        "BUS_PDO_REPORT_STAGE_RESULT Stage: ViGEmPdoCreate  [serial: %d, status: %!STATUS!]",
+        pdoData->SerialNo, status);
+
     BUS_PDO_REPORT_STAGE_RESULT(pdoData->BusInterface, ViGEmPdoPrepareHardware, pdoData->SerialNo, status);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
 
     return status;
 }
@@ -510,6 +605,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
     PPDO_DEVICE_DATA        pdoData;
     PIO_STACK_LOCATION      irpStack;
 
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Entry");
+
     hDevice = WdfIoQueueGetDevice(Queue);
     pdoData = PdoGetData(hDevice);
     // No help from the framework available from here on
@@ -520,7 +618,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
     {
     case IOCTL_INTERNAL_USB_SUBMIT_URB:
 
-        KdPrint((DRIVERNAME ">> IOCTL_INTERNAL_USB_SUBMIT_URB\n"));
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_BUSPDO,
+            ">> IOCTL_INTERNAL_USB_SUBMIT_URB");
 
         urb = (PURB)URB_FROM_IRP(irp);
 
@@ -528,7 +628,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
         {
         case URB_FUNCTION_CONTROL_TRANSFER:
 
-            KdPrint((DRIVERNAME ">> >> URB_FUNCTION_CONTROL_TRANSFER\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSPDO,
+                ">> >> URB_FUNCTION_CONTROL_TRANSFER");
 
             switch (urb->UrbControlTransfer.SetupPacket[6])
             {
@@ -564,7 +666,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
         case URB_FUNCTION_CONTROL_TRANSFER_EX:
 
-            KdPrint((DRIVERNAME ">> >> URB_FUNCTION_CONTROL_TRANSFER_EX\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSPDO,
+                ">> >> URB_FUNCTION_CONTROL_TRANSFER_EX");
 
             status = STATUS_UNSUCCESSFUL;
 
@@ -572,7 +676,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
         case URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER:
 
-            KdPrint((DRIVERNAME ">> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSPDO,
+                ">> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER");
 
             status = UsbPdo_BulkOrInterruptTransfer(urb, hDevice, Request);
 
@@ -580,7 +686,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
         case URB_FUNCTION_SELECT_CONFIGURATION:
 
-            KdPrint((DRIVERNAME ">> >> URB_FUNCTION_SELECT_CONFIGURATION\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSPDO,
+                ">> >> URB_FUNCTION_SELECT_CONFIGURATION");
 
             status = UsbPdo_SelectConfiguration(urb, pdoData);
 
@@ -588,7 +696,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
         case URB_FUNCTION_SELECT_INTERFACE:
 
-            KdPrint((DRIVERNAME ">> >> URB_FUNCTION_SELECT_INTERFACE\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSPDO,
+                ">> >> URB_FUNCTION_SELECT_INTERFACE");
 
             status = UsbPdo_SelectInterface(urb, pdoData);
 
@@ -596,13 +706,17 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
         case URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE:
 
-            KdPrint((DRIVERNAME ">> >> URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSPDO,
+                ">> >> URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE");
 
             switch (urb->UrbControlDescriptorRequest.DescriptorType)
             {
             case USB_DEVICE_DESCRIPTOR_TYPE:
 
-                KdPrint((DRIVERNAME ">> >> >> USB_DEVICE_DESCRIPTOR_TYPE\n"));
+                TraceEvents(TRACE_LEVEL_VERBOSE,
+                    TRACE_BUSPDO,
+                    ">> >> >> USB_DEVICE_DESCRIPTOR_TYPE");
 
                 status = UsbPdo_GetDeviceDescriptorType(urb, pdoData);
 
@@ -610,7 +724,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
             case USB_CONFIGURATION_DESCRIPTOR_TYPE:
 
-                KdPrint((DRIVERNAME ">> >> >> USB_CONFIGURATION_DESCRIPTOR_TYPE\n"));
+                TraceEvents(TRACE_LEVEL_VERBOSE,
+                    TRACE_BUSPDO,
+                    ">> >> >> USB_CONFIGURATION_DESCRIPTOR_TYPE");
 
                 status = UsbPdo_GetConfigurationDescriptorType(urb, pdoData);
 
@@ -618,35 +734,49 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
             case USB_STRING_DESCRIPTOR_TYPE:
 
-                KdPrint((DRIVERNAME ">> >> >> USB_STRING_DESCRIPTOR_TYPE\n"));
+                TraceEvents(TRACE_LEVEL_VERBOSE,
+                    TRACE_BUSPDO,
+                    ">> >> >> USB_STRING_DESCRIPTOR_TYPE");
 
                 status = UsbPdo_GetStringDescriptorType(urb, pdoData);
 
                 break;
             case USB_INTERFACE_DESCRIPTOR_TYPE:
 
-                KdPrint((DRIVERNAME ">> >> >> USB_INTERFACE_DESCRIPTOR_TYPE\n"));
+                TraceEvents(TRACE_LEVEL_VERBOSE,
+                    TRACE_BUSPDO,
+                    ">> >> >> USB_INTERFACE_DESCRIPTOR_TYPE");
 
                 break;
 
             case USB_ENDPOINT_DESCRIPTOR_TYPE:
 
-                KdPrint((DRIVERNAME ">> >> >> USB_ENDPOINT_DESCRIPTOR_TYPE\n"));
+                TraceEvents(TRACE_LEVEL_VERBOSE,
+                    TRACE_BUSPDO,
+                    ">> >> >> USB_ENDPOINT_DESCRIPTOR_TYPE");
 
                 break;
 
             default:
-                KdPrint((DRIVERNAME ">> >> >> Unknown descriptor type\n"));
+
+                TraceEvents(TRACE_LEVEL_VERBOSE,
+                    TRACE_BUSPDO,
+                    ">> >> >> Unknown descriptor type");
+
                 break;
             }
 
-            KdPrint((DRIVERNAME "<< <<\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSPDO,
+                "<< <<");
 
             break;
 
         case URB_FUNCTION_GET_STATUS_FROM_DEVICE:
 
-            KdPrint((DRIVERNAME ">> >> URB_FUNCTION_GET_STATUS_FROM_DEVICE\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSPDO,
+                ">> >> URB_FUNCTION_GET_STATUS_FROM_DEVICE");
 
             // Defaults always succeed
             status = STATUS_SUCCESS;
@@ -655,7 +785,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
         case URB_FUNCTION_ABORT_PIPE:
 
-            KdPrint((DRIVERNAME ">> >> URB_FUNCTION_ABORT_PIPE\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSPDO,
+                ">> >> URB_FUNCTION_ABORT_PIPE");
 
             status = UsbPdo_AbortPipe(hDevice);
 
@@ -663,7 +795,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
         case URB_FUNCTION_CLASS_INTERFACE:
 
-            KdPrint((DRIVERNAME ">> >> URB_FUNCTION_CLASS_INTERFACE\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSPDO,
+                ">> >> URB_FUNCTION_CLASS_INTERFACE");
 
             status = UsbPdo_ClassInterface(urb, hDevice, pdoData);
 
@@ -671,7 +805,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
         case URB_FUNCTION_GET_DESCRIPTOR_FROM_INTERFACE:
 
-            KdPrint((DRIVERNAME ">> >> URB_FUNCTION_GET_DESCRIPTOR_FROM_INTERFACE\n"));
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSPDO,
+                ">> >> URB_FUNCTION_GET_DESCRIPTOR_FROM_INTERFACE");
 
             status = UsbPdo_GetDescriptorFromInterface(urb, pdoData);
 
@@ -694,17 +830,26 @@ VOID Pdo_EvtIoInternalDeviceControl(
             break;
 
         default:
-            KdPrint((DRIVERNAME ">> >> Unknown function: 0x%X\n", urb->UrbHeader.Function));
+
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSPDO,
+                ">> >>  Unknown function: 0x%X",
+                urb->UrbHeader.Function);
+
             break;
         }
 
-        KdPrint((DRIVERNAME "<<\n"));
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_BUSPDO,
+            "<<");
 
         break;
 
     case IOCTL_INTERNAL_USB_GET_PORT_STATUS:
 
-        KdPrint((DRIVERNAME ">> IOCTL_INTERNAL_USB_GET_PORT_STATUS\n"));
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_BUSPDO,
+            ">> IOCTL_INTERNAL_USB_GET_PORT_STATUS");
 
         // We report the (virtual) port as always active
         *(unsigned long *)irpStack->Parameters.Others.Argument1 = USBD_PORT_ENABLED | USBD_PORT_CONNECTED;
@@ -715,7 +860,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
     case IOCTL_INTERNAL_USB_RESET_PORT:
 
-        KdPrint((DRIVERNAME ">> IOCTL_INTERNAL_USB_RESET_PORT\n"));
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_BUSPDO,
+            ">> IOCTL_INTERNAL_USB_RESET_PORT");
 
         // Sure, why not ;)
         status = STATUS_SUCCESS;
@@ -724,7 +871,9 @@ VOID Pdo_EvtIoInternalDeviceControl(
 
     case IOCTL_INTERNAL_USB_SUBMIT_IDLE_NOTIFICATION:
 
-        KdPrint((DRIVERNAME ">> IOCTL_INTERNAL_USB_SUBMIT_IDLE_NOTIFICATION\n"));
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_BUSPDO,
+            ">> IOCTL_INTERNAL_USB_SUBMIT_IDLE_NOTIFICATION");
 
         // TODO: implement
         // This happens if the I/O latency is too high so HIDUSB aborts communication.
@@ -733,7 +882,12 @@ VOID Pdo_EvtIoInternalDeviceControl(
         break;
 
     default:
-        KdPrint((DRIVERNAME ">> Unknown I/O control code 0x%X\n", IoControlCode));
+
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_BUSPDO,
+            ">> Unknown I/O control code 0x%X",
+            IoControlCode);
+
         break;
     }
 
@@ -741,5 +895,7 @@ VOID Pdo_EvtIoInternalDeviceControl(
     {
         WdfRequestComplete(Request, status);
     }
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
 }
 

@@ -19,9 +19,10 @@
 /build/bin/Debug
 /build/obj/Debug
 /bin
-/sys/RCb21300
-/sys/RCa21300
+/sys/x64/Debug
+/x64/Debug
+/x64/Debug (static)
 *.user
 /.vs/config
-/sys/x64/Debug
-/x64
+/sys/RCa21300
+/sys/RCb21300

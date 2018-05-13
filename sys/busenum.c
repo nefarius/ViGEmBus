@@ -26,6 +26,7 @@ SOFTWARE.
 #include "busenum.h"
 #include <wdmguid.h>
 #include <usb.h>
+#include "busenum.tmh"
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (PAGE, Bus_PlugInDevice)
@@ -56,24 +57,33 @@ NTSTATUS Bus_PlugInDevice(
     PAGED_CODE();
 
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Entry");
+
     pFdoData = FdoGetData(Device);
 
     status = WdfRequestRetrieveInputBuffer(Request, sizeof(VIGEM_PLUGIN_TARGET), (PVOID)&plugIn, &length);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!", status);
         return status;
     }
 
     if ((sizeof(VIGEM_PLUGIN_TARGET) != plugIn->Size) || (length != plugIn->Size))
     {
-        KdPrint((DRIVERNAME "Input buffer size mismatch"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "sizeof(VIGEM_PLUGIN_TARGET) buffer size mismatch [%d != %d]",
+            sizeof(VIGEM_PLUGIN_TARGET), plugIn->Size);
         return STATUS_INVALID_PARAMETER;
     }
 
     if (plugIn->SerialNo == 0)
     {
-        KdPrint((DRIVERNAME "Serial no. 0 not allowed"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "Serial no. 0 not allowed");
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -82,14 +92,20 @@ NTSTATUS Bus_PlugInDevice(
     fileObject = WdfRequestGetFileObject(Request);
     if (fileObject == NULL)
     {
-        KdPrint((DRIVERNAME "File object associated with request is null"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfRequestGetFileObject failed to fetch WDFFILEOBJECT from request 0x%p",
+            Request);
         return STATUS_INVALID_PARAMETER;
     }
 
     pFileData = FileObjectGetData(fileObject);
     if (pFileData == NULL)
     {
-        KdPrint((DRIVERNAME "File object context associated with request is null"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "FileObjectGetData failed to get context data for 0x%p",
+            fileObject);
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -141,22 +157,49 @@ NTSTATUS Bus_PlugInDevice(
         description.ProductId = plugIn->ProductId;
     }
 
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSENUM,
+        "New PDO properties: serial = %d, type = %d, pid = %d, session = %d, internal = %d, vid = 0x%04X, pid = 0x%04X",
+        description.SerialNo,
+        description.TargetType,
+        description.OwnerProcessId,
+        description.SessionId,
+        description.OwnerIsDriver,
+        description.VendorId,
+        description.ProductId
+    );
+
     WdfSpinLockAcquire(pFdoData->PendingPluginRequestsLock);
 
-    KdPrint((DRIVERNAME "Items count: %d\n", WdfCollectionGetCount(pFdoData->PendingPluginRequests)));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSENUM,
+        "Current pending requests count: %d",
+        WdfCollectionGetCount(pFdoData->PendingPluginRequests));
 
     status = WdfChildListAddOrUpdateChildDescriptionAsPresent(WdfFdoGetDefaultChildList(Device), &description.Header, NULL);
 
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfChildListAddOrUpdateChildDescriptionAsPresent failed with 0x%X\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfChildListAddOrUpdateChildDescriptionAsPresent failed with status %!STATUS!",
+            status);
 
         goto pluginEnd;
     }
 
+    //
+    // The requested serial number is already in use
+    // 
     if (status == STATUS_OBJECT_NAME_EXISTS)
     {
         status = STATUS_INVALID_PARAMETER;
+
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "The described PDO already exists (%!STATUS!)",
+            status);
+
         goto pluginEnd;
     }
 
@@ -168,7 +211,10 @@ NTSTATUS Bus_PlugInDevice(
     status = WdfObjectAllocateContext(Request, &requestAttribs, (PVOID)&pReqData);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfCollectionAdd failed with 0x%X\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfObjectAllocateContext failed with status %!STATUS!",
+            status);
 
         goto pluginEnd;
     }
@@ -179,23 +225,42 @@ NTSTATUS Bus_PlugInDevice(
     pReqData->Serial = plugIn->SerialNo;
 
     //
+    // Timestamp the request to track its age
+    // 
+    pReqData->Timestamp = KeQueryPerformanceCounter(&pReqData->Frequency);
+
+    //
     // Keep track of pending request in collection
     // 
     status = WdfCollectionAdd(pFdoData->PendingPluginRequests, Request);
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfCollectionAdd failed with 0x%X\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfCollectionAdd failed with status %!STATUS!",
+            status);
 
         goto pluginEnd;
     }
 
-    KdPrint((DRIVERNAME "Added item with serial: %d\n", plugIn->SerialNo));
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_BUSENUM,
+        "Added item with serial: %d",
+        plugIn->SerialNo);
 
     status = NT_SUCCESS(status) ? STATUS_PENDING : status;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_BUSENUM,
+        "Status before releasing lock: %!STATUS!",
+        status);
 
 pluginEnd:
 
     WdfSpinLockRelease(pFdoData->PendingPluginRequestsLock);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Exit with status %!STATUS!", status);
+
     return status;
 }
 
@@ -222,19 +287,25 @@ NTSTATUS Bus_UnPlugDevice(
 
     PAGED_CODE();
 
-    KdPrint((DRIVERNAME "Entered Bus_UnPlugDevice\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Entry");
 
     status = WdfRequestRetrieveInputBuffer(Request, sizeof(VIGEM_UNPLUG_TARGET), (PVOID)&unPlug, &length);
 
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "Bus_UnPlugDevice: WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+            status);
         return status;
     }
 
     if ((sizeof(VIGEM_UNPLUG_TARGET) != unPlug->Size) || (length != unPlug->Size))
     {
-        KdPrint((DRIVERNAME "Bus_UnPlugDevice: Input buffer size mismatch"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "sizeof(VIGEM_UNPLUG_TARGET) buffer size mismatch [%d != %d]",
+            sizeof(VIGEM_UNPLUG_TARGET), unPlug->Size);
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -246,17 +317,27 @@ NTSTATUS Bus_UnPlugDevice(
         fileObject = WdfRequestGetFileObject(Request);
         if (fileObject == NULL)
         {
-            KdPrint((DRIVERNAME "Bus_UnPlugDevice: File object associated with request is null"));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSENUM,
+                "WdfRequestGetFileObject failed to fetch WDFFILEOBJECT from request 0x%p",
+                Request);
             return STATUS_INVALID_PARAMETER;
         }
 
         pFileData = FileObjectGetData(fileObject);
         if (pFileData == NULL)
         {
-            KdPrint((DRIVERNAME "Bus_UnPlugDevice: File object context associated with request is null"));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSENUM,
+                "FileObjectGetData failed to get context data for 0x%p",
+                fileObject);
             return STATUS_INVALID_PARAMETER;
         }
     }
+
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSENUM,
+        "Starting child list traversal");
 
     list = WdfFdoGetDefaultChildList(Device);
 
@@ -274,20 +355,39 @@ NTSTATUS Bus_UnPlugDevice(
         // Error or no more children, end loop
         if (!NT_SUCCESS(status) || status == STATUS_NO_MORE_ENTRIES)
         {
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSENUM,
+                "WdfChildListRetrieveNextDevice returned with status %!STATUS!",
+                status);
             break;
         }
 
         // If unable to retrieve device
         if (childInfo.Status != WdfChildListRetrieveDeviceSuccess)
         {
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSENUM,
+                "childInfo.Status = %d",
+                childInfo.Status);
             continue;
         }
 
         // Child isn't the one we looked for, skip
         if (!unplugAll && description.SerialNo != unPlug->SerialNo)
         {
+            TraceEvents(TRACE_LEVEL_VERBOSE,
+                TRACE_BUSENUM,
+                "Seeking serial mismatch: %d != %d",
+                description.SerialNo,
+                unPlug->SerialNo);
             continue;
         }
+
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_BUSENUM,
+            "description.SessionId = %d, pFileData->SessionId = %d",
+            description.SessionId,
+            pFileData->SessionId);
 
         // Only unplug owned children
         if (IsInternal || description.SessionId == pFileData->SessionId)
@@ -296,12 +396,21 @@ NTSTATUS Bus_UnPlugDevice(
             status = WdfChildListUpdateChildDescriptionAsMissing(list, &description.Header);
             if (!NT_SUCCESS(status))
             {
-                KdPrint((DRIVERNAME "Bus_UnPlugDevice: WdfChildListUpdateChildDescriptionAsMissing failed with status 0x%X\n", status));
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_BUSENUM,
+                    "WdfChildListUpdateChildDescriptionAsMissing failed with status %!STATUS!",
+                    status);
             }
         }
     }
 
     WdfChildListEndIteration(list, &iterator);
+
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSENUM,
+        "Finished child list traversal");
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Exit with status %!STATUS!", STATUS_SUCCESS);
 
     return STATUS_SUCCESS;
 }
@@ -311,6 +420,8 @@ NTSTATUS Bus_UnPlugDevice(
 // 
 NTSTATUS Bus_XusbSubmitReport(WDFDEVICE Device, ULONG SerialNo, PXUSB_SUBMIT_REPORT Report, BOOLEAN FromInterface)
 {
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Entry");
+
     return Bus_SubmitReport(Device, SerialNo, Report, FromInterface);
 }
 
@@ -326,14 +437,17 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
     PDS4_DEVICE_DATA            ds4Data;
 
 
-    KdPrint((DRIVERNAME "Entered Bus_QueueNotification\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Entry");
 
     hChild = Bus_GetPdo(Device, SerialNo);
 
     // Validate child
     if (hChild == NULL)
     {
-        KdPrint((DRIVERNAME "Bus_QueueNotification: PDO with serial %d not found\n", SerialNo));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "Bus_GetPdo: PDO with serial %d not found",
+            SerialNo);
         return STATUS_NO_SUCH_DEVICE;
     }
 
@@ -341,14 +455,20 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
     pdoData = PdoGetData(hChild);
     if (pdoData == NULL)
     {
-        KdPrint((DRIVERNAME "Bus_QueueNotification: PDO context not found\n"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "PdoGetData failed");
         return STATUS_INVALID_PARAMETER;
     }
 
     // Check if caller owns this PDO
     if (!IS_OWNER(pdoData))
     {
-        KdPrint((DRIVERNAME "Bus_QueueNotification: PID mismatch: %d != %d\n", pdoData->OwnerProcessId, CURRENT_PROCESS_ID()));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "PDO & Request ownership mismatch: %d != %d",
+            pdoData->OwnerProcessId,
+            CURRENT_PROCESS_ID());
         return STATUS_ACCESS_DENIED;
     }
 
@@ -359,7 +479,13 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
 
         xusbData = XusbGetData(hChild);
 
-        if (xusbData == NULL) break;
+        if (xusbData == NULL)
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSENUM,
+                "XusbGetData failed");
+            break;
+        }
 
         status = WdfRequestForwardToIoQueue(Request, pdoData->PendingNotificationRequests);
 
@@ -368,22 +494,40 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
 
         ds4Data = Ds4GetData(hChild);
 
-        if (ds4Data == NULL) break;
+        if (ds4Data == NULL)
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_BUSENUM,
+                "Ds4GetData failed");
+            break;
+        }
 
         status = WdfRequestForwardToIoQueue(Request, pdoData->PendingNotificationRequests);
 
         break;
     default:
         status = STATUS_NOT_SUPPORTED;
+        TraceEvents(TRACE_LEVEL_WARNING,
+            TRACE_BUSENUM,
+            "Unknown target type: %d (%!STATUS!)",
+            pdoData->TargetType,
+            status);
         break;
     }
 
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "WdfRequestForwardToIoQueue failed with status 0x%X\n", status));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "WdfRequestForwardToIoQueue failed with status %!STATUS!",
+            status);
     }
 
-    return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
+    status = (NT_SUCCESS(status)) ? STATUS_PENDING : status;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Exit with status %!STATUS!", status);
+
+    return status;
 }
 
 //
@@ -391,16 +535,22 @@ NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Requ
 // 
 NTSTATUS Bus_Ds4SubmitReport(WDFDEVICE Device, ULONG SerialNo, PDS4_SUBMIT_REPORT Report, BOOLEAN FromInterface)
 {
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Entry");
+
     return Bus_SubmitReport(Device, SerialNo, Report, FromInterface);
 }
 
 NTSTATUS Bus_XgipSubmitReport(WDFDEVICE Device, ULONG SerialNo, PXGIP_SUBMIT_REPORT Report, BOOLEAN FromInterface)
 {
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Entry");
+
     return Bus_SubmitReport(Device, SerialNo, Report, FromInterface);
 }
 
 NTSTATUS Bus_XgipSubmitInterrupt(WDFDEVICE Device, ULONG SerialNo, PXGIP_SUBMIT_INTERRUPT Report, BOOLEAN FromInterface)
 {
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Entry");
+
     return Bus_SubmitReport(Device, SerialNo, Report, FromInterface);
 }
 
@@ -432,14 +582,17 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     BOOLEAN                     changed;
 
 
-    KdPrint((DRIVERNAME "Entered Bus_SubmitReport\n"));
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Entry");
 
     hChild = Bus_GetPdo(Device, SerialNo);
 
     // Validate child
     if (hChild == NULL)
     {
-        KdPrint((DRIVERNAME "Bus_SubmitReport: PDO with serial %d not found\n", SerialNo));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "Bus_GetPdo: PDO with serial %d not found",
+            SerialNo);
         return STATUS_NO_SUCH_DEVICE;
     }
 
@@ -447,14 +600,20 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     pdoData = PdoGetData(hChild);
     if (pdoData == NULL)
     {
-        KdPrint((DRIVERNAME "Bus_SubmitReport: PDO context not found\n"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "PdoGetData failed");
         return STATUS_INVALID_PARAMETER;
     }
 
     // Check if caller owns this PDO
     if (!FromInterface && !IS_OWNER(pdoData))
     {
-        KdPrint((DRIVERNAME "Bus_SubmitReport: PID mismatch: %d != %d\n", pdoData->OwnerProcessId, CURRENT_PROCESS_ID()));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSENUM,
+            "PDO & Request ownership mismatch: %d != %d",
+            pdoData->OwnerProcessId,
+            CURRENT_PROCESS_ID());
         return STATUS_ACCESS_DENIED;
     }
 
@@ -488,9 +647,17 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
 
     // Don't waste pending IRP if input hasn't changed
     if (!changed)
+    {
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_BUSENUM,
+            "Input report hasn't changed since last update, aborting with %!STATUS!",
+            status);
         return status;
+    }
 
-    KdPrint((DRIVERNAME "Bus_SubmitReport: received new report\n"));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSENUM,
+        "Received new report, processing");
 
     // Get pending USB request
     switch (pdoData->TargetType)
@@ -562,6 +729,13 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     default:
 
         status = STATUS_NOT_SUPPORTED;
+
+        TraceEvents(TRACE_LEVEL_WARNING,
+            TRACE_BUSENUM,
+            "Unknown target type: %d (%!STATUS!)",
+            pdoData->TargetType,
+            status);
+
         goto endSubmitReport;
     }
 
@@ -570,7 +744,9 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     else if (!NT_SUCCESS(status))
         goto endSubmitReport;
 
-    KdPrint((DRIVERNAME "Bus_SubmitReport: pending IRP found\n"));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_BUSENUM,
+        "Processing pending IRP");
 
     // Get pending IRP
     pendingIrp = WdfRequestWdmGetIrp(usbRequest);
@@ -633,6 +809,9 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     WdfRequestComplete(usbRequest, status);
 
 endSubmitReport:
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Exit with status %!STATUS!", status);
+
     return status;
 }
 

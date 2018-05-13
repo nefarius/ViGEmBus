@@ -1,4 +1,6 @@
 #include "ByteArray.h"
+#include "trace.h"
+#include "bytearray.tmh"
 
 //
 // Helpers

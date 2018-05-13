@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 #include "busenum.h"
+#include "queue.tmh"
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (PAGE, Bus_EvtIoDefault)
@@ -54,14 +55,16 @@ VOID Bus_EvtIoDeviceControl(
 
     Device = WdfIoQueueGetDevice(Queue);
 
-    KdPrint((DRIVERNAME "Bus_EvtIoDeviceControl: 0x%p\n", Device));
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_QUEUE, "%!FUNC! Entry (device: 0x%p)", Device);
 
     switch (IoControlCode)
     {
 #pragma region IOCTL_VIGEM_CHECK_VERSION
     case IOCTL_VIGEM_CHECK_VERSION:
 
-        KdPrint((DRIVERNAME "IOCTL_VIGEM_CHECK_VERSION\n"));
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE,
+            "IOCTL_VIGEM_CHECK_VERSION");
 
         status = WdfRequestRetrieveInputBuffer(Request, sizeof(VIGEM_CHECK_VERSION), (PVOID)&pCheckVersion, &length);
 
@@ -73,13 +76,20 @@ VOID Bus_EvtIoDeviceControl(
 
         status = (pCheckVersion->Version == VIGEM_COMMON_VERSION) ? STATUS_SUCCESS : STATUS_NOT_SUPPORTED;
 
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_QUEUE,
+            "Requested version: 0x%04X, compiled version: 0x%04X",
+            pCheckVersion->Version, VIGEM_COMMON_VERSION);
+
         break;
 #pragma endregion 
 
 #pragma region IOCTL_VIGEM_PLUGIN_TARGET
     case IOCTL_VIGEM_PLUGIN_TARGET:
 
-        KdPrint((DRIVERNAME "IOCTL_VIGEM_PLUGIN_TARGET\n"));
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE,
+            "IOCTL_VIGEM_PLUGIN_TARGET");
 
         status = Bus_PlugInDevice(Device, Request, FALSE, &length);
 
@@ -89,7 +99,9 @@ VOID Bus_EvtIoDeviceControl(
 #pragma region IOCTL_VIGEM_UNPLUG_TARGET
     case IOCTL_VIGEM_UNPLUG_TARGET:
 
-        KdPrint((DRIVERNAME "IOCTL_VIGEM_UNPLUG_TARGET\n"));
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE,
+            "IOCTL_VIGEM_UNPLUG_TARGET");
 
         status = Bus_UnPlugDevice(Device, Request, FALSE, &length);
 
@@ -99,13 +111,18 @@ VOID Bus_EvtIoDeviceControl(
 #pragma region IOCTL_XUSB_SUBMIT_REPORT
     case IOCTL_XUSB_SUBMIT_REPORT:
 
-        KdPrint((DRIVERNAME "IOCTL_XUSB_SUBMIT_REPORT\n"));
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_QUEUE,
+            "IOCTL_XUSB_SUBMIT_REPORT");
 
         status = WdfRequestRetrieveInputBuffer(Request, sizeof(XUSB_SUBMIT_REPORT), (PVOID)&xusbSubmit, &length);
 
         if (!NT_SUCCESS(status))
         {
-            KdPrint((DRIVERNAME "WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE,
+                "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+                status);
             break;
         }
 
@@ -114,6 +131,10 @@ VOID Bus_EvtIoDeviceControl(
             // This request only supports a single PDO at a time
             if (xusbSubmit->SerialNo == 0)
             {
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_QUEUE,
+                    "Invalid serial 0 submitted");
+
                 status = STATUS_INVALID_PARAMETER;
                 break;
             }
@@ -127,12 +148,17 @@ VOID Bus_EvtIoDeviceControl(
 #pragma region IOCTL_XUSB_REQUEST_NOTIFICATION
     case IOCTL_XUSB_REQUEST_NOTIFICATION:
 
-        KdPrint((DRIVERNAME "IOCTL_XUSB_REQUEST_NOTIFICATION\n"));
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE,
+            "IOCTL_XUSB_REQUEST_NOTIFICATION");
 
         // Don't accept the request if the output buffer can't hold the results
         if (OutputBufferLength < sizeof(XUSB_REQUEST_NOTIFICATION))
         {
-            KdPrint((DRIVERNAME "IOCTL_XUSB_REQUEST_NOTIFICATION: output buffer too small: %ul\n", OutputBufferLength));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE,
+                "Output buffer %d too small, require at least %d",
+                (int)OutputBufferLength, (int)sizeof(XUSB_REQUEST_NOTIFICATION));
             break;
         }
 
@@ -140,7 +166,10 @@ VOID Bus_EvtIoDeviceControl(
 
         if (!NT_SUCCESS(status))
         {
-            KdPrint((DRIVERNAME "WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE,
+                "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+                status);
             break;
         }
 
@@ -149,6 +178,10 @@ VOID Bus_EvtIoDeviceControl(
             // This request only supports a single PDO at a time
             if (xusbNotify->SerialNo == 0)
             {
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_QUEUE,
+                    "Invalid serial 0 submitted");
+
                 status = STATUS_INVALID_PARAMETER;
                 break;
             }
@@ -162,13 +195,18 @@ VOID Bus_EvtIoDeviceControl(
 #pragma region IOCTL_DS4_SUBMIT_REPORT
     case IOCTL_DS4_SUBMIT_REPORT:
 
-        KdPrint((DRIVERNAME "IOCTL_DS4_SUBMIT_REPORT\n"));
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_QUEUE,
+            "IOCTL_DS4_SUBMIT_REPORT");
 
         status = WdfRequestRetrieveInputBuffer(Request, sizeof(DS4_SUBMIT_REPORT), (PVOID)&ds4Submit, &length);
 
         if (!NT_SUCCESS(status))
         {
-            KdPrint((DRIVERNAME "WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE,
+                "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+                status);
             break;
         }
 
@@ -177,6 +215,10 @@ VOID Bus_EvtIoDeviceControl(
             // This request only supports a single PDO at a time
             if (ds4Submit->SerialNo == 0)
             {
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_QUEUE,
+                    "Invalid serial 0 submitted");
+
                 status = STATUS_INVALID_PARAMETER;
                 break;
             }
@@ -190,12 +232,17 @@ VOID Bus_EvtIoDeviceControl(
 #pragma region IOCTL_DS4_REQUEST_NOTIFICATION
     case IOCTL_DS4_REQUEST_NOTIFICATION:
 
-        KdPrint((DRIVERNAME "IOCTL_DS4_REQUEST_NOTIFICATION\n"));
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE,
+            "IOCTL_DS4_REQUEST_NOTIFICATION");
 
         // Don't accept the request if the output buffer can't hold the results
         if (OutputBufferLength < sizeof(DS4_REQUEST_NOTIFICATION))
         {
-            KdPrint((DRIVERNAME "IOCTL_DS4_REQUEST_NOTIFICATION: output buffer too small: %ul\n", OutputBufferLength));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE,
+                "Output buffer %d too small, require at least %d",
+                (int)OutputBufferLength, (int)sizeof(DS4_REQUEST_NOTIFICATION));
             break;
         }
 
@@ -203,7 +250,10 @@ VOID Bus_EvtIoDeviceControl(
 
         if (!NT_SUCCESS(status))
         {
-            KdPrint((DRIVERNAME "WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE,
+                "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+                status);
             break;
         }
 
@@ -212,6 +262,10 @@ VOID Bus_EvtIoDeviceControl(
             // This request only supports a single PDO at a time
             if (ds4Notify->SerialNo == 0)
             {
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_QUEUE,
+                    "Invalid serial 0 submitted");
+
                 status = STATUS_INVALID_PARAMETER;
                 break;
             }
@@ -225,7 +279,9 @@ VOID Bus_EvtIoDeviceControl(
 #pragma region IOCTL_XGIP_SUBMIT_REPORT
     case IOCTL_XGIP_SUBMIT_REPORT:
 
-        KdPrint((DRIVERNAME "IOCTL_XGIP_SUBMIT_REPORT\n"));
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_QUEUE,
+            "IOCTL_XGIP_SUBMIT_REPORT");
 
         status = WdfRequestRetrieveInputBuffer(Request, sizeof(XGIP_SUBMIT_REPORT), (PVOID)&xgipSubmit, &length);
 
@@ -318,7 +374,11 @@ VOID Bus_EvtIoDeviceControl(
 #pragma endregion
 
     default:
-        KdPrint((DRIVERNAME "UNKNOWN IOCTL CODE 0x%x\n", IoControlCode));
+
+        TraceEvents(TRACE_LEVEL_WARNING,
+            TRACE_QUEUE,
+            "Unknown I/O control code 0x%X", IoControlCode);
+
         break; // default status is STATUS_INVALID_PARAMETER
     }
 
@@ -326,8 +386,15 @@ VOID Bus_EvtIoDeviceControl(
     {
         WdfRequestCompleteWithInformation(Request, status, length);
     }
+    
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_QUEUE, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
+//
+// Gets called upon driver-to-driver communication.
+// 
+// TODO: incomplete and unused currently
+// 
 VOID Bus_EvtIoInternalDeviceControl(
     _In_ WDFQUEUE   Queue,
     _In_ WDFREQUEST Request,
@@ -383,7 +450,9 @@ VOID Bus_EvtIoDefault(
     UNREFERENCED_PARAMETER(Queue);
     UNREFERENCED_PARAMETER(Request);
 
-    KdPrint((DRIVERNAME "Bus_EvtIoDefault called\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
 
     WdfRequestComplete(Request, STATUS_INVALID_DEVICE_REQUEST);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
 }
