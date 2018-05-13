@@ -556,4 +556,6 @@ Bus_PdoStageResult(
         }
         WdfSpinLockRelease(pFdoData->PendingPluginRequestsLock);
     }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 }
