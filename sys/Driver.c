@@ -499,11 +499,11 @@ Bus_PdoStageResult(
     _In_ NTSTATUS Status
 )
 {
-    ULONG i;
-    PFDO_DEVICE_DATA pFdoData;
-    WDFREQUEST curRequest;
-    ULONG curSerial;
-    ULONG items;
+    ULONG               i;
+    PFDO_DEVICE_DATA    pFdoData;
+    WDFREQUEST          curRequest;
+    ULONG               curSerial;
+    ULONG               items;
 
     UNREFERENCED_PARAMETER(InterfaceHeader);
 
