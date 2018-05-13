@@ -231,7 +231,10 @@ NTSTATUS UsbPdo_GetConfigurationDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommo
 // 
 NTSTATUS UsbPdo_GetStringDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
 {
-    KdPrint((DRIVERNAME "Index = %d\n", urb->UrbControlDescriptorRequest.Index));
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        "Index = %d",
+        urb->UrbControlDescriptorRequest.Index);
 
     switch (pCommon->TargetType)
     {

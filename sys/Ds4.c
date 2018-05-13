@@ -384,11 +384,13 @@ VOID Ds4_GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, PPDO_DEVICE
 
 VOID Ds4_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 {
-    KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d\n",
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_DS4,
+        ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
         (int)pInfo->Length,
         (int)pInfo->InterfaceNumber,
         (int)pInfo->AlternateSetting,
-        pInfo->NumberOfPipes));
+        pInfo->NumberOfPipes);
 
     pInfo->Class = 0x03; // HID
     pInfo->SubClass = 0x00;

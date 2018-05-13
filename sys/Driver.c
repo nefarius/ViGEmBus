@@ -509,7 +509,10 @@ Bus_PdoStageResult(
 
     PAGED_CODE();
 
-    KdPrint((DRIVERNAME "Bus_PdoStageResult: Stage: %d, Serial: %d, status: 0x%X\n", Stage, Serial, Status));
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_DRIVER,
+        "%!FUNC! Entry (stage = %d, serial = %d, status = %!STATUS!)",
+        Stage, Serial, Status);
 
     pFdoData = FdoGetData(InterfaceHeader->Context);
 
@@ -522,14 +525,20 @@ Bus_PdoStageResult(
 
         items = WdfCollectionGetCount(pFdoData->PendingPluginRequests);
 
-        KdPrint((DRIVERNAME "Items count: %d\n", items));
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_DRIVER,
+            "Items count: %d",
+            items);
 
         for (i = 0; i < items; i++)
         {
             curRequest = WdfCollectionGetItem(pFdoData->PendingPluginRequests, i);
             curSerial = PluginRequestGetData(curRequest)->Serial;
 
-            KdPrint((DRIVERNAME "Serial: %d, curSerial: %d\n", Serial, curSerial));
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_DRIVER,
+                "Serial: %d, curSerial: %d",
+                Serial, curSerial);
 
             if (Serial == curSerial)
             {
@@ -537,7 +546,10 @@ Bus_PdoStageResult(
 
                 WdfCollectionRemove(pFdoData->PendingPluginRequests, curRequest);
 
-                KdPrint((DRIVERNAME "Removed item with serial: %d\n", curSerial));
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_DRIVER,
+                    "Removed item with serial: %d",
+                    curSerial);
 
                 break;
             }

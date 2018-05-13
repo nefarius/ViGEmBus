@@ -417,7 +417,11 @@ NTSTATUS Bus_CreatePdo(
 
     if (!NT_SUCCESS(status))
     {
-        KdPrint((DRIVERNAME "Couldn't initialize additional contexts\n"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BUSPDO,
+            "Couldn't initialize additional contexts: %!STATUS!",
+            status);
+
         goto endCreatePdo;
     }
 
