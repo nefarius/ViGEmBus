@@ -58,6 +58,11 @@ SOFTWARE.
 #define DRIVERNAME                      "ViGEm: "
 #define MAX_HARDWARE_ID_LENGTH          0xFF
 
+#define ORC_PC_FREQUENCY_DIVIDER        1000
+#define ORC_TIMER_START_DELAY           500 // ms
+#define ORC_TIMER_PERIODIC_DUE_TIME     500 // ms
+#define ORC_REQUEST_MAX_AGE             500 // ms
+
 #pragma endregion
 
 #pragma region Helpers

@@ -192,7 +192,11 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
 #pragma region Create timer for sweeping up orphaned requests
 
-    WDF_TIMER_CONFIG_INIT_PERIODIC(&reqTimerCfg, Bus_PlugInRequestCleanUpEvtTimerFunc, 500);
+    WDF_TIMER_CONFIG_INIT_PERIODIC(
+        &reqTimerCfg, 
+        Bus_PlugInRequestCleanUpEvtTimerFunc, 
+        ORC_TIMER_START_DELAY
+    );
     WDF_OBJECT_ATTRIBUTES_INIT(&timerAttributes);
     timerAttributes.ParentObject = device;
 
@@ -205,7 +209,10 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
         return status;
     }
 
-    WdfTimerStart(pFDOData->PendingPluginRequestsCleanupTimer, WDF_REL_TIMEOUT_IN_SEC(1));
+    WdfTimerStart(
+        pFDOData->PendingPluginRequestsCleanupTimer, 
+        WDF_REL_TIMEOUT_IN_MS(ORC_TIMER_PERIODIC_DUE_TIME)
+    );
 
 #pragma endregion
 
@@ -617,7 +624,7 @@ Bus_PlugInRequestCleanUpEvtTimerFunc(
         curRequest = WdfCollectionGetItem(pFdoData->PendingPluginRequests, i);
         pPluginData = PluginRequestGetData(curRequest);
 
-        freq = pPluginData->Frequency.QuadPart / 1000;
+        freq = pPluginData->Frequency.QuadPart / ORC_PC_FREQUENCY_DIVIDER;
         pcNow = KeQueryPerformanceCounter(NULL);
         ellapsed = (pcNow.QuadPart - pPluginData->Timestamp.QuadPart) / freq;
         
@@ -626,7 +633,7 @@ Bus_PlugInRequestCleanUpEvtTimerFunc(
             "PDO (serial = %d) age: %llu",
             pPluginData->Serial, ellapsed);
 
-        if (ellapsed > 500)
+        if (ellapsed >= ORC_REQUEST_MAX_AGE)
         {
             WdfRequestComplete(curRequest, STATUS_SUCCESS);
 
