@@ -248,12 +248,18 @@ NTSTATUS Bus_PlugInDevice(
         "Added item with serial: %d",
         plugIn->SerialNo);
 
-    status = NT_SUCCESS(status) ? STATUS_PENDING : status;
+    //
+    // At least one request present in the collection; start clean-up timer
+    // 
+    WdfTimerStart(
+        pFdoData->PendingPluginRequestsCleanupTimer,
+        WDF_REL_TIMEOUT_IN_MS(ORC_TIMER_PERIODIC_DUE_TIME)
+    );
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_DRIVER,
+        "Started periodic timer");
 
-    TraceEvents(TRACE_LEVEL_INFORMATION,
-        TRACE_BUSENUM,
-        "Status before releasing lock: %!STATUS!",
-        status);
+    status = NT_SUCCESS(status) ? STATUS_PENDING : status;
 
 pluginEnd:
 

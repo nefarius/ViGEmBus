@@ -193,8 +193,8 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 #pragma region Create timer for sweeping up orphaned requests
 
     WDF_TIMER_CONFIG_INIT_PERIODIC(
-        &reqTimerCfg, 
-        Bus_PlugInRequestCleanUpEvtTimerFunc, 
+        &reqTimerCfg,
+        Bus_PlugInRequestCleanUpEvtTimerFunc,
         ORC_TIMER_START_DELAY
     );
     WDF_OBJECT_ATTRIBUTES_INIT(&timerAttributes);
@@ -208,11 +208,6 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
             status);
         return status;
     }
-
-    WdfTimerStart(
-        pFDOData->PendingPluginRequestsCleanupTimer, 
-        WDF_REL_TIMEOUT_IN_MS(ORC_TIMER_PERIODIC_DUE_TIME)
-    );
 
 #pragma endregion
 
@@ -619,6 +614,17 @@ Bus_PlugInRequestCleanUpEvtTimerFunc(
         "Items count: %d",
         items);
 
+    //
+    // Collection is empty; no need to keep timer running
+    // 
+    if (items == 0)
+    {
+        TraceEvents(TRACE_LEVEL_VERBOSE,
+            TRACE_DRIVER,
+            "Collection is empty, stopping periodic timer");
+        WdfTimerStop(Timer, FALSE);
+    }
+
     for (i = 0; i < items; i++)
     {
         curRequest = WdfCollectionGetItem(pFdoData->PendingPluginRequests, i);
@@ -627,7 +633,7 @@ Bus_PlugInRequestCleanUpEvtTimerFunc(
         freq = pPluginData->Frequency.QuadPart / ORC_PC_FREQUENCY_DIVIDER;
         pcNow = KeQueryPerformanceCounter(NULL);
         ellapsed = (pcNow.QuadPart - pPluginData->Timestamp.QuadPart) / freq;
-        
+
         TraceEvents(TRACE_LEVEL_VERBOSE,
             TRACE_DRIVER,
             "PDO (serial = %d) age: %llu",
