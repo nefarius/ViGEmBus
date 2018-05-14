@@ -80,7 +80,7 @@ typedef struct _XUSB_DEVICE_DATA
     //
     // LED number (represents XInput slot index)
     //
-    UCHAR LedNumber;
+    CHAR LedNumber;
 
     //
     // Report packet
@@ -120,7 +120,7 @@ Bus_XusbSubmitReport(
 // 
 NTSTATUS Xusb_PreparePdo(PWDFDEVICE_INIT DeviceInit, USHORT VendorId, USHORT ProductId, PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription);
 NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device);
-NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION Description);
+NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device);
 VOID Xusb_GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length);
 VOID Xusb_GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, PPDO_DEVICE_DATA pCommon);
 VOID Xusb_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo);

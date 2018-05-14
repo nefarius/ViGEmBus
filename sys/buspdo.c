@@ -395,7 +395,7 @@ NTSTATUS Bus_CreatePdo(
     {
     case Xbox360Wired:
 
-        status = Xusb_AssignPdoContext(hChild, Description);
+        status = Xusb_AssignPdoContext(hChild);
 
         break;
 

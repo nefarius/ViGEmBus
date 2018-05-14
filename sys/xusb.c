@@ -246,7 +246,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     return STATUS_SUCCESS;
 }
 
-NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION Description)
+NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device)
 {
     NTSTATUS status;
     WDF_OBJECT_ATTRIBUTES attributes;
@@ -261,7 +261,7 @@ NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device, PPDO_IDENTIFICATION_DESCRIPTION
     RtlZeroMemory(xusb, sizeof(XUSB_DEVICE_DATA));
 
     // Is later overwritten by actual XInput slot
-    xusb->LedNumber = (UCHAR)Description->SerialNo;
+    xusb->LedNumber = -1;
     // Packet size (20 bytes = 0x14)
     xusb->Packet.Size = 0x14;
 
@@ -567,19 +567,22 @@ VOID Xusb_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 
 NTSTATUS Xusb_GetUserIndex(WDFDEVICE Device, PXUSB_GET_USER_INDEX Request)
 {
-    NTSTATUS                    status = STATUS_INVALID_PARAMETER;
+    NTSTATUS                    status = STATUS_INVALID_DEVICE_REQUEST;
     WDFDEVICE                   hChild;
     PPDO_DEVICE_DATA            pdoData;
+    CHAR                        userIndex;
 
 
-    KdPrint((DRIVERNAME "Entered Bus_QueueNotification\n"));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_XUSB, "%!FUNC! Entry");
 
     hChild = Bus_GetPdo(Device, Request->SerialNo);
 
     // Validate child
     if (hChild == NULL)
     {
-        KdPrint((DRIVERNAME "Bus_QueueNotification: PDO with serial %d not found\n", Request->SerialNo));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "Bus_GetPdo for serial %d failed", Request->SerialNo);
         return STATUS_NO_SUCH_DEVICE;
     }
 
@@ -587,18 +590,32 @@ NTSTATUS Xusb_GetUserIndex(WDFDEVICE Device, PXUSB_GET_USER_INDEX Request)
     pdoData = PdoGetData(hChild);
     if (pdoData == NULL)
     {
-        KdPrint((DRIVERNAME "Bus_QueueNotification: PDO context not found\n"));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "PdoGetData failed");
         return STATUS_INVALID_PARAMETER;
     }
 
     // Check if caller owns this PDO
     if (!IS_OWNER(pdoData))
     {
-        KdPrint((DRIVERNAME "Bus_QueueNotification: PID mismatch: %d != %d\n", pdoData->OwnerProcessId, CURRENT_PROCESS_ID()));
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "PID mismatch: %d != %d",
+            pdoData->OwnerProcessId,
+            CURRENT_PROCESS_ID());
         return STATUS_ACCESS_DENIED;
     }
 
-    Request->UserIndex = (ULONG)XusbGetData(hChild)->LedNumber;
+    userIndex = XusbGetData(hChild)->LedNumber;
+
+    if (userIndex >= 0)
+    {
+        Request->UserIndex = (ULONG)userIndex;
+        status = STATUS_SUCCESS;
+    }
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XUSB, "%!FUNC! Exit with status %!STATUS!", status);
 
     return status;
 }
