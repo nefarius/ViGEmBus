@@ -636,7 +636,7 @@ Bus_PlugInRequestCleanUpEvtTimerFunc(
 
         TraceEvents(TRACE_LEVEL_VERBOSE,
             TRACE_DRIVER,
-            "PDO (serial = %d) age: %llu",
+            "PDO (serial = %d) plugin request age: %llu ms",
             pPluginData->Serial, ellapsed);
 
         if (ellapsed >= ORC_REQUEST_MAX_AGE)
