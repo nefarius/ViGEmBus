@@ -42,7 +42,7 @@
     <Configuration>Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
     <RootNamespace>ViGEmBus</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
     <AppVeyorBuildVersion Condition=" '$(APPVEYOR_BUILD_VERSION)' == '' ">*</AppVeyorBuildVersion>
     <AppVeyorBuildVersion Condition=" '$(APPVEYOR_BUILD_VERSION)' != '' ">$(APPVEYOR_BUILD_VERSION)</AppVeyorBuildVersion>
   </PropertyGroup>
