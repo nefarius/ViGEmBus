@@ -9,8 +9,6 @@ Windows kernel-mode driver emulating well-known USB game controllers.
 Currently supports emulation of the following USB gamepads:
 - [Microsoft Xbox 360 Controller](https://en.wikipedia.org/wiki/Xbox_360_controller)
 - [Sony DualShock 4 Controller](https://en.wikipedia.org/wiki/DualShock#DualShock_4)
-- [Microsoft Xbox One Controller](https://en.wikipedia.org/wiki/Xbox_One_Controller)
-  - Experimental; not ready for stable release yet
 
 ## Necessary preparations for Windows 7
 Before installing the bus driver on Windows 7 (x86 or x64) the following 3rd party software has to be installed:
@@ -20,4 +18,4 @@ Before installing the bus driver on Windows 7 (x86 or x64) the following 3rd par
    * [Security Update for Windows 7 for x64-based Systems (KB3033929)](https://www.microsoft.com/en-us/download/details.aspx?id=46148)
 
 ## Installation
-[Follow the installation instructions](https://github.com/nefarius/ViGEm/wiki/Driver-Installation).
+[Follow the installation instructions](<https://vigem.org/wiki/vigem-bus-driver-installation/>).
