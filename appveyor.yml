@@ -1,5 +1,5 @@
 version: 1.16.{build}.0
-image: Visual Studio 2017
+image: Previous Visual Studio 2017
 build_script:
 - ps: .\build.ps1 -configuration release
 after_build:

@@ -270,7 +270,7 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
     return VIGEM_ERROR_NO_FREE_SLOT;
 }
 
-VIGEM_ERROR vigem_target_add_async(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_TARGET_ADD_RESULT result)
+VIGEM_ERROR vigem_target_add_async(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PFN_VIGEM_TARGET_ADD_RESULT result)
 {
     if (vigem->hBusDevice == nullptr)
     {
@@ -290,7 +290,7 @@ VIGEM_ERROR vigem_target_add_async(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PV
     std::thread _async{ [](
         PVIGEM_TARGET _Target,
         PVIGEM_CLIENT _Client,
-        PVIGEM_TARGET_ADD_RESULT _Result)
+        PFN_VIGEM_TARGET_ADD_RESULT _Result)
     {
         DWORD transfered = 0;
         VIGEM_PLUGIN_TARGET plugin;
@@ -372,7 +372,7 @@ VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
     return VIGEM_ERROR_REMOVAL_FAILED;
 }
 
-VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_X360_NOTIFICATION notification)
+VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PFN_VIGEM_X360_NOTIFICATION notification)
 {
     if (vigem->hBusDevice == nullptr)
     {
@@ -422,7 +422,7 @@ VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_
                     return;
                 }
 
-                reinterpret_cast<PVIGEM_X360_NOTIFICATION>(_Target->Notification)(
+                reinterpret_cast<PFN_VIGEM_X360_NOTIFICATION>(_Target->Notification)(
                     _Client,
                     _Target,
                     notify.LargeMotor,
@@ -444,7 +444,7 @@ VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_
     return VIGEM_ERROR_NONE;
 }
 
-VIGEM_ERROR vigem_target_ds4_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_DS4_NOTIFICATION notification)
+VIGEM_ERROR vigem_target_ds4_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PFN_VIGEM_DS4_NOTIFICATION notification)
 {
     if (vigem->hBusDevice == nullptr)
     {
@@ -494,7 +494,7 @@ VIGEM_ERROR vigem_target_ds4_register_notification(PVIGEM_CLIENT vigem, PVIGEM_T
                     return;
                 }
 
-                reinterpret_cast<PVIGEM_DS4_NOTIFICATION>(_Target->Notification)(
+                reinterpret_cast<PFN_VIGEM_DS4_NOTIFICATION>(_Target->Notification)(
                     _Client,
                     _Target,
                     notify.Report.LargeMotor,
