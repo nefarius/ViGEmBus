@@ -35,3 +35,19 @@ Before installing the bus driver on Windows 7 (x86 or x64) the following 3rd par
 
 ## Installation
 [Follow the installation instructions](<https://vigem.org/wiki/vigem-bus-driver-installation/>).
+
+## Sponsors
+ - [3dRudder](https://www.3drudder.com/eu/)
+ - [Wohlfeil.IT e.U.](https://wohlfeil.it/)
+ - [Parsec](https://parsec.tv/)
+ - [Rainway, Inc](https://rainway.io/)
+
+## Known users of ViGEm
+ - [3dRudder](https://www.3drudder.com/eu/)
+ - [Parsec](https://parsec.tv/)
+ - [GloSC](https://github.com/Alia5/GloSC)
+ - [WhiteKnight](https://autohotkey.com/boards/viewtopic.php?t=34890)
+ - [InputMapper](https://inputmapper.com/)
+ - [Oculus VR, LLC.](https://www.oculus.com/)
+ - [Rainway, Inc](https://rainway.io/)
+ - [WiimoteHook](https://forum.cemu.info/showthread.php/140-WiimoteHook-Nintendo-Wii-Remote-with-Motion-Rumble-and-Nunchuk-support)- 
