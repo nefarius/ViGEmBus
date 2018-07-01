@@ -6,6 +6,8 @@ Windows kernel-mode driver emulating well-known USB game controllers.
 )](https://ci.appveyor.com/project/nefarius/indicium-supra) [![Discord](https://img.shields.io/discord/346756263763378176.svg)](https://discord.gg/QTJpBX5)  [![Website](https://img.shields.io/website-up-down-green-red/https/vigem.org.svg?label=ViGEm.org)](https://vigem.org/) [![PayPal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](<https://paypal.me/NefariusMaximus>) [![Support on Patreon](https://img.shields.io/badge/patreon-donate-orange.svg)](<https://www.patreon.com/nefarius>) [![GitHub followers](https://img.shields.io/github/followers/nefarius.svg?style=social&label=Follow)](https://github.com/nefarius) [![Twitter Follow](https://img.shields.io/twitter/follow/nefariusmaximus.svg?style=social&label=Follow)](https://twitter.com/nefariusmaximus)
 
 ## About
+**Disclaimer:** this project is for software developers. To make it do something useful you'll also need a [feeder application](<https://vigem.org/wiki/vigem-feeder/>).  
+
 The `ViGEmBus` driver and `ViGEmClient` libraries represent the core of the Virtual Gamepad Emulation Framework (or `ViGEm` , for short). `ViGEm` aims for a 100% accurate [emulation](<https://en.wikipedia.org/wiki/Emulator>) of well-known gaming peripherals as pure software-based devices at kernel level. As it mimics "the real thing" games and other processes require no additional modification whatsoever to detect `ViGEm`-based devices (no Proxy-DLLs or API-Hooking) and simply work out of the box. While the (now obsolete) [Scarlett.Crush Productions Virtual Bus Driver](<https://github.com/nefarius/ScpVBus>) is the spiritual father of this project, `ViGEm` has been designed and written from the ground up utilizing Microsoft's [Kernel-Mode Driver Framework](https://en.wikipedia.org/wiki/Kernel-Mode_Driver_Framework).
 
 ### Emulated devices
@@ -25,8 +27,22 @@ A few examples of the most common use cases for `ViGEm` are:
 ## Supported Systems
 The driver is built for Windows 7/8/8.1/10 (x86 and amd64).
 
+## How to build
+
+### Prerequisites 
+ - Visual Studio **2017** ([Community Edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15) is just fine)
+ - [WDK for Windows 10, version 1803](https://developer.microsoft.com/en-us/windows/hardware/windows-driver-kit)
+
+ You can either build directly within Visual Studio or in PowerShell by running the build script:
+ 
+ ```
+ .\build.ps1 -configuration release
+ ```
+ 
+ Do bear in mind that you'll need to sign the driver to use it without [test mode](<https://technet.microsoft.com/en-us/ff553484(v=vs.96)>).
+
 ## Installation
-[Follow the installation instructions](<https://vigem.org/wiki/vigem-bus-driver-installation/>).
+To grab the latest signed binaries for use or redistribution [follow the installation instructions](<https://vigem.org/wiki/vigem-bus-driver-installation/>).
 
 ### Necessary preparations for Windows 7
 Before installing the bus driver on Windows 7 (x86 or x64) the following 3rd party software has to be installed:
