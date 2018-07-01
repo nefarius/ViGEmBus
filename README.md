@@ -52,14 +52,14 @@ Before installing the bus driver on Windows 7 (x86 or x64) the following 3rd par
    * [Security Update for Windows 7 for x64-based Systems (KB3033929)](https://www.microsoft.com/en-us/download/details.aspx?id=46148)
 
 ## Sponsors
- - [3dRudder](https://www.3drudder.com/eu/)
+ - [3dRudder](https://www.3drudder.com/)
  - [Wohlfeil.IT e.U.](https://wohlfeil.it/)
- - [Parsec](https://parsec.tv/)
+ - [Parsec](https://parsecgaming.com/)
  - [Rainway, Inc](https://rainway.io/)
 
 ## Known users of ViGEm
- - [3dRudder](https://www.3drudder.com/eu/)
- - [Parsec](https://parsec.tv/)
+ - [3dRudder](https://www.3drudder.com/)
+ - [Parsec](https://parsecgaming.com/)
  - [GloSC](https://github.com/Alia5/GloSC)
  - [WhiteKnight](https://autohotkey.com/boards/viewtopic.php?t=34890)
  - [InputMapper](https://inputmapper.com/)
