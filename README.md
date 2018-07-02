@@ -61,7 +61,7 @@ Before installing the bus driver on Windows 7 (x86 or x64) the following 3rd par
  - [3dRudder](https://www.3drudder.com/)
  - [Parsec](https://parsecgaming.com/)
  - [GloSC](https://github.com/Alia5/GloSC)
- - [WhiteKnight](https://autohotkey.com/boards/viewtopic.php?t=34890)
+ - [UCR](https://github.com/Snoothy/UCR)
  - [InputMapper](https://inputmapper.com/)
  - [Oculus VR, LLC.](https://www.oculus.com/)
  - [Rainway, Inc](https://rainway.io/)
