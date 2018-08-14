@@ -42,7 +42,7 @@ The driver is built for Windows 7/8/8.1/10 (x86 and amd64).
  Do bear in mind that you'll need to sign the driver to use it without [test mode](<https://technet.microsoft.com/en-us/ff553484(v=vs.96)>).
 
 ## Installation
-To grab the latest signed binaries for use or redistribution [follow the installation instructions](<https://vigem.org/wiki/vigem-bus-driver-installation/>).
+To grab the latest signed binaries for use or redistribution [follow the installation instructions](<https://docs.vigem.org/#!vigem-bus-driver-installation.md>).
 
 ### Necessary preparations for Windows 7
 Before installing the bus driver on Windows 7 (x86 or x64) the following 3rd party software has to be installed:
