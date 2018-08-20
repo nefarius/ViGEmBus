@@ -1,10 +1,10 @@
 version: 1.16.{build}.0
-image: Previous Visual Studio 2017
+image: Visual Studio 2017
 build_script:
 - ps: .\build.ps1 -configuration release
 after_build:
 - ps: |
-    Invoke-WebRequest "https://github.com/pavel-a/ddverpatch/files/1215010/verpatch-1.0.15.1-x86-codeplex.zip" -OutFile verpatch-1.0.15.1-x86-codeplex.zip
+    Invoke-WebRequest "https://downloads.vigem.org/other/pavel-a/ddverpatch/verpatch-1.0.15.1-x86-codeplex.zip" -OutFile verpatch-1.0.15.1-x86-codeplex.zip
     Expand-Archive verpatch-1.0.15.1-x86-codeplex.zip -DestinationPath .
     .\verpatch.exe .\artifacts\x64\ViGEmBus.sys "$env:APPVEYOR_BUILD_VERSION"
     .\verpatch.exe .\artifacts\x64\ViGEmBus.sys /pv "$env:APPVEYOR_BUILD_VERSION"
@@ -17,3 +17,5 @@ artifacts:
 deploy:
 - provider: Environment
   name: BUILDBOT
+  on:
+    appveyor_repo_tag: true
