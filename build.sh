@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
-NOINIT=0
+echo $(bash --version 2>&1 | head -n 1)
+
+#CUSTOMPARAM=0
 BUILD_ARGUMENTS=()
 for i in "$@"; do
     case $(echo $1 | awk '{print tolower($0)}') in
-        -noinit) NOINIT=1;;
+        # -custom-param) CUSTOMPARAM=1;;
         *) BUILD_ARGUMENTS+=("$1") ;;
     esac
     shift
@@ -17,34 +19,50 @@ SCRIPT_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 # CONFIGURATION
 ###########################################################################
 
-NUGET_VERSION="latest"
-SOLUTION_DIRECTORY="$SCRIPT_DIR/../ViGEm"
-BUILD_PROJECT_FILE="$SCRIPT_DIR/./build/.build.csproj"
-BUILD_EXE_FILE="$SCRIPT_DIR/./build/bin/Debug/.build.exe"
+BUILD_PROJECT_FILE="$SCRIPT_DIR/build/_build.csproj"
+TEMP_DIRECTORY="$SCRIPT_DIR//.tmp"
 
-TEMP_DIRECTORY="$SCRIPT_DIR/.tmp"
+DOTNET_GLOBAL_FILE="$SCRIPT_DIR//global.json"
+DOTNET_INSTALL_URL="https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.sh"
+DOTNET_RELEASES_URL="https://raw.githubusercontent.com/dotnet/core/master/release-notes/releases.json"
 
-NUGET_URL="https://dist.nuget.org/win-x86-commandline/$NUGET_VERSION/nuget.exe"
-NUGET_FILE="$TEMP_DIRECTORY/nuget.exe"
-export NUGET_EXE="$NUGET_FILE"
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
+export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+export NUGET_XMLDOC_MODE="skip"
 
 ###########################################################################
-# PREPARE BUILD
+# EXECUTION
 ###########################################################################
 
-if ! ((NOINIT)); then
-  mkdir -p "$TEMP_DIRECTORY"
+function FirstJsonValue {
+    perl -nle 'print $1 if m{"'$1'": "([^"\-]+)",?}' <<< ${@:2}
+}
 
-  if [ ! -f "$NUGET_FILE" ]; then curl -Lsfo "$NUGET_FILE" $NUGET_URL;
-  elif [ $NUGET_VERSION == "latest" ]; then mono "$NUGET_FILE" update -Self; fi
-
-  mono "$NUGET_FILE" restore "$BUILD_PROJECT_FILE" -SolutionDirectory $SOLUTION_DIRECTORY
+# If global.json exists, load expected version
+if [ -f "$DOTNET_GLOBAL_FILE" ]; then
+    DOTNET_VERSION=$(FirstJsonValue "version" $(cat "$DOTNET_GLOBAL_FILE"))
 fi
 
-msbuild "$BUILD_PROJECT_FILE"
+# If dotnet is installed locally, and expected version is not set or installation matches the expected version
+if [[ -x "$(command -v dotnet)" && (-z ${DOTNET_VERSION+x} || $(dotnet --version) == "$DOTNET_VERSION") ]]; then
+    export DOTNET_EXE="$(command -v dotnet)"
+else
+    DOTNET_DIRECTORY="$TEMP_DIRECTORY/dotnet-unix"
+    export DOTNET_EXE="$DOTNET_DIRECTORY/dotnet"
+    
+    # If expected version is not set, get latest version
+    if [ -z ${DOTNET_VERSION+x} ]; then
+        DOTNET_VERSION=$(FirstJsonValue "version-sdk" $(curl -s "$DOTNET_RELEASES_URL"))
+    fi
+    
+    # Download and execute install script
+    DOTNET_INSTALL_FILE="$TEMP_DIRECTORY/dotnet-install.sh"
+    mkdir -p "$TEMP_DIRECTORY"
+    curl -Lsfo "$DOTNET_INSTALL_FILE" "$DOTNET_INSTALL_URL"
+    chmod +x "$DOTNET_INSTALL_FILE"
+    "$DOTNET_INSTALL_FILE" --install-dir "$DOTNET_DIRECTORY" --version "$DOTNET_VERSION" --no-path
+fi
 
-###########################################################################
-# EXECUTE BUILD
-###########################################################################
+echo "Microsoft (R) .NET Core SDK version $("$DOTNET_EXE" --version)"
 
-mono "$BUILD_EXE_FILE" ${BUILD_ARGUMENTS[@]}
+"$DOTNET_EXE" run --project "$BUILD_PROJECT_FILE" -- ${BUILD_ARGUMENTS[@]}
