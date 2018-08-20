@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using Nuke.Common;
 using Nuke.Common.Git;
@@ -58,6 +59,42 @@ class Build : NukeBuild
                 .SetMaxCpuCount(Environment.ProcessorCount)
                 .SetNodeReuse(IsLocalBuild)
                 .SetTargetPlatform(MSBuildTargetPlatform.x86));
+
+            #region Ugly hack, fix me!
+            EnsureExistingDirectory(Path.Combine(ArtifactsDirectory, @"x64"));
+            EnsureExistingDirectory(Path.Combine(ArtifactsDirectory, @"x86"));
+
+            File.Copy(
+                Path.Combine(WorkingDirectory, @"bin\x64\ViGEmBus.inf"),
+                Path.Combine(ArtifactsDirectory, @"ViGEmBus.inf")
+            );
+
+            File.Copy(
+                Path.Combine(WorkingDirectory, @"bin\x64\ViGEmBus.pdb"),
+                Path.Combine(ArtifactsDirectory, @"x64\ViGEmBus.pdb")
+            );
+            File.Copy(
+                Path.Combine(WorkingDirectory, @"bin\x64\ViGEmBus\ViGEmBus.sys"),
+                Path.Combine(ArtifactsDirectory, @"x64\ViGEmBus.sys")
+            );
+            File.Copy(
+                Path.Combine(WorkingDirectory, @"bin\x64\ViGEmBus\WdfCoinstaller01009.dll"),
+                Path.Combine(ArtifactsDirectory, @"x64\WdfCoinstaller01009.dll")
+            );
+
+            File.Copy(
+                Path.Combine(WorkingDirectory, @"bin\x86\ViGEmBus.pdb"),
+                Path.Combine(ArtifactsDirectory, @"x86\ViGEmBus.pdb")
+            );
+            File.Copy(
+                Path.Combine(WorkingDirectory, @"bin\x86\ViGEmBus\ViGEmBus.sys"),
+                Path.Combine(ArtifactsDirectory, @"x86\ViGEmBus.sys")
+            );
+            File.Copy(
+                Path.Combine(WorkingDirectory, @"bin\x86\ViGEmBus\WdfCoinstaller01009.dll"),
+                Path.Combine(ArtifactsDirectory, @"x86\WdfCoinstaller01009.dll")
+            );
+            #endregion
         });
 
     private Target Pack => _ => _
