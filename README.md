@@ -1,4 +1,4 @@
-# ViGEm Bus Driver
+# ViGEm Client Native SDK
 
 Developer SDK for communication with `ViGEmBus`.
 
