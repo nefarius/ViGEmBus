@@ -29,7 +29,7 @@ SOFTWARE.
 #include <SetupAPI.h>
 #include <initguid.h>
 
-#include "ViGEmBusShared.h"
+#include "km/ViGEmBusShared.h"
 #include "ViGEmClient.h"
 #include <winioctl.h>
 #include <limits.h>
