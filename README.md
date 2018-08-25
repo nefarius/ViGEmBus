@@ -77,3 +77,4 @@ Before installing the bus driver on Windows 7 (x86 or x64) the following 3rd par
 - [Oculus VR, LLC.](https://www.oculus.com/)
 - [Rainway, Inc](https://rainway.io/)
 - [WiimoteHook](https://forum.cemu.info/showthread.php/140-WiimoteHook-Nintendo-Wii-Remote-with-Motion-Rumble-and-Nunchuk-support)
+- [XJoy](https://github.com/sam0x17/XJoy)
