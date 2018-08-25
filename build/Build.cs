@@ -31,13 +31,7 @@ class Build : NukeBuild
         {
             MSBuild(s => s
                 .SetTargetPath(SolutionFile)
-                .SetTargets("Restore")
-                .SetTargetPlatform(MSBuildTargetPlatform.x64));
-
-            MSBuild(s => s
-                .SetTargetPath(SolutionFile)
-                .SetTargets("Restore")
-                .SetTargetPlatform(MSBuildTargetPlatform.x86));
+                .SetTargets("Restore"));
         });
 
     Target Compile => _ => _
