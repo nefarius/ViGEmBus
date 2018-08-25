@@ -30,3 +30,8 @@
 /artifacts
 /.vs/ViGEmBus/DesignTimeBuild
 /build/obj
+/.vs/ViGEmClient
+/src/Release (static)
+/src/x64/Debug (static)
+/src/x64/Release (dynamic)
+/src/x64/Release (static)
