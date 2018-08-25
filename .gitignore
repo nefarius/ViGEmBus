@@ -27,3 +27,6 @@
 /sys/RCa21300
 /sys/RCb21300
 /build/*.dotsettings
+/artifacts
+/.vs/ViGEmBus/DesignTimeBuild
+/build/obj
