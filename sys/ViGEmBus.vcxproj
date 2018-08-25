@@ -179,7 +179,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(SolutionDir)\Include\ViGEmBusDriver.h" />
-    <ClInclude Include="$(SolutionDir)\Include\ViGEmCommon.h" />
     <ClInclude Include="..\client\include\km\ViGEmBusShared.h" />
     <ClInclude Include="busenum.h" />
     <ClInclude Include="ByteArray.h" />
