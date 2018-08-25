@@ -30,3 +30,5 @@
 /artifacts
 /.vs/ViGEmBus/DesignTimeBuild
 /build/obj
+/Debug
+/sys/Debug

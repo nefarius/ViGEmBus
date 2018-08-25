@@ -57,9 +57,6 @@
     <ClInclude Include="ByteArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)\Include\ViGEmBusShared.h">
-      <Filter>Header Files\Common</Filter>
-    </ClInclude>
     <ClInclude Include="$(SolutionDir)\Include\ViGEmBusDriver.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
@@ -68,6 +65,9 @@
     </ClInclude>
     <ClInclude Include="trace.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\client\include\km\ViGEmBusShared.h">
+      <Filter>Header Files\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

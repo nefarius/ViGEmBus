@@ -33,7 +33,7 @@ SOFTWARE.
 #include <ntintsafe.h>
 #include <initguid.h>
 #include "ViGEmBusDriver.h"
-#include "ViGEmBusShared.h"
+#include <km/ViGEmBusShared.h>
 #include "Queue.h"
 #include <usb.h>
 #include <usbbusif.h>
