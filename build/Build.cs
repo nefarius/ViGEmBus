@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Linq;
 using Nuke.Common;
 using Nuke.Common.Git;
@@ -17,11 +16,13 @@ class Build : NukeBuild
     [Solution] readonly Solution Solution;
     [GitRepository] readonly GitRepository GitRepository;
 
+    AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
 
     Target Clean => _ => _
         .Executes(() =>
         {
+            DeleteDirectories(GlobDirectories(SourceDirectory, "**/bin", "**/obj"));
             EnsureCleanDirectory(ArtifactsDirectory);
         });
 
@@ -31,13 +32,7 @@ class Build : NukeBuild
         {
             MSBuild(s => s
                 .SetTargetPath(SolutionFile)
-                .SetTargets("Restore")
-                .SetTargetPlatform(MSBuildTargetPlatform.x64));
-
-            MSBuild(s => s
-                .SetTargetPath(SolutionFile)
-                .SetTargets("Restore")
-                .SetTargetPlatform(MSBuildTargetPlatform.x86));
+                .SetTargets("Restore"));
         });
 
     Target Compile => _ => _
@@ -49,52 +44,7 @@ class Build : NukeBuild
                 .SetTargets("Rebuild")
                 .SetConfiguration(Configuration)
                 .SetMaxCpuCount(Environment.ProcessorCount)
-                .SetNodeReuse(IsLocalBuild)
-                .SetTargetPlatform(MSBuildTargetPlatform.x64));
-
-            MSBuild(s => s
-                .SetTargetPath(SolutionFile)
-                .SetTargets("Rebuild")
-                .SetConfiguration(Configuration)
-                .SetMaxCpuCount(Environment.ProcessorCount)
-                .SetNodeReuse(IsLocalBuild)
-                .SetTargetPlatform(MSBuildTargetPlatform.x86));
-
-            #region Ugly hack, fix me!
-            EnsureExistingDirectory(Path.Combine(ArtifactsDirectory, @"x64"));
-            EnsureExistingDirectory(Path.Combine(ArtifactsDirectory, @"x86"));
-
-            File.Copy(
-                Path.Combine(WorkingDirectory, @"bin\x64\ViGEmBus.inf"),
-                Path.Combine(ArtifactsDirectory, @"ViGEmBus.inf")
-            );
-
-            File.Copy(
-                Path.Combine(WorkingDirectory, @"bin\x64\ViGEmBus.pdb"),
-                Path.Combine(ArtifactsDirectory, @"x64\ViGEmBus.pdb")
-            );
-            File.Copy(
-                Path.Combine(WorkingDirectory, @"bin\x64\ViGEmBus\ViGEmBus.sys"),
-                Path.Combine(ArtifactsDirectory, @"x64\ViGEmBus.sys")
-            );
-            File.Copy(
-                Path.Combine(WorkingDirectory, @"bin\x64\ViGEmBus\WdfCoinstaller01009.dll"),
-                Path.Combine(ArtifactsDirectory, @"x64\WdfCoinstaller01009.dll")
-            );
-
-            File.Copy(
-                Path.Combine(WorkingDirectory, @"bin\x86\ViGEmBus.pdb"),
-                Path.Combine(ArtifactsDirectory, @"x86\ViGEmBus.pdb")
-            );
-            File.Copy(
-                Path.Combine(WorkingDirectory, @"bin\x86\ViGEmBus\ViGEmBus.sys"),
-                Path.Combine(ArtifactsDirectory, @"x86\ViGEmBus.sys")
-            );
-            File.Copy(
-                Path.Combine(WorkingDirectory, @"bin\x86\ViGEmBus\WdfCoinstaller01009.dll"),
-                Path.Combine(ArtifactsDirectory, @"x86\WdfCoinstaller01009.dll")
-            );
-            #endregion
+                .SetNodeReuse(IsLocalBuild));
         });
 
     private Target Pack => _ => _
