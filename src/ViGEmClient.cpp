@@ -127,18 +127,18 @@ VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem)
     }
 
     const auto deviceInfoSet = SetupDiGetClassDevs(
-        &GUID_DEVINTERFACE_BUSENUM_VIGEM, 
-        nullptr, 
-        nullptr, 
+        &GUID_DEVINTERFACE_BUSENUM_VIGEM,
+        nullptr,
+        nullptr,
         DIGCF_PRESENT | DIGCF_DEVICEINTERFACE
     );
 
     // enumerate device instances
     while (SetupDiEnumDeviceInterfaces(
-        deviceInfoSet, 
-        nullptr, 
-        &GUID_DEVINTERFACE_BUSENUM_VIGEM, 
-        memberIndex++, 
+        deviceInfoSet,
+        nullptr,
+        &GUID_DEVINTERFACE_BUSENUM_VIGEM,
+        memberIndex++,
         &deviceInterfaceData
     ))
     {
@@ -151,11 +151,11 @@ VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem)
 
         // get detail buffer
         if (!SetupDiGetDeviceInterfaceDetail(
-            deviceInfoSet, 
-            &deviceInterfaceData, 
-            detailDataBuffer, 
-            requiredSize, 
-            &requiredSize, 
+            deviceInfoSet,
+            &deviceInterfaceData,
+            detailDataBuffer,
+            requiredSize,
+            &requiredSize,
             nullptr
         ))
         {
@@ -193,13 +193,13 @@ VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem)
 
         // send compiled library version to driver to check compatibility
         DeviceIoControl(
-            vigem->hBusDevice, 
-            IOCTL_VIGEM_CHECK_VERSION, 
-            &version, 
-            version.Size, 
-            nullptr, 
-            0, 
-            &transfered, 
+            vigem->hBusDevice,
+            IOCTL_VIGEM_CHECK_VERSION,
+            &version,
+            version.Size,
+            nullptr,
+            0,
+            &transfered,
             &lOverlapped
         );
 
@@ -299,13 +299,13 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
         plugin.ProductId = target->ProductId;
 
         DeviceIoControl(
-            vigem->hBusDevice, 
-            IOCTL_VIGEM_PLUGIN_TARGET, 
+            vigem->hBusDevice,
+            IOCTL_VIGEM_PLUGIN_TARGET,
             &plugin,
-            plugin.Size, 
-            nullptr, 
-            0, 
-            &transfered, 
+            plugin.Size,
+            nullptr,
+            0,
+            &transfered,
             &lOverlapped
         );
 
@@ -408,13 +408,13 @@ VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
     VIGEM_UNPLUG_TARGET_INIT(&unplug, target->SerialNo);
 
     DeviceIoControl(
-        vigem->hBusDevice, 
-        IOCTL_VIGEM_UNPLUG_TARGET, 
-        &unplug, 
+        vigem->hBusDevice,
+        IOCTL_VIGEM_UNPLUG_TARGET,
+        &unplug,
         unplug.Size,
-        nullptr, 
-        0, 
-        &transfered, 
+        nullptr,
+        0,
+        &transfered,
         &lOverlapped
     );
 
@@ -432,8 +432,8 @@ VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 }
 
 VIGEM_ERROR vigem_target_x360_register_notification(
-    PVIGEM_CLIENT vigem, 
-    PVIGEM_TARGET target, 
+    PVIGEM_CLIENT vigem,
+    PVIGEM_TARGET target,
     PFN_VIGEM_X360_NOTIFICATION notification
 )
 {
@@ -508,8 +508,8 @@ VIGEM_ERROR vigem_target_x360_register_notification(
 }
 
 VIGEM_ERROR vigem_target_ds4_register_notification(
-    PVIGEM_CLIENT vigem, 
-    PVIGEM_TARGET target, 
+    PVIGEM_CLIENT vigem,
+    PVIGEM_TARGET target,
     PFN_VIGEM_DS4_NOTIFICATION notification
 )
 {
@@ -614,8 +614,8 @@ USHORT vigem_target_get_pid(PVIGEM_TARGET target)
 }
 
 VIGEM_ERROR vigem_target_x360_update(
-    PVIGEM_CLIENT vigem, 
-    PVIGEM_TARGET target, 
+    PVIGEM_CLIENT vigem,
+    PVIGEM_TARGET target,
     XUSB_REPORT report
 )
 {
@@ -641,13 +641,13 @@ VIGEM_ERROR vigem_target_x360_update(
     xsr.Report = report;
 
     DeviceIoControl(
-        vigem->hBusDevice, 
-        IOCTL_XUSB_SUBMIT_REPORT, 
-        &xsr, 
-        xsr.Size, 
-        nullptr, 
-        0, 
-        &transfered, 
+        vigem->hBusDevice,
+        IOCTL_XUSB_SUBMIT_REPORT,
+        &xsr,
+        xsr.Size,
+        nullptr,
+        0,
+        &transfered,
         &lOverlapped
     );
 
@@ -666,8 +666,8 @@ VIGEM_ERROR vigem_target_x360_update(
 }
 
 VIGEM_ERROR vigem_target_ds4_update(
-    PVIGEM_CLIENT vigem, 
-    PVIGEM_TARGET target, 
+    PVIGEM_CLIENT vigem,
+    PVIGEM_TARGET target,
     DS4_REPORT report
 )
 {
@@ -693,13 +693,13 @@ VIGEM_ERROR vigem_target_ds4_update(
     dsr.Report = report;
 
     DeviceIoControl(
-        vigem->hBusDevice, 
+        vigem->hBusDevice,
         IOCTL_DS4_SUBMIT_REPORT,
-        &dsr, 
-        dsr.Size, 
-        nullptr, 
-        0, 
-        &transfered, 
+        &dsr,
+        dsr.Size,
+        nullptr,
+        0,
+        &transfered,
         &lOverlapped
     );
 
@@ -733,8 +733,8 @@ BOOL vigem_target_is_attached(PVIGEM_TARGET target)
 }
 
 VIGEM_ERROR vigem_target_x360_get_user_index(
-    PVIGEM_CLIENT vigem, 
-    PVIGEM_TARGET target, 
+    PVIGEM_CLIENT vigem,
+    PVIGEM_TARGET target,
     PULONG index
 )
 {
@@ -770,11 +770,20 @@ VIGEM_ERROR vigem_target_x360_get_user_index(
 
     if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transfered, TRUE) == 0)
     {
-        if (GetLastError() == ERROR_ACCESS_DENIED)
+        const auto error = GetLastError();
+
+        if (error == ERROR_ACCESS_DENIED)
         {
             CloseHandle(lOverlapped.hEvent);
             return VIGEM_ERROR_INVALID_TARGET;
         }
+
+        // TODO: handle userindex out-of-range situation here
+        //if (error == ???)
+        //{
+        //    CloseHandle(lOverlapped.hEvent);
+        //    return VIGEM_ERROR_XUSB_USERINDEX_OUT_OF_RANGE;
+        //}
     }
 
     CloseHandle(lOverlapped.hEvent);
