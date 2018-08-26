@@ -25,14 +25,14 @@ SOFTWARE.
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <SetupAPI.h>
 #include <initguid.h>
 
 #include "km/ViGEmBusShared.h"
 #include "ViGEmClient.h"
 #include <winioctl.h>
-#include <limits.h>
+#include <climits>
 #include <mutex>
 
 #define VIGEM_TARGETS_MAX   USHRT_MAX
@@ -92,7 +92,10 @@ PVIGEM_TARGET FORCEINLINE VIGEM_TARGET_ALLOC_INIT(
 
 PVIGEM_CLIENT vigem_alloc()
 {
-    auto driver = static_cast<PVIGEM_CLIENT>(malloc(sizeof(VIGEM_CLIENT)));
+    const auto driver = static_cast<PVIGEM_CLIENT>(malloc(sizeof(VIGEM_CLIENT)));
+
+    if (!driver)
+        return nullptr;
 
     RtlZeroMemory(driver, sizeof(VIGEM_CLIENT));
     driver->hBusDevice = INVALID_HANDLE_VALUE;
@@ -108,6 +111,9 @@ void vigem_free(PVIGEM_CLIENT vigem)
 
 VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem)
 {
+    if (!vigem)
+        return VIGEM_ERROR_BUS_INVALID_HANDLE;
+
     SP_DEVICE_INTERFACE_DATA deviceInterfaceData = { 0 };
     deviceInterfaceData.cbSize = sizeof(deviceInterfaceData);
     DWORD memberIndex = 0;
@@ -120,20 +126,38 @@ VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem)
         return VIGEM_ERROR_BUS_ALREADY_CONNECTED;
     }
 
-    auto deviceInfoSet = SetupDiGetClassDevs(&GUID_DEVINTERFACE_BUSENUM_VIGEM, nullptr, nullptr, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+    const auto deviceInfoSet = SetupDiGetClassDevs(
+        &GUID_DEVINTERFACE_BUSENUM_VIGEM, 
+        nullptr, 
+        nullptr, 
+        DIGCF_PRESENT | DIGCF_DEVICEINTERFACE
+    );
 
     // enumerate device instances
-    while (SetupDiEnumDeviceInterfaces(deviceInfoSet, nullptr, &GUID_DEVINTERFACE_BUSENUM_VIGEM, memberIndex++, &deviceInterfaceData))
+    while (SetupDiEnumDeviceInterfaces(
+        deviceInfoSet, 
+        nullptr, 
+        &GUID_DEVINTERFACE_BUSENUM_VIGEM, 
+        memberIndex++, 
+        &deviceInterfaceData
+    ))
     {
         // get required target buffer size
         SetupDiGetDeviceInterfaceDetail(deviceInfoSet, &deviceInterfaceData, nullptr, 0, &requiredSize, nullptr);
 
         // allocate target buffer
-        auto detailDataBuffer = static_cast<PSP_DEVICE_INTERFACE_DETAIL_DATA>(malloc(requiredSize));
+        const auto detailDataBuffer = static_cast<PSP_DEVICE_INTERFACE_DETAIL_DATA>(malloc(requiredSize));
         detailDataBuffer->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
 
         // get detail buffer
-        if (!SetupDiGetDeviceInterfaceDetail(deviceInfoSet, &deviceInterfaceData, detailDataBuffer, requiredSize, &requiredSize, nullptr))
+        if (!SetupDiGetDeviceInterfaceDetail(
+            deviceInfoSet, 
+            &deviceInterfaceData, 
+            detailDataBuffer, 
+            requiredSize, 
+            &requiredSize, 
+            nullptr
+        ))
         {
             SetupDiDestroyDeviceInfoList(deviceInfoSet);
             free(detailDataBuffer);
@@ -142,13 +166,15 @@ VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem)
         }
 
         // bus found, open it
-        vigem->hBusDevice = CreateFile(detailDataBuffer->DevicePath,
+        vigem->hBusDevice = CreateFile(
+            detailDataBuffer->DevicePath,
             GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE,
             nullptr,
             OPEN_EXISTING,
             FILE_ATTRIBUTE_NORMAL | FILE_FLAG_NO_BUFFERING | FILE_FLAG_WRITE_THROUGH | FILE_FLAG_OVERLAPPED,
-            nullptr);
+            nullptr
+        );
 
         // check bus open result
         if (vigem->hBusDevice == INVALID_HANDLE_VALUE)
@@ -166,7 +192,16 @@ VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem)
         VIGEM_CHECK_VERSION_INIT(&version, VIGEM_COMMON_VERSION);
 
         // send compiled library version to driver to check compatibility
-        DeviceIoControl(vigem->hBusDevice, IOCTL_VIGEM_CHECK_VERSION, &version, version.Size, nullptr, 0, &transfered, &lOverlapped);
+        DeviceIoControl(
+            vigem->hBusDevice, 
+            IOCTL_VIGEM_CHECK_VERSION, 
+            &version, 
+            version.Size, 
+            nullptr, 
+            0, 
+            &transfered, 
+            &lOverlapped
+        );
 
         // wait for result
         if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transfered, TRUE) != 0)
@@ -190,6 +225,9 @@ VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem)
 
 void vigem_disconnect(PVIGEM_CLIENT vigem)
 {
+    if (!vigem)
+        return;
+
     if (vigem->hBusDevice != INVALID_HANDLE_VALUE)
     {
         CloseHandle(vigem->hBusDevice);
@@ -201,7 +239,10 @@ void vigem_disconnect(PVIGEM_CLIENT vigem)
 
 PVIGEM_TARGET vigem_target_x360_alloc(void)
 {
-    auto target = VIGEM_TARGET_ALLOC_INIT(Xbox360Wired);
+    const auto target = VIGEM_TARGET_ALLOC_INIT(Xbox360Wired);
+
+    if (!target)
+        return nullptr;
 
     target->VendorId = 0x045E;
     target->ProductId = 0x028E;
@@ -211,7 +252,10 @@ PVIGEM_TARGET vigem_target_x360_alloc(void)
 
 PVIGEM_TARGET vigem_target_ds4_alloc(void)
 {
-    auto target = VIGEM_TARGET_ALLOC_INIT(DualShock4Wired);
+    const auto target = VIGEM_TARGET_ALLOC_INIT(DualShock4Wired);
+
+    if (!target)
+        return nullptr;
 
     target->VendorId = 0x054C;
     target->ProductId = 0x05C4;
@@ -227,20 +271,20 @@ void vigem_target_free(PVIGEM_TARGET target)
 
 VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 {
+    if (!vigem)
+        return VIGEM_ERROR_BUS_INVALID_HANDLE;
+
+    if (!target)
+        return VIGEM_ERROR_INVALID_TARGET;
+
     if (vigem->hBusDevice == nullptr)
-    {
         return VIGEM_ERROR_BUS_NOT_FOUND;
-    }
 
     if (target->State == VIGEM_TARGET_NEW)
-    {
         return VIGEM_ERROR_TARGET_UNINITIALIZED;
-    }
 
     if (target->State == VIGEM_TARGET_CONNECTED)
-    {
         return VIGEM_ERROR_ALREADY_CONNECTED;
-    }
 
     DWORD transfered = 0;
     VIGEM_PLUGIN_TARGET plugin;
@@ -254,7 +298,16 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
         plugin.VendorId = target->VendorId;
         plugin.ProductId = target->ProductId;
 
-        DeviceIoControl(vigem->hBusDevice, IOCTL_VIGEM_PLUGIN_TARGET, &plugin, plugin.Size, nullptr, 0, &transfered, &lOverlapped);
+        DeviceIoControl(
+            vigem->hBusDevice, 
+            IOCTL_VIGEM_PLUGIN_TARGET, 
+            &plugin,
+            plugin.Size, 
+            nullptr, 
+            0, 
+            &transfered, 
+            &lOverlapped
+        );
 
         if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transfered, TRUE) != 0)
         {
@@ -272,20 +325,20 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 
 VIGEM_ERROR vigem_target_add_async(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PFN_VIGEM_TARGET_ADD_RESULT result)
 {
+    if (!vigem)
+        return VIGEM_ERROR_BUS_INVALID_HANDLE;
+
+    if (!target)
+        return VIGEM_ERROR_INVALID_TARGET;
+
     if (vigem->hBusDevice == nullptr)
-    {
         return VIGEM_ERROR_BUS_NOT_FOUND;
-    }
 
     if (target->State == VIGEM_TARGET_NEW)
-    {
         return VIGEM_ERROR_TARGET_UNINITIALIZED;
-    }
 
     if (target->State == VIGEM_TARGET_CONNECTED)
-    {
         return VIGEM_ERROR_ALREADY_CONNECTED;
-    }
 
     std::thread _async{ [](
         PVIGEM_TARGET _Target,
@@ -332,20 +385,20 @@ VIGEM_ERROR vigem_target_add_async(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PF
 
 VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 {
+    if (!vigem)
+        return VIGEM_ERROR_BUS_INVALID_HANDLE;
+
+    if (!target)
+        return VIGEM_ERROR_INVALID_TARGET;
+
     if (vigem->hBusDevice == nullptr)
-    {
         return VIGEM_ERROR_BUS_NOT_FOUND;
-    }
 
     if (target->State == VIGEM_TARGET_NEW)
-    {
         return VIGEM_ERROR_TARGET_UNINITIALIZED;
-    }
 
     if (target->State != VIGEM_TARGET_CONNECTED)
-    {
         return VIGEM_ERROR_TARGET_NOT_PLUGGED_IN;
-    }
 
     DWORD transfered = 0;
     VIGEM_UNPLUG_TARGET unplug;
@@ -354,15 +407,21 @@ VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 
     VIGEM_UNPLUG_TARGET_INIT(&unplug, target->SerialNo);
 
-    DeviceIoControl(vigem->hBusDevice, IOCTL_VIGEM_UNPLUG_TARGET, &unplug, unplug.Size, nullptr, 0, &transfered, &lOverlapped);
+    DeviceIoControl(
+        vigem->hBusDevice, 
+        IOCTL_VIGEM_UNPLUG_TARGET, 
+        &unplug, 
+        unplug.Size,
+        nullptr, 
+        0, 
+        &transfered, 
+        &lOverlapped
+    );
 
     if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transfered, TRUE) != 0)
     {
         target->State = VIGEM_TARGET_DISCONNECTED;
         CloseHandle(lOverlapped.hEvent);
-
-        //g_xusbCallbacks.erase(Target->SerialNo);
-        //g_ds4Callbacks.erase(Target->SerialNo);
 
         return VIGEM_ERROR_NONE;
     }
@@ -372,22 +431,26 @@ VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
     return VIGEM_ERROR_REMOVAL_FAILED;
 }
 
-VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PFN_VIGEM_X360_NOTIFICATION notification)
+VIGEM_ERROR vigem_target_x360_register_notification(
+    PVIGEM_CLIENT vigem, 
+    PVIGEM_TARGET target, 
+    PFN_VIGEM_X360_NOTIFICATION notification
+)
 {
+    if (!vigem)
+        return VIGEM_ERROR_BUS_INVALID_HANDLE;
+
+    if (!target)
+        return VIGEM_ERROR_INVALID_TARGET;
+
     if (vigem->hBusDevice == nullptr)
-    {
         return VIGEM_ERROR_BUS_NOT_FOUND;
-    }
 
     if (target->SerialNo == 0 || notification == nullptr)
-    {
         return VIGEM_ERROR_INVALID_TARGET;
-    }
 
     if (target->Notification == reinterpret_cast<DWORD_PTR>(notification))
-    {
         return VIGEM_ERROR_CALLBACK_ALREADY_REGISTERED;
-    }
 
     target->Notification = reinterpret_cast<DWORD_PTR>(notification);
 
@@ -444,22 +507,26 @@ VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_
     return VIGEM_ERROR_NONE;
 }
 
-VIGEM_ERROR vigem_target_ds4_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PFN_VIGEM_DS4_NOTIFICATION notification)
+VIGEM_ERROR vigem_target_ds4_register_notification(
+    PVIGEM_CLIENT vigem, 
+    PVIGEM_TARGET target, 
+    PFN_VIGEM_DS4_NOTIFICATION notification
+)
 {
+    if (!vigem)
+        return VIGEM_ERROR_BUS_INVALID_HANDLE;
+
+    if (!target)
+        return VIGEM_ERROR_INVALID_TARGET;
+
     if (vigem->hBusDevice == nullptr)
-    {
         return VIGEM_ERROR_BUS_NOT_FOUND;
-    }
 
     if (target->SerialNo == 0 || notification == nullptr)
-    {
         return VIGEM_ERROR_INVALID_TARGET;
-    }
 
     if (target->Notification == reinterpret_cast<DWORD_PTR>(notification))
-    {
         return VIGEM_ERROR_CALLBACK_ALREADY_REGISTERED;
-    }
 
     target->Notification = reinterpret_cast<DWORD_PTR>(notification);
 
@@ -546,17 +613,23 @@ USHORT vigem_target_get_pid(PVIGEM_TARGET target)
     return target->ProductId;
 }
 
-VIGEM_ERROR vigem_target_x360_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, XUSB_REPORT report)
+VIGEM_ERROR vigem_target_x360_update(
+    PVIGEM_CLIENT vigem, 
+    PVIGEM_TARGET target, 
+    XUSB_REPORT report
+)
 {
+    if (!vigem)
+        return VIGEM_ERROR_BUS_INVALID_HANDLE;
+
+    if (!target)
+        return VIGEM_ERROR_INVALID_TARGET;
+
     if (vigem->hBusDevice == nullptr)
-    {
         return VIGEM_ERROR_BUS_NOT_FOUND;
-    }
 
     if (target->SerialNo == 0)
-    {
         return VIGEM_ERROR_INVALID_TARGET;
-    }
 
     DWORD transfered = 0;
     OVERLAPPED lOverlapped = { 0 };
@@ -567,7 +640,16 @@ VIGEM_ERROR vigem_target_x360_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, 
 
     xsr.Report = report;
 
-    DeviceIoControl(vigem->hBusDevice, IOCTL_XUSB_SUBMIT_REPORT, &xsr, xsr.Size, nullptr, 0, &transfered, &lOverlapped);
+    DeviceIoControl(
+        vigem->hBusDevice, 
+        IOCTL_XUSB_SUBMIT_REPORT, 
+        &xsr, 
+        xsr.Size, 
+        nullptr, 
+        0, 
+        &transfered, 
+        &lOverlapped
+    );
 
     if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transfered, TRUE) == 0)
     {
@@ -583,17 +665,23 @@ VIGEM_ERROR vigem_target_x360_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, 
     return VIGEM_ERROR_NONE;
 }
 
-VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, DS4_REPORT report)
+VIGEM_ERROR vigem_target_ds4_update(
+    PVIGEM_CLIENT vigem, 
+    PVIGEM_TARGET target, 
+    DS4_REPORT report
+)
 {
+    if (!vigem)
+        return VIGEM_ERROR_BUS_INVALID_HANDLE;
+
+    if (!target)
+        return VIGEM_ERROR_INVALID_TARGET;
+
     if (vigem->hBusDevice == nullptr)
-    {
         return VIGEM_ERROR_BUS_NOT_FOUND;
-    }
 
     if (target->SerialNo == 0)
-    {
         return VIGEM_ERROR_INVALID_TARGET;
-    }
 
     DWORD transfered = 0;
     OVERLAPPED lOverlapped = { 0 };
@@ -604,7 +692,16 @@ VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, D
 
     dsr.Report = report;
 
-    DeviceIoControl(vigem->hBusDevice, IOCTL_DS4_SUBMIT_REPORT, &dsr, dsr.Size, nullptr, 0, &transfered, &lOverlapped);
+    DeviceIoControl(
+        vigem->hBusDevice, 
+        IOCTL_DS4_SUBMIT_REPORT,
+        &dsr, 
+        dsr.Size, 
+        nullptr, 
+        0, 
+        &transfered, 
+        &lOverlapped
+    );
 
     if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transfered, TRUE) == 0)
     {
@@ -635,17 +732,23 @@ BOOL vigem_target_is_attached(PVIGEM_TARGET target)
     return (target->State == VIGEM_TARGET_CONNECTED);
 }
 
-VIGEM_ERROR vigem_target_x360_get_user_index(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PULONG index)
+VIGEM_ERROR vigem_target_x360_get_user_index(
+    PVIGEM_CLIENT vigem, 
+    PVIGEM_TARGET target, 
+    PULONG index
+)
 {
+    if (!vigem)
+        return VIGEM_ERROR_BUS_INVALID_HANDLE;
+
+    if (!target)
+        return VIGEM_ERROR_INVALID_TARGET;
+
     if (vigem->hBusDevice == nullptr)
-    {
         return VIGEM_ERROR_BUS_NOT_FOUND;
-    }
 
     if (target->SerialNo == 0 || target->Type != Xbox360Wired)
-    {
         return VIGEM_ERROR_INVALID_TARGET;
-    }
 
     DWORD transfered = 0;
     OVERLAPPED lOverlapped = { 0 };
