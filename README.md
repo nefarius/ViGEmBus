@@ -39,7 +39,7 @@ The driver is built for Windows 7/8/8.1/10 (x86 and amd64).
 - Visual Studio **2017** ([Community Edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15) is just fine)
 - [WDK for Windows 10, version 1803](https://developer.microsoft.com/en-us/windows/hardware/windows-driver-kit)
 
- You can either build directly within Visual Studio or in PowerShell by running the build script:
+You can either build directly within Visual Studio or in PowerShell by running the build script:
 
 ```PowerShell
 .\build.ps1 -configuration release
