@@ -7,3 +7,16 @@ Developer SDK for communication with `ViGEmBus`.
 ## About
 
 TBD
+
+## How to build
+
+### Prerequisites
+
+- Visual Studio **2017** ([Community Edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15) is just fine)
+- [.NET Core SDK 2.1](https://www.microsoft.com/net/download/dotnet-core/2.1) (or greater, required for building only)
+
+You can either build directly within Visual Studio or in PowerShell by running the build script:
+
+```PowerShell
+.\build.ps1 -configuration release
+```
