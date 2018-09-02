@@ -41,3 +41,7 @@
 /x64/Debug_LIB
 /Debug_LIB
 *.aps
+/Release_LIB
+/src/Release_LIB
+/src/x64/Release_LIB
+/x64/Release_LIB
