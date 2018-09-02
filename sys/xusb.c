@@ -608,6 +608,12 @@ NTSTATUS Xusb_GetUserIndex(WDFDEVICE Device, PXUSB_GET_USER_INDEX Request)
         Request->UserIndex = (ULONG)userIndex;
         status = STATUS_SUCCESS;
     }
+    else
+    {
+        // If the index is negative at this stage, we've exceeded XUSER_MAX_COUNT
+        // and need to fail this request with a distinct status.
+        status = STATUS_INVALID_DEVICE_OBJECT_PARAMETER;
+    }
 
     TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XUSB, "%!FUNC! Exit with status %!STATUS!", status);
 
