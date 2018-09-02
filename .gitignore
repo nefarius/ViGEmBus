@@ -36,3 +36,8 @@
 /src/x64/Release (dynamic)
 /src/x64/Release (static)
 *.TMP
+/src/Debug_LIB
+/src/x64/Debug_LIB
+/x64/Debug_LIB
+/Debug_LIB
+*.aps
