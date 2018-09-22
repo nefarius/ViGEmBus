@@ -5,7 +5,7 @@
 /.vs/ViGEmBus/v15
 /build/bin/Release
 /build/obj/Release
-/lib/x64
+/lib
 /packages
 /sys/x64/Release
 /x64/Release
@@ -19,9 +19,8 @@
 /build/bin/Debug
 /build/obj/Debug
 /bin
-/sys/x64/Debug
-/x64/Debug
-/x64/Debug (static)
+/sys/x64
+/x64
 *.user
 /.vs/config
 /sys/RCa21300
@@ -43,5 +42,4 @@
 *.aps
 /Release_LIB
 /src/Release_LIB
-/src/x64/Release_LIB
-/x64/Release_LIB
+/src/x64

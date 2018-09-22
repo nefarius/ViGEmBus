@@ -44,7 +44,16 @@ class Build : NukeBuild
                 .SetTargets("Rebuild")
                 .SetConfiguration(Configuration)
                 .SetMaxCpuCount(Environment.ProcessorCount)
-                .SetNodeReuse(IsLocalBuild));
+                .SetNodeReuse(IsLocalBuild)
+                .SetTargetPlatform(MSBuildTargetPlatform.x64));
+
+            MSBuild(s => s
+                .SetTargetPath(SolutionFile)
+                .SetTargets("Rebuild")
+                .SetConfiguration(Configuration)
+                .SetMaxCpuCount(Environment.ProcessorCount)
+                .SetNodeReuse(IsLocalBuild)
+                .SetTargetPlatform(MSBuildTargetPlatform.x86));
         });
 
     private Target Pack => _ => _
