@@ -27,7 +27,7 @@
 #include <ntintsafe.h>
 #include <initguid.h>
 #include "ViGEmBusDriver.h"
-#include <km/ViGEmBusShared.h>
+#include <ViGEm/km/BusShared.h>
 #include "Queue.h"
 #include <usb.h>
 #include <usbbusif.h>
