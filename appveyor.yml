@@ -2,11 +2,13 @@ version: 1.16.{build}.0
 image: Visual Studio 2017
 install:
 - ps: Copy-Item "$env:APPVEYOR_BUILD_FOLDER\vcpkg\ports\vigemclient" "c:\tools\vcpkg\ports"
+- cmd: vcpkg update
+- cmd: vcpkg upgrade
 build_script:
-- ps: "vcpkg build vigemclient:x64-windows"
-- ps: "vcpkg build vigemclient:x64-windows-static"
-- ps: "vcpkg build vigemclient:x86-windows"
-- ps: "vcpkg build vigemclient:x86-windows-static"
+- cmd: "vcpkg build vigemclient:x64-windows"
+- cmd: "vcpkg build vigemclient:x64-windows-static"
+- cmd: "vcpkg build vigemclient:x86-windows"
+- cmd: "vcpkg build vigemclient:x86-windows-static"
 deploy:
 - provider: Environment
   name: BUILDBOT
