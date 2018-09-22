@@ -30,7 +30,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_BUSENUM_VIGEM,
 
 #pragma once
 
-#include "ViGEmCommon.h"
+#include "ViGEm/Common.h"
 
 //
 // Common version for user-mode library and driver compatibility

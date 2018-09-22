@@ -29,8 +29,8 @@ SOFTWARE.
 #include <SetupAPI.h>
 #include <initguid.h>
 
-#include "km/ViGEmBusShared.h"
-#include "ViGEmClient.h"
+#include "ViGEm/km/BusShared.h"
+#include "ViGEm/Client.h"
 #include <winioctl.h>
 #include <climits>
 #include <mutex>

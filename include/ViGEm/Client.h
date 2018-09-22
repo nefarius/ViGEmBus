@@ -30,7 +30,7 @@ SOFTWARE.
 extern "C" {
 #endif
 
-#include "ViGEmCommon.h"
+#include "ViGEm/Common.h"
 
 #ifdef VIGEM_DYNAMIC
 #ifdef VIGEM_EXPORTS
