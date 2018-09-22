@@ -3,6 +3,7 @@ image: Visual Studio 2017
 install:
 - ps: Copy-Item "$env:APPVEYOR_BUILD_FOLDER\\vcpkg\\ports\\vigemclient" "c:\\tools\\vcpkg\\ports"
 build_script:
+- ps: Write-Host "$env:APPVEYOR_BUILD_FOLDER\\vcpkg\\ports\\vigemclient"
 - cmd: "vcpkg build vigemclient:x64-windows"
 - cmd: "vcpkg build vigemclient:x64-windows-static"
 - cmd: "vcpkg build vigemclient:x86-windows"
