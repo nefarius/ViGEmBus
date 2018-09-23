@@ -46,7 +46,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_BUSENUM_VIGEM,
 // access is permitted and success reported. If they mismatch, an
 // error is reported and the user-mode library skips this instance.
 // 
-#define VIGEM_COMMON_VERSION            0x0002
+#define VIGEM_COMMON_VERSION            0x0001
 
 #define FILE_DEVICE_BUSENUM             FILE_DEVICE_BUS_EXTENDER
 #define BUSENUM_IOCTL(_index_)          CTL_CODE(FILE_DEVICE_BUSENUM, _index_, METHOD_BUFFERED, FILE_READ_DATA)

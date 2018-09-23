@@ -43,3 +43,5 @@
 /Release_LIB
 /src/Release_LIB
 /src/x64
+/src/Debug_DLL
+/src/Release_DLL
