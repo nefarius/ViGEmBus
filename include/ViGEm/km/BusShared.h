@@ -23,8 +23,13 @@ SOFTWARE.
 */
 
 
+//
+// GUID identifying the bus device. Used by client library to detect and communicate.
+// 
+// IMPORTANT: make sure to change this value if you fork it or introduce 
+//				breaking changes!
+// 
 // {96E42B22-F5E9-42F8-B043-ED0F932F014F}
-// ReSharper disable once CppMissingIncludeGuard
 DEFINE_GUID(GUID_DEVINTERFACE_BUSENUM_VIGEM,
     0x96E42B22, 0xF5E9, 0x42F8, 0xB0, 0x43, 0xED, 0x0F, 0x93, 0x2F, 0x01, 0x4F);
 
@@ -41,7 +46,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_BUSENUM_VIGEM,
 // access is permitted and success reported. If they mismatch, an
 // error is reported and the user-mode library skips this instance.
 // 
-#define VIGEM_COMMON_VERSION            0x0001
+#define VIGEM_COMMON_VERSION            0x0002
 
 #define FILE_DEVICE_BUSENUM             FILE_DEVICE_BUS_EXTENDER
 #define BUSENUM_IOCTL(_index_)          CTL_CODE(FILE_DEVICE_BUSENUM, _index_, METHOD_BUFFERED, FILE_READ_DATA)

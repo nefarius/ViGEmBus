@@ -35,6 +35,8 @@ SOFTWARE.
 #include <climits>
 #include <mutex>
 
+#include <iostream>
+
 #define VIGEM_TARGETS_MAX   USHRT_MAX
 
 //
@@ -778,12 +780,11 @@ VIGEM_ERROR vigem_target_x360_get_user_index(
             return VIGEM_ERROR_INVALID_TARGET;
         }
 
-        // TODO: handle userindex out-of-range situation here
-        //if (error == ???)
-        //{
-        //    CloseHandle(lOverlapped.hEvent);
-        //    return VIGEM_ERROR_XUSB_USERINDEX_OUT_OF_RANGE;
-        //}
+        if (error == ERROR_INVALID_DEVICE_OBJECT_PARAMETER)
+        {
+            CloseHandle(lOverlapped.hEvent);
+            return VIGEM_ERROR_XUSB_USERINDEX_OUT_OF_RANGE;
+        }
     }
 
     CloseHandle(lOverlapped.hEvent);
