@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="0.6.2" />
+    <PackageReference Include="Nuke.Common" Version="0.9.0" />
     <PackageReference Include="GitVersion.CommandLine" Version="3.6.5" />
   </ItemGroup>
 
