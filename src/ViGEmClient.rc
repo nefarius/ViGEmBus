@@ -13,6 +13,55 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// English resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x7L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "000904b0"
+        BEGIN
+            VALUE "CompanyName", "Benjamin Höglinger-Stelzer"
+            VALUE "FileDescription", "Virtual Gamepad Emulation User-Mode Library"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "InternalName", "Virtual Gamepad Emulation User-Mode Library"
+            VALUE "LegalCopyright", "Copyright (C) Benjamin Höglinger-Stelzer 2017-2018"
+            VALUE "OriginalFilename", "ViGEmClient.lib"
+            VALUE "ProductName", "Virtual Gamepad Emulation User-Mode Library"
+            VALUE "ProductVersion", "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x9, 1200
+    END
+END
+
+#endif    // English resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // German (Austria) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEA)
@@ -43,45 +92,6 @@ BEGIN
 END
 
 #endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Version
-//
-
-VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,14,3,0
- PRODUCTVERSION 1,14,3,0
- FILEFLAGSMASK 0x3fL
-#ifdef _DEBUG
- FILEFLAGS 0x1L
-#else
- FILEFLAGS 0x0L
-#endif
- FILEOS 0x40004L
- FILETYPE 0x7L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "000904b0"
-        BEGIN
-            VALUE "CompanyName", "Benjamin Höglinger-Stelzer"
-            VALUE "FileDescription", "Virtual Gamepad Emulation User-Mode Library"
-            VALUE "FileVersion", "1.14.3.0"
-            VALUE "InternalName", "Virtual Gamepad Emulation User-Mode Library"
-            VALUE "LegalCopyright", "Copyright (C) Benjamin Höglinger-Stelzer 2017"
-            VALUE "OriginalFilename", "ViGEmCli.lib"
-            VALUE "ProductName", "Virtual Gamepad Emulation User-Mode Library"
-            VALUE "ProductVersion", "1.14.3.0"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x9, 1200
-    END
-END
 
 #endif    // German (Austria) resources
 /////////////////////////////////////////////////////////////////////////////
