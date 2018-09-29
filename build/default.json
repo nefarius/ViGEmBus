@@ -1,0 +1,10 @@
+{
+  "Version": {
+    "CompanyName": "Benjamin Höglinger-Stelzer",
+    "FileDescription": "Virtual Gamepad Emulation Framework User-Mode Library",
+    "InternalName": "ViGEmClient",
+    "LegalCopyright": "Copyright (C) 2017-2018 Benjamin Hoeglinger-Stelzer All Rights Reserved",
+    "OriginalFilename": "ViGEmClient",
+    "ProductName": "Virtual Gamepad Emulation Framework User-Mode Library"
+  }
+}
