@@ -21,675 +21,675 @@
 #include "xusb.tmh"
 
 NTSTATUS Xusb_PreparePdo(
-	PWDFDEVICE_INIT DeviceInit,
-	USHORT VendorId,
-	USHORT ProductId,
-	PUNICODE_STRING DeviceId,
-	PUNICODE_STRING DeviceDescription)
+    PWDFDEVICE_INIT DeviceInit,
+    USHORT VendorId,
+    USHORT ProductId,
+    PUNICODE_STRING DeviceId,
+    PUNICODE_STRING DeviceDescription)
 {
-	NTSTATUS status;
-	DECLARE_UNICODE_STRING_SIZE(buffer, MAX_HARDWARE_ID_LENGTH);
+    NTSTATUS status;
+    DECLARE_UNICODE_STRING_SIZE(buffer, MAX_HARDWARE_ID_LENGTH);
 
-	// prepare device description
-	status = RtlUnicodeStringInit(DeviceDescription, L"Virtual Xbox 360 Controller");
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"RtlUnicodeStringInit failed with status %!STATUS!",
-			status);
-		return status;
-	}
+    // prepare device description
+    status = RtlUnicodeStringInit(DeviceDescription, L"Virtual Xbox 360 Controller");
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "RtlUnicodeStringInit failed with status %!STATUS!",
+            status);
+        return status;
+    }
 
-	// Set hardware ID
-	RtlUnicodeStringPrintf(&buffer, L"USB\\VID_%04X&PID_%04X", VendorId, ProductId);
+    // Set hardware ID
+    RtlUnicodeStringPrintf(&buffer, L"USB\\VID_%04X&PID_%04X", VendorId, ProductId);
 
-	RtlUnicodeStringCopy(DeviceId, &buffer);
+    RtlUnicodeStringCopy(DeviceId, &buffer);
 
-	status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"WdfPdoInitAddHardwareID failed with status %!STATUS!",
-			status);
-		return status;
-	}
+    status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfPdoInitAddHardwareID failed with status %!STATUS!",
+            status);
+        return status;
+    }
 
 
-	// Set compatible IDs
-	RtlUnicodeStringInit(&buffer, L"USB\\MS_COMP_XUSB10");
+    // Set compatible IDs
+    RtlUnicodeStringInit(&buffer, L"USB\\MS_COMP_XUSB10");
 
-	status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"WdfPdoInitAddCompatibleID #1 failed with status %!STATUS!",
-			status);
-		return status;
-	}
+    status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfPdoInitAddCompatibleID #1 failed with status %!STATUS!",
+            status);
+        return status;
+    }
 
-	RtlUnicodeStringInit(&buffer, L"USB\\Class_FF&SubClass_5D&Prot_01");
+    RtlUnicodeStringInit(&buffer, L"USB\\Class_FF&SubClass_5D&Prot_01");
 
-	status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"WdfPdoInitAddCompatibleID #2 failed with status %!STATUS!",
-			status);
-		return status;
-	}
+    status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfPdoInitAddCompatibleID #2 failed with status %!STATUS!",
+            status);
+        return status;
+    }
 
-	RtlUnicodeStringInit(&buffer, L"USB\\Class_FF&SubClass_5D");
+    RtlUnicodeStringInit(&buffer, L"USB\\Class_FF&SubClass_5D");
 
-	status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"WdfPdoInitAddCompatibleID #3 failed with status %!STATUS!",
-			status);
-		return status;
-	}
+    status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfPdoInitAddCompatibleID #3 failed with status %!STATUS!",
+            status);
+        return status;
+    }
 
-	RtlUnicodeStringInit(&buffer, L"USB\\Class_FF");
+    RtlUnicodeStringInit(&buffer, L"USB\\Class_FF");
 
-	status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"WdfPdoInitAddCompatibleID #4 failed with status %!STATUS!",
-			status);
-		return status;
-	}
+    status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfPdoInitAddCompatibleID #4 failed with status %!STATUS!",
+            status);
+        return status;
+    }
 
-	return STATUS_SUCCESS;
+    return STATUS_SUCCESS;
 }
 
 NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
 {
-	NTSTATUS status;
-	WDF_QUERY_INTERFACE_CONFIG ifaceCfg;
+    NTSTATUS status;
+    WDF_QUERY_INTERFACE_CONFIG ifaceCfg;
 
-	INTERFACE dummyIface;
+    INTERFACE dummyIface;
 
-	dummyIface.Size = sizeof(INTERFACE);
-	dummyIface.Version = 1;
-	dummyIface.Context = (PVOID)Device;
+    dummyIface.Size = sizeof(INTERFACE);
+    dummyIface.Version = 1;
+    dummyIface.Context = (PVOID)Device;
 
-	dummyIface.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
-	dummyIface.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
+    dummyIface.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
+    dummyIface.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
 
-	/* XUSB.sys will query for the following three (unknown) interfaces
-	* BUT WONT USE IT so we just expose them to satisfy initialization. */
+    /* XUSB.sys will query for the following three (unknown) interfaces
+    * BUT WONT USE IT so we just expose them to satisfy initialization. */
 
-	// Dummy 0
+    // Dummy 0
 
-	WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_UNKNOWN_0, NULL);
+    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_UNKNOWN_0, NULL);
 
-	status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
-			"(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data1,
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data2,
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data3,
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[0],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[1],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[2],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[3],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[4],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[5],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[6],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[7],
-			status);
+    status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
+            "(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data1,
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data2,
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data3,
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[0],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[1],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[2],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[3],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[4],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[5],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[6],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[7],
+            status);
 
-		return status;
-	}
+        return status;
+    }
 
-	// Dummy 1
+    // Dummy 1
 
-	WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_UNKNOWN_1, NULL);
+    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_UNKNOWN_1, NULL);
 
-	status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
-			"(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data1,
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data2,
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data3,
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[0],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[1],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[2],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[3],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[4],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[5],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[6],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[7],
-			status);
+    status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
+            "(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data1,
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data2,
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data3,
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[0],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[1],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[2],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[3],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[4],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[5],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[6],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[7],
+            status);
 
-		return status;
-	}
+        return status;
+    }
 
-	// Dummy 2
+    // Dummy 2
 
-	WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_UNKNOWN_2, NULL);
+    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_UNKNOWN_2, NULL);
 
-	status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
-			"(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data1,
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data2,
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data3,
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[0],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[1],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[2],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[3],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[4],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[5],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[6],
-			GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[7],
-			status);
+    status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
+            "(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data1,
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data2,
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data3,
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[0],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[1],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[2],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[3],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[4],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[5],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[6],
+            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[7],
+            status);
 
-		return status;
-	}
+        return status;
+    }
 
-	// Expose USB_BUS_INTERFACE_USBDI_GUID
+    // Expose USB_BUS_INTERFACE_USBDI_GUID
 
-	// This interface actually IS used
-	USB_BUS_INTERFACE_USBDI_V1 xusbInterface;
+    // This interface actually IS used
+    USB_BUS_INTERFACE_USBDI_V1 xusbInterface;
 
-	xusbInterface.Size = sizeof(USB_BUS_INTERFACE_USBDI_V1);
-	xusbInterface.Version = USB_BUSIF_USBDI_VERSION_1;
-	xusbInterface.BusContext = (PVOID)Device;
+    xusbInterface.Size = sizeof(USB_BUS_INTERFACE_USBDI_V1);
+    xusbInterface.Version = USB_BUSIF_USBDI_VERSION_1;
+    xusbInterface.BusContext = (PVOID)Device;
 
-	xusbInterface.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
-	xusbInterface.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
+    xusbInterface.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
+    xusbInterface.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
 
-	xusbInterface.SubmitIsoOutUrb = UsbPdo_SubmitIsoOutUrb;
-	xusbInterface.GetUSBDIVersion = UsbPdo_GetUSBDIVersion;
-	xusbInterface.QueryBusTime = UsbPdo_QueryBusTime;
-	xusbInterface.QueryBusInformation = UsbPdo_QueryBusInformation;
-	xusbInterface.IsDeviceHighSpeed = UsbPdo_IsDeviceHighSpeed;
+    xusbInterface.SubmitIsoOutUrb = UsbPdo_SubmitIsoOutUrb;
+    xusbInterface.GetUSBDIVersion = UsbPdo_GetUSBDIVersion;
+    xusbInterface.QueryBusTime = UsbPdo_QueryBusTime;
+    xusbInterface.QueryBusInformation = UsbPdo_QueryBusInformation;
+    xusbInterface.IsDeviceHighSpeed = UsbPdo_IsDeviceHighSpeed;
 
-	WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&xusbInterface, &USB_BUS_INTERFACE_USBDI_GUID, NULL);
+    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&xusbInterface, &USB_BUS_INTERFACE_USBDI_GUID, NULL);
 
-	status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"WdfDeviceAddQueryInterface failed with status %!STATUS!",
-			status);
-		return status;
-	}
+    status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfDeviceAddQueryInterface failed with status %!STATUS!",
+            status);
+        return status;
+    }
 
-	return STATUS_SUCCESS;
+    return STATUS_SUCCESS;
 }
 
 NTSTATUS Xusb_ReleaseHardware(WDFDEVICE Device)
 {
-	ULONG index;
+    ULONG index;
 
-	PXUSB_DEVICE_DATA xusb = XusbGetData(Device);
+    PXUSB_DEVICE_DATA xusb = XusbGetData(Device);
 
-	for (index = 0; index < XUSB_INIT_BLOB_COUNT; index++)
-	{
-		if (xusb->InterruptInitStageBlobs[index])
-			ExFreePoolWithTag(xusb->InterruptInitStageBlobs[index], VIGEM_POOL_TAG);
-	}
+    for (index = 0; index < XUSB_INIT_BLOB_COUNT; index++)
+    {
+        if (xusb->InterruptInitStageBlobs[index])
+            ExFreePoolWithTag(xusb->InterruptInitStageBlobs[index], VIGEM_POOL_TAG);
+    }
 
-	return STATUS_SUCCESS;
+    return STATUS_SUCCESS;
 }
 
 NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device)
 {
-	NTSTATUS				status;
-	WDF_OBJECT_ATTRIBUTES	attributes;
-	ULONG					index;
+    NTSTATUS                status;
+    WDF_OBJECT_ATTRIBUTES    attributes;
+    ULONG                    index;
 
-	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-	attributes.ParentObject = Device;
+    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    attributes.ParentObject = Device;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XUSB, "Initializing XUSB context...");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XUSB, "Initializing XUSB context...");
 
-	PXUSB_DEVICE_DATA xusb = XusbGetData(Device);
+    PXUSB_DEVICE_DATA xusb = XusbGetData(Device);
 
-	RtlZeroMemory(xusb, sizeof(XUSB_DEVICE_DATA));
+    RtlZeroMemory(xusb, sizeof(XUSB_DEVICE_DATA));
 
-	// Is later overwritten by actual XInput slot
-	xusb->LedNumber = -1;
-	// Packet size (20 bytes = 0x14)
-	xusb->Packet.Size = 0x14;
+    // Is later overwritten by actual XInput slot
+    xusb->LedNumber = -1;
+    // Packet size (20 bytes = 0x14)
+    xusb->Packet.Size = 0x14;
 
-	// Prepare blob storage
-	xusb->InterruptInitStageBlobs[0] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
-	xusb->InterruptInitStageBlobs[1] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
-	xusb->InterruptInitStageBlobs[2] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
-	xusb->InterruptInitStageBlobs[3] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
-	xusb->InterruptInitStageBlobs[4] = ExAllocatePoolWithTag(NonPagedPool, sizeof(XUSB_INTERRUPT_IN_PACKET), VIGEM_POOL_TAG);
-	xusb->InterruptInitStageBlobs[5] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
-	xusb->InterruptInitStageBlobs[6] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
+    // Prepare blob storage
+    xusb->InterruptInitStageBlobs[0] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
+    xusb->InterruptInitStageBlobs[1] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
+    xusb->InterruptInitStageBlobs[2] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
+    xusb->InterruptInitStageBlobs[3] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
+    xusb->InterruptInitStageBlobs[4] = ExAllocatePoolWithTag(NonPagedPool, sizeof(XUSB_INTERRUPT_IN_PACKET), VIGEM_POOL_TAG);
+    xusb->InterruptInitStageBlobs[5] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
+    xusb->InterruptInitStageBlobs[6] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
 
-	// Validate allocations
-	for (index = 0; index < XUSB_INIT_BLOB_COUNT; index++)
-	{
-		// If even one allocation failed...
-		if (!xusb->InterruptInitStageBlobs[index])
-		{
-			// ...re-enumerate...
-			for (index = 0; index < XUSB_INIT_BLOB_COUNT; index++)
-			{
-				// ...and free the ones who succeeded...
-				if (xusb->InterruptInitStageBlobs[index])
-					// ...to not leak memory...
-					ExFreePoolWithTag(xusb->InterruptInitStageBlobs[index], VIGEM_POOL_TAG);
-			}
+    // Validate allocations
+    for (index = 0; index < XUSB_INIT_BLOB_COUNT; index++)
+    {
+        // If even one allocation failed...
+        if (!xusb->InterruptInitStageBlobs[index])
+        {
+            // ...re-enumerate...
+            for (index = 0; index < XUSB_INIT_BLOB_COUNT; index++)
+            {
+                // ...and free the ones who succeeded...
+                if (xusb->InterruptInitStageBlobs[index])
+                    // ...to not leak memory...
+                    ExFreePoolWithTag(xusb->InterruptInitStageBlobs[index], VIGEM_POOL_TAG);
+            }
 
-			// ...and abort with error
-			return STATUS_INSUFFICIENT_RESOURCES;
-		}
-	}
+            // ...and abort with error
+            return STATUS_INSUFFICIENT_RESOURCES;
+        }
+    }
 
-	/*
-	 * Fill blobs
-	 *
-	 * Values obtained by reversing the communication of a physical pad.
-	 */
-	COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[0], P99_PROTECT({
-		0x01, 0x03, 0x0E
-		}));
-	COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[1], P99_PROTECT({
-		0x02, 0x03, 0x00
-		}));
-	COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[2], P99_PROTECT({
-		0x03, 0x03, 0x03
-		}));
-	COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[3], P99_PROTECT({
-		0x08, 0x03, 0x00
-		}));
-	COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[4], P99_PROTECT({
-		0x00, 0x14, 0x00, 0x00, 0x00, 0x00, 0xe4, 0xf2,
-		0xb3, 0xf8, 0x49, 0xf3, 0xb0, 0xfc, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00
-		}));
-	COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[5], P99_PROTECT({
-		0x01, 0x03, 0x03
-		}));
-	COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[6], P99_PROTECT({
-		0x05, 0x03, 0x00
-		}));
+    /*
+     * Fill blobs
+     *
+     * Values obtained by reversing the communication of a physical pad.
+     */
+    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[0], P99_PROTECT({
+        0x01, 0x03, 0x0E
+        }));
+    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[1], P99_PROTECT({
+        0x02, 0x03, 0x00
+        }));
+    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[2], P99_PROTECT({
+        0x03, 0x03, 0x03
+        }));
+    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[3], P99_PROTECT({
+        0x08, 0x03, 0x00
+        }));
+    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[4], P99_PROTECT({
+        0x00, 0x14, 0x00, 0x00, 0x00, 0x00, 0xe4, 0xf2,
+        0xb3, 0xf8, 0x49, 0xf3, 0xb0, 0xfc, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00
+        }));
+    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[5], P99_PROTECT({
+        0x01, 0x03, 0x03
+        }));
+    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[6], P99_PROTECT({
+        0x05, 0x03, 0x00
+        }));
 
-	// I/O Queue for pending IRPs
-	WDF_IO_QUEUE_CONFIG holdingInQueueConfig;
+    // I/O Queue for pending IRPs
+    WDF_IO_QUEUE_CONFIG holdingInQueueConfig;
 
-	// Create and assign queue for unhandled interrupt requests
-	WDF_IO_QUEUE_CONFIG_INIT(&holdingInQueueConfig, WdfIoQueueDispatchManual);
+    // Create and assign queue for unhandled interrupt requests
+    WDF_IO_QUEUE_CONFIG_INIT(&holdingInQueueConfig, WdfIoQueueDispatchManual);
 
-	status = WdfIoQueueCreate(Device, &holdingInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &xusb->HoldingUsbInRequests);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"WdfIoQueueCreate (HoldingUsbInRequests) failed with status %!STATUS!",
-			status);
-		return status;
-	}
+    status = WdfIoQueueCreate(Device, &holdingInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &xusb->HoldingUsbInRequests);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfIoQueueCreate (HoldingUsbInRequests) failed with status %!STATUS!",
+            status);
+        return status;
+    }
 
-	return STATUS_SUCCESS;
+    return STATUS_SUCCESS;
 }
 
 VOID Xusb_GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length)
 {
-	UCHAR XusbDescriptorData[XUSB_DESCRIPTOR_SIZE] =
-	{
-		0x09,        //   bLength
-		0x02,        //   bDescriptorType (Configuration)
-		0x99, 0x00,  //   wTotalLength 153
-		0x04,        //   bNumInterfaces 4
-		0x01,        //   bConfigurationValue
-		0x00,        //   iConfiguration (String Index)
-		0xA0,        //   bmAttributes Remote Wakeup
-		0xFA,        //   bMaxPower 500mA
+    UCHAR XusbDescriptorData[XUSB_DESCRIPTOR_SIZE] =
+    {
+        0x09,        //   bLength
+        0x02,        //   bDescriptorType (Configuration)
+        0x99, 0x00,  //   wTotalLength 153
+        0x04,        //   bNumInterfaces 4
+        0x01,        //   bConfigurationValue
+        0x00,        //   iConfiguration (String Index)
+        0xA0,        //   bmAttributes Remote Wakeup
+        0xFA,        //   bMaxPower 500mA
 
-		0x09,        //   bLength
-		0x04,        //   bDescriptorType (Interface)
-		0x00,        //   bInterfaceNumber 0
-		0x00,        //   bAlternateSetting
-		0x02,        //   bNumEndpoints 2
-		0xFF,        //   bInterfaceClass
-		0x5D,        //   bInterfaceSubClass
-		0x01,        //   bInterfaceProtocol
-		0x00,        //   iInterface (String Index)
+        0x09,        //   bLength
+        0x04,        //   bDescriptorType (Interface)
+        0x00,        //   bInterfaceNumber 0
+        0x00,        //   bAlternateSetting
+        0x02,        //   bNumEndpoints 2
+        0xFF,        //   bInterfaceClass
+        0x5D,        //   bInterfaceSubClass
+        0x01,        //   bInterfaceProtocol
+        0x00,        //   iInterface (String Index)
 
-		0x11,        //   bLength
-		0x21,        //   bDescriptorType (HID)
-		0x00, 0x01,  //   bcdHID 1.00
-		0x01,        //   bCountryCode
-		0x25,        //   bNumDescriptors
-		0x81,        //   bDescriptorType[0] (Unknown 0x81)
-		0x14, 0x00,  //   wDescriptorLength[0] 20
-		0x00,        //   bDescriptorType[1] (Unknown 0x00)
-		0x00, 0x00,  //   wDescriptorLength[1] 0
-		0x13,        //   bDescriptorType[2] (Unknown 0x13)
-		0x01, 0x08,  //   wDescriptorLength[2] 2049
-		0x00,        //   bDescriptorType[3] (Unknown 0x00)
-		0x00,
-		0x07,        //   bLength
-		0x05,        //   bDescriptorType (Endpoint)
-		0x81,        //   bEndpointAddress (IN/D2H)
-		0x03,        //   bmAttributes (Interrupt)
-		0x20, 0x00,  //   wMaxPacketSize 32
-		0x04,        //   bInterval 4 (unit depends on device speed)
+        0x11,        //   bLength
+        0x21,        //   bDescriptorType (HID)
+        0x00, 0x01,  //   bcdHID 1.00
+        0x01,        //   bCountryCode
+        0x25,        //   bNumDescriptors
+        0x81,        //   bDescriptorType[0] (Unknown 0x81)
+        0x14, 0x00,  //   wDescriptorLength[0] 20
+        0x00,        //   bDescriptorType[1] (Unknown 0x00)
+        0x00, 0x00,  //   wDescriptorLength[1] 0
+        0x13,        //   bDescriptorType[2] (Unknown 0x13)
+        0x01, 0x08,  //   wDescriptorLength[2] 2049
+        0x00,        //   bDescriptorType[3] (Unknown 0x00)
+        0x00,
+        0x07,        //   bLength
+        0x05,        //   bDescriptorType (Endpoint)
+        0x81,        //   bEndpointAddress (IN/D2H)
+        0x03,        //   bmAttributes (Interrupt)
+        0x20, 0x00,  //   wMaxPacketSize 32
+        0x04,        //   bInterval 4 (unit depends on device speed)
 
-		0x07,        //   bLength
-		0x05,        //   bDescriptorType (Endpoint)
-		0x01,        //   bEndpointAddress (OUT/H2D)
-		0x03,        //   bmAttributes (Interrupt)
-		0x20, 0x00,  //   wMaxPacketSize 32
-		0x08,        //   bInterval 8 (unit depends on device speed)
+        0x07,        //   bLength
+        0x05,        //   bDescriptorType (Endpoint)
+        0x01,        //   bEndpointAddress (OUT/H2D)
+        0x03,        //   bmAttributes (Interrupt)
+        0x20, 0x00,  //   wMaxPacketSize 32
+        0x08,        //   bInterval 8 (unit depends on device speed)
 
-		0x09,        //   bLength
-		0x04,        //   bDescriptorType (Interface)
-		0x01,        //   bInterfaceNumber 1
-		0x00,        //   bAlternateSetting
-		0x04,        //   bNumEndpoints 4
-		0xFF,        //   bInterfaceClass
-		0x5D,        //   bInterfaceSubClass
-		0x03,        //   bInterfaceProtocol
-		0x00,        //   iInterface (String Index)
+        0x09,        //   bLength
+        0x04,        //   bDescriptorType (Interface)
+        0x01,        //   bInterfaceNumber 1
+        0x00,        //   bAlternateSetting
+        0x04,        //   bNumEndpoints 4
+        0xFF,        //   bInterfaceClass
+        0x5D,        //   bInterfaceSubClass
+        0x03,        //   bInterfaceProtocol
+        0x00,        //   iInterface (String Index)
 
-		0x1B,        //   bLength
-		0x21,        //   bDescriptorType (HID)
-		0x00, 0x01,  //   bcdHID 1.00
-		0x01,        //   bCountryCode
-		0x01,        //   bNumDescriptors
-		0x82,        //   bDescriptorType[0] (Unknown 0x82)
-		0x40, 0x01,  //   wDescriptorLength[0] 320
-		0x02, 0x20, 0x16, 0x83, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x07,        //   bLength
-		0x05,        //   bDescriptorType (Endpoint)
-		0x82,        //   bEndpointAddress (IN/D2H)
-		0x03,        //   bmAttributes (Interrupt)
-		0x20, 0x00,  //   wMaxPacketSize 32
-		0x02,        //   bInterval 2 (unit depends on device speed)
+        0x1B,        //   bLength
+        0x21,        //   bDescriptorType (HID)
+        0x00, 0x01,  //   bcdHID 1.00
+        0x01,        //   bCountryCode
+        0x01,        //   bNumDescriptors
+        0x82,        //   bDescriptorType[0] (Unknown 0x82)
+        0x40, 0x01,  //   wDescriptorLength[0] 320
+        0x02, 0x20, 0x16, 0x83, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x07,        //   bLength
+        0x05,        //   bDescriptorType (Endpoint)
+        0x82,        //   bEndpointAddress (IN/D2H)
+        0x03,        //   bmAttributes (Interrupt)
+        0x20, 0x00,  //   wMaxPacketSize 32
+        0x02,        //   bInterval 2 (unit depends on device speed)
 
-		0x07,        //   bLength
-		0x05,        //   bDescriptorType (Endpoint)
-		0x02,        //   bEndpointAddress (OUT/H2D)
-		0x03,        //   bmAttributes (Interrupt)
-		0x20, 0x00,  //   wMaxPacketSize 32
-		0x04,        //   bInterval 4 (unit depends on device speed)
+        0x07,        //   bLength
+        0x05,        //   bDescriptorType (Endpoint)
+        0x02,        //   bEndpointAddress (OUT/H2D)
+        0x03,        //   bmAttributes (Interrupt)
+        0x20, 0x00,  //   wMaxPacketSize 32
+        0x04,        //   bInterval 4 (unit depends on device speed)
 
-		0x07,        //   bLength
-		0x05,        //   bDescriptorType (Endpoint)
-		0x83,        //   bEndpointAddress (IN/D2H)
-		0x03,        //   bmAttributes (Interrupt)
-		0x20, 0x00,  //   wMaxPacketSize 32
-		0x40,        //   bInterval 64 (unit depends on device speed)
+        0x07,        //   bLength
+        0x05,        //   bDescriptorType (Endpoint)
+        0x83,        //   bEndpointAddress (IN/D2H)
+        0x03,        //   bmAttributes (Interrupt)
+        0x20, 0x00,  //   wMaxPacketSize 32
+        0x40,        //   bInterval 64 (unit depends on device speed)
 
-		0x07,        //   bLength
-		0x05,        //   bDescriptorType (Endpoint)
-		0x03,        //   bEndpointAddress (OUT/H2D)
-		0x03,        //   bmAttributes (Interrupt)
-		0x20, 0x00,  //   wMaxPacketSize 32
-		0x10,        //   bInterval 16 (unit depends on device speed)
+        0x07,        //   bLength
+        0x05,        //   bDescriptorType (Endpoint)
+        0x03,        //   bEndpointAddress (OUT/H2D)
+        0x03,        //   bmAttributes (Interrupt)
+        0x20, 0x00,  //   wMaxPacketSize 32
+        0x10,        //   bInterval 16 (unit depends on device speed)
 
-		0x09,        //   bLength
-		0x04,        //   bDescriptorType (Interface)
-		0x02,        //   bInterfaceNumber 2
-		0x00,        //   bAlternateSetting
-		0x01,        //   bNumEndpoints 1
-		0xFF,        //   bInterfaceClass
-		0x5D,        //   bInterfaceSubClass
-		0x02,        //   bInterfaceProtocol
-		0x00,        //   iInterface (String Index)
+        0x09,        //   bLength
+        0x04,        //   bDescriptorType (Interface)
+        0x02,        //   bInterfaceNumber 2
+        0x00,        //   bAlternateSetting
+        0x01,        //   bNumEndpoints 1
+        0xFF,        //   bInterfaceClass
+        0x5D,        //   bInterfaceSubClass
+        0x02,        //   bInterfaceProtocol
+        0x00,        //   iInterface (String Index)
 
-		0x09,        //   bLength
-		0x21,        //   bDescriptorType (HID)
-		0x00, 0x01,  //   bcdHID 1.00
-		0x01,        //   bCountryCode
-		0x22,        //   bNumDescriptors
-		0x84,        //   bDescriptorType[0] (Unknown 0x84)
-		0x07, 0x00,  //   wDescriptorLength[0] 7
+        0x09,        //   bLength
+        0x21,        //   bDescriptorType (HID)
+        0x00, 0x01,  //   bcdHID 1.00
+        0x01,        //   bCountryCode
+        0x22,        //   bNumDescriptors
+        0x84,        //   bDescriptorType[0] (Unknown 0x84)
+        0x07, 0x00,  //   wDescriptorLength[0] 7
 
-		0x07,        //   bLength
-		0x05,        //   bDescriptorType (Endpoint)
-		0x84,        //   bEndpointAddress (IN/D2H)
-		0x03,        //   bmAttributes (Interrupt)
-		0x20, 0x00,  //   wMaxPacketSize 32
-		0x10,        //   bInterval 16 (unit depends on device speed)
+        0x07,        //   bLength
+        0x05,        //   bDescriptorType (Endpoint)
+        0x84,        //   bEndpointAddress (IN/D2H)
+        0x03,        //   bmAttributes (Interrupt)
+        0x20, 0x00,  //   wMaxPacketSize 32
+        0x10,        //   bInterval 16 (unit depends on device speed)
 
-		0x09,        //   bLength
-		0x04,        //   bDescriptorType (Interface)
-		0x03,        //   bInterfaceNumber 3
-		0x00,        //   bAlternateSetting
-		0x00,        //   bNumEndpoints 0
-		0xFF,        //   bInterfaceClass
-		0xFD,        //   bInterfaceSubClass
-		0x13,        //   bInterfaceProtocol
-		0x04,        //   iInterface (String Index)
+        0x09,        //   bLength
+        0x04,        //   bDescriptorType (Interface)
+        0x03,        //   bInterfaceNumber 3
+        0x00,        //   bAlternateSetting
+        0x00,        //   bNumEndpoints 0
+        0xFF,        //   bInterfaceClass
+        0xFD,        //   bInterfaceSubClass
+        0x13,        //   bInterfaceProtocol
+        0x04,        //   iInterface (String Index)
 
-		0x06,        //   bLength
-		0x41,        //   bDescriptorType (Unknown)
-		0x00, 0x01, 0x01, 0x03,
-		// 153 bytes
+        0x06,        //   bLength
+        0x41,        //   bDescriptorType (Unknown)
+        0x00, 0x01, 0x01, 0x03,
+        // 153 bytes
 
-		// best guess: USB Standard Descriptor
-	};
+        // best guess: USB Standard Descriptor
+    };
 
-	RtlCopyBytes(Buffer, XusbDescriptorData, Length);
+    RtlCopyBytes(Buffer, XusbDescriptorData, Length);
 }
 
 VOID Xusb_GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, PPDO_DEVICE_DATA pCommon)
 {
-	pDescriptor->bLength = 0x12;
-	pDescriptor->bDescriptorType = USB_DEVICE_DESCRIPTOR_TYPE;
-	pDescriptor->bcdUSB = 0x0200; // USB v2.0
-	pDescriptor->bDeviceClass = 0xFF;
-	pDescriptor->bDeviceSubClass = 0xFF;
-	pDescriptor->bDeviceProtocol = 0xFF;
-	pDescriptor->bMaxPacketSize0 = 0x08;
-	pDescriptor->idVendor = pCommon->VendorId;
-	pDescriptor->idProduct = pCommon->ProductId;
-	pDescriptor->bcdDevice = 0x0114;
-	pDescriptor->iManufacturer = 0x01;
-	pDescriptor->iProduct = 0x02;
-	pDescriptor->iSerialNumber = 0x03;
-	pDescriptor->bNumConfigurations = 0x01;
+    pDescriptor->bLength = 0x12;
+    pDescriptor->bDescriptorType = USB_DEVICE_DESCRIPTOR_TYPE;
+    pDescriptor->bcdUSB = 0x0200; // USB v2.0
+    pDescriptor->bDeviceClass = 0xFF;
+    pDescriptor->bDeviceSubClass = 0xFF;
+    pDescriptor->bDeviceProtocol = 0xFF;
+    pDescriptor->bMaxPacketSize0 = 0x08;
+    pDescriptor->idVendor = pCommon->VendorId;
+    pDescriptor->idProduct = pCommon->ProductId;
+    pDescriptor->bcdDevice = 0x0114;
+    pDescriptor->iManufacturer = 0x01;
+    pDescriptor->iProduct = 0x02;
+    pDescriptor->iSerialNumber = 0x03;
+    pDescriptor->bNumConfigurations = 0x01;
 }
 
 VOID Xusb_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 {
-	TraceEvents(TRACE_LEVEL_VERBOSE,
-		TRACE_XUSB,
-		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
-		(int)pInfo->Length,
-		(int)pInfo->InterfaceNumber,
-		(int)pInfo->AlternateSetting,
-		pInfo->NumberOfPipes);
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_XUSB,
+        ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
+        (int)pInfo->Length,
+        (int)pInfo->InterfaceNumber,
+        (int)pInfo->AlternateSetting,
+        pInfo->NumberOfPipes);
 
-	pInfo->Class = 0xFF;
-	pInfo->SubClass = 0x5D;
-	pInfo->Protocol = 0x01;
+    pInfo->Class = 0xFF;
+    pInfo->SubClass = 0x5D;
+    pInfo->Protocol = 0x01;
 
-	pInfo->InterfaceHandle = (USBD_INTERFACE_HANDLE)0xFFFF0000;
+    pInfo->InterfaceHandle = (USBD_INTERFACE_HANDLE)0xFFFF0000;
 
-	pInfo->Pipes[0].MaximumTransferSize = 0x00400000;
-	pInfo->Pipes[0].MaximumPacketSize = 0x20;
-	pInfo->Pipes[0].EndpointAddress = 0x81;
-	pInfo->Pipes[0].Interval = 0x04;
-	pInfo->Pipes[0].PipeType = 0x03;
-	pInfo->Pipes[0].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0081;
-	pInfo->Pipes[0].PipeFlags = 0x00;
+    pInfo->Pipes[0].MaximumTransferSize = 0x00400000;
+    pInfo->Pipes[0].MaximumPacketSize = 0x20;
+    pInfo->Pipes[0].EndpointAddress = 0x81;
+    pInfo->Pipes[0].Interval = 0x04;
+    pInfo->Pipes[0].PipeType = 0x03;
+    pInfo->Pipes[0].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0081;
+    pInfo->Pipes[0].PipeFlags = 0x00;
 
-	pInfo->Pipes[1].MaximumTransferSize = 0x00400000;
-	pInfo->Pipes[1].MaximumPacketSize = 0x20;
-	pInfo->Pipes[1].EndpointAddress = 0x01;
-	pInfo->Pipes[1].Interval = 0x08;
-	pInfo->Pipes[1].PipeType = 0x03;
-	pInfo->Pipes[1].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0001;
-	pInfo->Pipes[1].PipeFlags = 0x00;
+    pInfo->Pipes[1].MaximumTransferSize = 0x00400000;
+    pInfo->Pipes[1].MaximumPacketSize = 0x20;
+    pInfo->Pipes[1].EndpointAddress = 0x01;
+    pInfo->Pipes[1].Interval = 0x08;
+    pInfo->Pipes[1].PipeType = 0x03;
+    pInfo->Pipes[1].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0001;
+    pInfo->Pipes[1].PipeFlags = 0x00;
 
-	pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
+    pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE,
-		TRACE_XUSB,
-		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
-		(int)pInfo->Length,
-		(int)pInfo->InterfaceNumber,
-		(int)pInfo->AlternateSetting,
-		pInfo->NumberOfPipes);
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_XUSB,
+        ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
+        (int)pInfo->Length,
+        (int)pInfo->InterfaceNumber,
+        (int)pInfo->AlternateSetting,
+        pInfo->NumberOfPipes);
 
-	pInfo->Class = 0xFF;
-	pInfo->SubClass = 0x5D;
-	pInfo->Protocol = 0x03;
+    pInfo->Class = 0xFF;
+    pInfo->SubClass = 0x5D;
+    pInfo->Protocol = 0x03;
 
-	pInfo->InterfaceHandle = (USBD_INTERFACE_HANDLE)0xFFFF0000;
+    pInfo->InterfaceHandle = (USBD_INTERFACE_HANDLE)0xFFFF0000;
 
-	pInfo->Pipes[0].MaximumTransferSize = 0x00400000;
-	pInfo->Pipes[0].MaximumPacketSize = 0x20;
-	pInfo->Pipes[0].EndpointAddress = 0x82;
-	pInfo->Pipes[0].Interval = 0x04;
-	pInfo->Pipes[0].PipeType = 0x03;
-	pInfo->Pipes[0].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0082;
-	pInfo->Pipes[0].PipeFlags = 0x00;
+    pInfo->Pipes[0].MaximumTransferSize = 0x00400000;
+    pInfo->Pipes[0].MaximumPacketSize = 0x20;
+    pInfo->Pipes[0].EndpointAddress = 0x82;
+    pInfo->Pipes[0].Interval = 0x04;
+    pInfo->Pipes[0].PipeType = 0x03;
+    pInfo->Pipes[0].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0082;
+    pInfo->Pipes[0].PipeFlags = 0x00;
 
-	pInfo->Pipes[1].MaximumTransferSize = 0x00400000;
-	pInfo->Pipes[1].MaximumPacketSize = 0x20;
-	pInfo->Pipes[1].EndpointAddress = 0x02;
-	pInfo->Pipes[1].Interval = 0x08;
-	pInfo->Pipes[1].PipeType = 0x03;
-	pInfo->Pipes[1].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0002;
-	pInfo->Pipes[1].PipeFlags = 0x00;
+    pInfo->Pipes[1].MaximumTransferSize = 0x00400000;
+    pInfo->Pipes[1].MaximumPacketSize = 0x20;
+    pInfo->Pipes[1].EndpointAddress = 0x02;
+    pInfo->Pipes[1].Interval = 0x08;
+    pInfo->Pipes[1].PipeType = 0x03;
+    pInfo->Pipes[1].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0002;
+    pInfo->Pipes[1].PipeFlags = 0x00;
 
-	pInfo->Pipes[2].MaximumTransferSize = 0x00400000;
-	pInfo->Pipes[2].MaximumPacketSize = 0x20;
-	pInfo->Pipes[2].EndpointAddress = 0x83;
-	pInfo->Pipes[2].Interval = 0x08;
-	pInfo->Pipes[2].PipeType = 0x03;
-	pInfo->Pipes[2].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0083;
-	pInfo->Pipes[2].PipeFlags = 0x00;
+    pInfo->Pipes[2].MaximumTransferSize = 0x00400000;
+    pInfo->Pipes[2].MaximumPacketSize = 0x20;
+    pInfo->Pipes[2].EndpointAddress = 0x83;
+    pInfo->Pipes[2].Interval = 0x08;
+    pInfo->Pipes[2].PipeType = 0x03;
+    pInfo->Pipes[2].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0083;
+    pInfo->Pipes[2].PipeFlags = 0x00;
 
-	pInfo->Pipes[3].MaximumTransferSize = 0x00400000;
-	pInfo->Pipes[3].MaximumPacketSize = 0x20;
-	pInfo->Pipes[3].EndpointAddress = 0x03;
-	pInfo->Pipes[3].Interval = 0x08;
-	pInfo->Pipes[3].PipeType = 0x03;
-	pInfo->Pipes[3].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0003;
-	pInfo->Pipes[3].PipeFlags = 0x00;
+    pInfo->Pipes[3].MaximumTransferSize = 0x00400000;
+    pInfo->Pipes[3].MaximumPacketSize = 0x20;
+    pInfo->Pipes[3].EndpointAddress = 0x03;
+    pInfo->Pipes[3].Interval = 0x08;
+    pInfo->Pipes[3].PipeType = 0x03;
+    pInfo->Pipes[3].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0003;
+    pInfo->Pipes[3].PipeFlags = 0x00;
 
-	pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
+    pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE,
-		TRACE_XUSB,
-		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
-		(int)pInfo->Length,
-		(int)pInfo->InterfaceNumber,
-		(int)pInfo->AlternateSetting,
-		pInfo->NumberOfPipes);
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_XUSB,
+        ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
+        (int)pInfo->Length,
+        (int)pInfo->InterfaceNumber,
+        (int)pInfo->AlternateSetting,
+        pInfo->NumberOfPipes);
 
-	pInfo->Class = 0xFF;
-	pInfo->SubClass = 0x5D;
-	pInfo->Protocol = 0x02;
+    pInfo->Class = 0xFF;
+    pInfo->SubClass = 0x5D;
+    pInfo->Protocol = 0x02;
 
-	pInfo->InterfaceHandle = (USBD_INTERFACE_HANDLE)0xFFFF0000;
+    pInfo->InterfaceHandle = (USBD_INTERFACE_HANDLE)0xFFFF0000;
 
-	pInfo->Pipes[0].MaximumTransferSize = 0x00400000;
-	pInfo->Pipes[0].MaximumPacketSize = 0x20;
-	pInfo->Pipes[0].EndpointAddress = 0x84;
-	pInfo->Pipes[0].Interval = 0x04;
-	pInfo->Pipes[0].PipeType = 0x03;
-	pInfo->Pipes[0].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0084;
-	pInfo->Pipes[0].PipeFlags = 0x00;
+    pInfo->Pipes[0].MaximumTransferSize = 0x00400000;
+    pInfo->Pipes[0].MaximumPacketSize = 0x20;
+    pInfo->Pipes[0].EndpointAddress = 0x84;
+    pInfo->Pipes[0].Interval = 0x04;
+    pInfo->Pipes[0].PipeType = 0x03;
+    pInfo->Pipes[0].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0084;
+    pInfo->Pipes[0].PipeFlags = 0x00;
 
-	pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
+    pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE,
-		TRACE_XUSB,
-		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
-		(int)pInfo->Length,
-		(int)pInfo->InterfaceNumber,
-		(int)pInfo->AlternateSetting,
-		pInfo->NumberOfPipes);
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_XUSB,
+        ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
+        (int)pInfo->Length,
+        (int)pInfo->InterfaceNumber,
+        (int)pInfo->AlternateSetting,
+        pInfo->NumberOfPipes);
 
-	pInfo->Class = 0xFF;
-	pInfo->SubClass = 0xFD;
-	pInfo->Protocol = 0x13;
+    pInfo->Class = 0xFF;
+    pInfo->SubClass = 0xFD;
+    pInfo->Protocol = 0x13;
 
-	pInfo->InterfaceHandle = (USBD_INTERFACE_HANDLE)0xFFFF0000;
+    pInfo->InterfaceHandle = (USBD_INTERFACE_HANDLE)0xFFFF0000;
 }
 
 NTSTATUS Xusb_GetUserIndex(WDFDEVICE Device, PXUSB_GET_USER_INDEX Request)
 {
-	NTSTATUS                    status = STATUS_INVALID_DEVICE_REQUEST;
-	WDFDEVICE                   hChild;
-	PPDO_DEVICE_DATA            pdoData;
-	CHAR                        userIndex;
+    NTSTATUS                    status = STATUS_INVALID_DEVICE_REQUEST;
+    WDFDEVICE                   hChild;
+    PPDO_DEVICE_DATA            pdoData;
+    CHAR                        userIndex;
 
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_XUSB, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_XUSB, "%!FUNC! Entry");
 
-	hChild = Bus_GetPdo(Device, Request->SerialNo);
+    hChild = Bus_GetPdo(Device, Request->SerialNo);
 
-	// Validate child
-	if (hChild == NULL)
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"Bus_GetPdo for serial %d failed", Request->SerialNo);
-		return STATUS_NO_SUCH_DEVICE;
-	}
+    // Validate child
+    if (hChild == NULL)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "Bus_GetPdo for serial %d failed", Request->SerialNo);
+        return STATUS_NO_SUCH_DEVICE;
+    }
 
-	// Check common context
-	pdoData = PdoGetData(hChild);
-	if (pdoData == NULL)
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"PdoGetData failed");
-		return STATUS_INVALID_PARAMETER;
-	}
+    // Check common context
+    pdoData = PdoGetData(hChild);
+    if (pdoData == NULL)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "PdoGetData failed");
+        return STATUS_INVALID_PARAMETER;
+    }
 
-	// Check if caller owns this PDO
-	if (!IS_OWNER(pdoData))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"PID mismatch: %d != %d",
-			pdoData->OwnerProcessId,
-			CURRENT_PROCESS_ID());
-		return STATUS_ACCESS_DENIED;
-	}
+    // Check if caller owns this PDO
+    if (!IS_OWNER(pdoData))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "PID mismatch: %d != %d",
+            pdoData->OwnerProcessId,
+            CURRENT_PROCESS_ID());
+        return STATUS_ACCESS_DENIED;
+    }
 
-	userIndex = XusbGetData(hChild)->LedNumber;
+    userIndex = XusbGetData(hChild)->LedNumber;
 
-	if (userIndex >= 0)
-	{
-		Request->UserIndex = (ULONG)userIndex;
-		status = STATUS_SUCCESS;
-	}
-	else
-	{
-		// If the index is negative at this stage, we've exceeded XUSER_MAX_COUNT
-		// and need to fail this request with a distinct status.
-		status = STATUS_INVALID_DEVICE_OBJECT_PARAMETER;
-	}
+    if (userIndex >= 0)
+    {
+        Request->UserIndex = (ULONG)userIndex;
+        status = STATUS_SUCCESS;
+    }
+    else
+    {
+        // If the index is negative at this stage, we've exceeded XUSER_MAX_COUNT
+        // and need to fail this request with a distinct status.
+        status = STATUS_INVALID_DEVICE_OBJECT_PARAMETER;
+    }
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XUSB, "%!FUNC! Exit with status %!STATUS!", status);
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XUSB, "%!FUNC! Exit with status %!STATUS!", status);
 
-	return status;
+    return status;
 }

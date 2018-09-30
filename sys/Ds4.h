@@ -32,7 +32,7 @@
 #define HID_REPORT_ID_3                                 0x13
 #define HID_REPORT_ID_4                                 0x14
 
-#define DS4_DESCRIPTOR_SIZE	                            0x0029
+#define DS4_DESCRIPTOR_SIZE                                0x0029
 #if defined(_X86_)
 #define DS4_CONFIGURATION_SIZE                          0x0050
 #else

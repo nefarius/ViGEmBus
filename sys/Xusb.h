@@ -44,12 +44,12 @@ DEFINE_GUID(GUID_DEVINTERFACE_XUSB_UNKNOWN_2,
 #else
 #define XUSB_CONFIGURATION_SIZE         0x0130
 #endif
-#define XUSB_DESCRIPTOR_SIZE	        0x0099
+#define XUSB_DESCRIPTOR_SIZE            0x0099
 #define XUSB_RUMBLE_SIZE                0x08
 #define XUSB_LEDSET_SIZE                0x03
 #define XUSB_LEDNUM_SIZE                0x01
 #define XUSB_INIT_STAGE_SIZE            0x03
-#define XUSB_INIT_BLOB_COUNT			0x07
+#define XUSB_INIT_BLOB_COUNT            0x07
 
 #define XUSB_IS_DATA_PIPE(_x_)          ((BOOLEAN)(_x_->PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0081))
 #define XUSB_IS_CONTROL_PIPE(_x_)       ((BOOLEAN)(_x_->PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0083))
@@ -99,10 +99,10 @@ typedef struct _XUSB_DEVICE_DATA
     // 
     ULONG InterruptInitStage;
 
-	//
-	// Storage of binary blobs (packets) for PDO initialization
-	// 
-	PVOID InterruptInitStageBlobs[XUSB_INIT_BLOB_COUNT];
+    //
+    // Storage of binary blobs (packets) for PDO initialization
+    // 
+    PVOID InterruptInitStageBlobs[XUSB_INIT_BLOB_COUNT];
 
 } XUSB_DEVICE_DATA, *PXUSB_DEVICE_DATA;
 

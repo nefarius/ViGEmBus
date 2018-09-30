@@ -46,7 +46,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_XGIP_UNKNOWN_4,
 
 #pragma once
 
-#define XGIP_DESCRIPTOR_SIZE	        0x0040
+#define XGIP_DESCRIPTOR_SIZE            0x0040
 #define XGIP_CONFIGURATION_SIZE         0x88
 #define XGIP_REPORT_SIZE                0x12
 #define XGIP_SYS_INIT_PACKETS           0x0F

@@ -22,13 +22,13 @@
 #include <ntifs.h>
 
 #define INITIAL_ARRAY_CAPACITY PAGE_SIZE
-#define ARRAY_POOL_TAG	'arrA'
+#define ARRAY_POOL_TAG    'arrA'
 
 typedef struct _BYTE_ARRAY
 {
-    UCHAR* Data;		//> array of data we're storing
-    ULONG_PTR Size;		//> slots used so far
-    ULONG_PTR Capacity;	//> total available memory
+    UCHAR* Data;        //> array of data we're storing
+    ULONG_PTR Size;        //> slots used so far
+    ULONG_PTR Capacity;    //> total available memory
 } BYTE_ARRAY, *PBYTE_ARRAY;
 
 NTSTATUS InitByteArray(IN OUT PBYTE_ARRAY Array);

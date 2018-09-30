@@ -262,7 +262,7 @@ NTSTATUS Bus_CreatePdo(
     WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
 
     pnpPowerCallbacks.EvtDevicePrepareHardware = Pdo_EvtDevicePrepareHardware;
-	pnpPowerCallbacks.EvtDeviceReleaseHardware = Pdo_EvtDeviceReleaseHardware;
+    pnpPowerCallbacks.EvtDeviceReleaseHardware = Pdo_EvtDeviceReleaseHardware;
 
     WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
@@ -585,37 +585,37 @@ NTSTATUS Pdo_EvtDevicePrepareHardware(
 _Use_decl_annotations_
 NTSTATUS
 Pdo_EvtDeviceReleaseHardware(
-	WDFDEVICE  Device,
-	WDFCMRESLIST  ResourcesTranslated
+    WDFDEVICE  Device,
+    WDFCMRESLIST  ResourcesTranslated
 )
 {
-	PPDO_DEVICE_DATA    pdoData;
-	NTSTATUS            status = STATUS_UNSUCCESSFUL;
+    PPDO_DEVICE_DATA    pdoData;
+    NTSTATUS            status = STATUS_UNSUCCESSFUL;
 
-	PAGED_CODE();
+    PAGED_CODE();
 
-	UNREFERENCED_PARAMETER(ResourcesTranslated);
+    UNREFERENCED_PARAMETER(ResourcesTranslated);
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Entry");
 
-	pdoData = PdoGetData(Device);
+    pdoData = PdoGetData(Device);
 
-	switch (pdoData->TargetType)
-	{
-		// Free XUSB resources
-	case Xbox360Wired:
+    switch (pdoData->TargetType)
+    {
+        // Free XUSB resources
+    case Xbox360Wired:
 
-		status = Xusb_ReleaseHardware(Device);
+        status = Xusb_ReleaseHardware(Device);
 
-		break;
+        break;
 
-	default:
-		break;
-	}
+    default:
+        break;
+    }
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
 
-	return status;
+    return status;
 }
 
 //
