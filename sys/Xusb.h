@@ -122,7 +122,6 @@ Bus_XusbSubmitReport(
 // 
 NTSTATUS Xusb_PreparePdo(PWDFDEVICE_INIT DeviceInit, USHORT VendorId, USHORT ProductId, PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription);
 NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device);
-NTSTATUS Xusb_ReleaseHardware(WDFDEVICE Device);
 NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device);
 VOID Xusb_GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length);
 VOID Xusb_GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, PPDO_DEVICE_DATA pCommon);

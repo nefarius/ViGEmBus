@@ -49,6 +49,7 @@
 #define HID_REPORT_TYPE_FEATURE         0x03
 
 #define VIGEM_POOL_TAG                  0x45476956 // "EGiV"
+#define XUSB_POOL_TAG                   'BSUX'
 #define DRIVERNAME                      "ViGEm: "
 #define MAX_HARDWARE_ID_LENGTH          0xFF
 
@@ -94,8 +95,7 @@ EVT_WDF_CHILD_LIST_CREATE_DEVICE Bus_EvtDeviceListCreatePdo;
 EVT_WDF_CHILD_LIST_IDENTIFICATION_DESCRIPTION_COMPARE Bus_EvtChildListIdentificationDescriptionCompare;
 
 EVT_WDF_DEVICE_PREPARE_HARDWARE Pdo_EvtDevicePrepareHardware;
-EVT_WDF_DEVICE_RELEASE_HARDWARE Pdo_EvtDeviceReleaseHardware;
-
+EVT_WDF_OBJECT_CONTEXT_CLEANUP Pdo_EvtWdfObjectContextCleanup;
 EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL Pdo_EvtIoInternalDeviceControl;
 
 EVT_WDF_TIMER Xgip_SysInitTimerFunc;

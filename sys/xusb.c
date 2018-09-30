@@ -240,21 +240,6 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     return STATUS_SUCCESS;
 }
 
-NTSTATUS Xusb_ReleaseHardware(WDFDEVICE Device)
-{
-    ULONG index;
-
-    PXUSB_DEVICE_DATA xusb = XusbGetData(Device);
-
-    for (index = 0; index < XUSB_INIT_BLOB_COUNT; index++)
-    {
-        if (xusb->InterruptInitStageBlobs[index])
-            ExFreePoolWithTag(xusb->InterruptInitStageBlobs[index], VIGEM_POOL_TAG);
-    }
-
-    return STATUS_SUCCESS;
-}
-
 NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device)
 {
     NTSTATUS                status;
@@ -276,13 +261,20 @@ NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device)
     xusb->Packet.Size = 0x14;
 
     // Prepare blob storage
-    xusb->InterruptInitStageBlobs[0] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
-    xusb->InterruptInitStageBlobs[1] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
-    xusb->InterruptInitStageBlobs[2] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
-    xusb->InterruptInitStageBlobs[3] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
-    xusb->InterruptInitStageBlobs[4] = ExAllocatePoolWithTag(NonPagedPool, sizeof(XUSB_INTERRUPT_IN_PACKET), VIGEM_POOL_TAG);
-    xusb->InterruptInitStageBlobs[5] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
-    xusb->InterruptInitStageBlobs[6] = ExAllocatePoolWithTag(NonPagedPool, XUSB_INIT_STAGE_SIZE, VIGEM_POOL_TAG);
+    xusb->InterruptInitStageBlobs[0] = ExAllocatePoolWithTag(
+        NonPagedPoolNx, XUSB_INIT_STAGE_SIZE, XUSB_POOL_TAG);
+    xusb->InterruptInitStageBlobs[1] = ExAllocatePoolWithTag(
+        NonPagedPoolNx, XUSB_INIT_STAGE_SIZE, XUSB_POOL_TAG);
+    xusb->InterruptInitStageBlobs[2] = ExAllocatePoolWithTag(
+        NonPagedPoolNx, XUSB_INIT_STAGE_SIZE, XUSB_POOL_TAG);
+    xusb->InterruptInitStageBlobs[3] = ExAllocatePoolWithTag(
+        NonPagedPoolNx, XUSB_INIT_STAGE_SIZE, XUSB_POOL_TAG);
+    xusb->InterruptInitStageBlobs[4] = ExAllocatePoolWithTag(
+        NonPagedPoolNx, sizeof(XUSB_INTERRUPT_IN_PACKET), XUSB_POOL_TAG);
+    xusb->InterruptInitStageBlobs[5] = ExAllocatePoolWithTag(
+        NonPagedPoolNx, XUSB_INIT_STAGE_SIZE, XUSB_POOL_TAG);
+    xusb->InterruptInitStageBlobs[6] = ExAllocatePoolWithTag(
+        NonPagedPoolNx, XUSB_INIT_STAGE_SIZE, XUSB_POOL_TAG);
 
     // Validate allocations
     for (index = 0; index < XUSB_INIT_BLOB_COUNT; index++)

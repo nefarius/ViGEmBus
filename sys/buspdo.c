@@ -26,7 +26,7 @@
 #pragma alloc_text(PAGE, Bus_CreatePdo)
 #pragma alloc_text(PAGE, Bus_EvtDeviceListCreatePdo)
 #pragma alloc_text(PAGE, Pdo_EvtDevicePrepareHardware)
-#pragma alloc_text(PAGE, Pdo_EvtDeviceReleaseHardware)
+#pragma alloc_text(PAGE, Pdo_EvtWdfObjectContextCleanup)
 #endif
 
 NTSTATUS Bus_EvtDeviceListCreatePdo(
@@ -262,7 +262,6 @@ NTSTATUS Bus_CreatePdo(
     WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
 
     pnpPowerCallbacks.EvtDevicePrepareHardware = Pdo_EvtDevicePrepareHardware;
-    pnpPowerCallbacks.EvtDeviceReleaseHardware = Pdo_EvtDeviceReleaseHardware;
 
     WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
@@ -275,6 +274,7 @@ NTSTATUS Bus_CreatePdo(
 
     // Add common device data context
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&pdoAttributes, PDO_DEVICE_DATA);
+    pdoAttributes.EvtCleanupCallback = Pdo_EvtWdfObjectContextCleanup;
 
     status = WdfDeviceCreate(&DeviceInit, &pdoAttributes, &hChild);
     if (!NT_SUCCESS(status))
@@ -579,33 +579,38 @@ NTSTATUS Pdo_EvtDevicePrepareHardware(
     return status;
 }
 
-//
-// PDO power-down.
-// 
 _Use_decl_annotations_
-NTSTATUS
-Pdo_EvtDeviceReleaseHardware(
-    WDFDEVICE  Device,
-    WDFCMRESLIST  ResourcesTranslated
+VOID
+Pdo_EvtWdfObjectContextCleanup(
+    WDFOBJECT Object
 )
 {
     PPDO_DEVICE_DATA    pdoData;
-    NTSTATUS            status = STATUS_UNSUCCESSFUL;
+    ULONG               index;
+    PXUSB_DEVICE_DATA   xusb;
 
     PAGED_CODE();
 
-    UNREFERENCED_PARAMETER(ResourcesTranslated);
-
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Entry");
 
-    pdoData = PdoGetData(Device);
+    pdoData = PdoGetData(Object);
+
+    UNREFERENCED_PARAMETER(pdoData);
 
     switch (pdoData->TargetType)
     {
         // Free XUSB resources
     case Xbox360Wired:
 
-        status = Xusb_ReleaseHardware(Device);
+        xusb = XusbGetData(Object);
+
+        for (index = 0; index < XUSB_INIT_BLOB_COUNT; index++)
+        {
+            //
+            // TODO: crashes...
+            // 
+            ExFreePool(xusb->InterruptInitStageBlobs[index]);
+        }
 
         break;
 
@@ -613,9 +618,7 @@ Pdo_EvtDeviceReleaseHardware(
         break;
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
-
-    return status;
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit");
 }
 
 //
