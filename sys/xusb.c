@@ -243,8 +243,8 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
 NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device)
 {
     NTSTATUS                status;
-    WDF_OBJECT_ATTRIBUTES    attributes;
-    ULONG                    index;
+    WDF_OBJECT_ATTRIBUTES   attributes;
+    PUCHAR                  blobBuffer;
 
     WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
     attributes.ParentObject = Device;
@@ -260,68 +260,41 @@ NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device)
     // Packet size (20 bytes = 0x14)
     xusb->Packet.Size = 0x14;
 
-    // Prepare blob storage
-    xusb->InterruptInitStageBlobs[0] = ExAllocatePoolWithTag(
-        NonPagedPoolNx, XUSB_INIT_STAGE_SIZE, XUSB_POOL_TAG);
-    xusb->InterruptInitStageBlobs[1] = ExAllocatePoolWithTag(
-        NonPagedPoolNx, XUSB_INIT_STAGE_SIZE, XUSB_POOL_TAG);
-    xusb->InterruptInitStageBlobs[2] = ExAllocatePoolWithTag(
-        NonPagedPoolNx, XUSB_INIT_STAGE_SIZE, XUSB_POOL_TAG);
-    xusb->InterruptInitStageBlobs[3] = ExAllocatePoolWithTag(
-        NonPagedPoolNx, XUSB_INIT_STAGE_SIZE, XUSB_POOL_TAG);
-    xusb->InterruptInitStageBlobs[4] = ExAllocatePoolWithTag(
-        NonPagedPoolNx, sizeof(XUSB_INTERRUPT_IN_PACKET), XUSB_POOL_TAG);
-    xusb->InterruptInitStageBlobs[5] = ExAllocatePoolWithTag(
-        NonPagedPoolNx, XUSB_INIT_STAGE_SIZE, XUSB_POOL_TAG);
-    xusb->InterruptInitStageBlobs[6] = ExAllocatePoolWithTag(
-        NonPagedPoolNx, XUSB_INIT_STAGE_SIZE, XUSB_POOL_TAG);
-
-    // Validate allocations
-    for (index = 0; index < XUSB_INIT_BLOB_COUNT; index++)
+    // Allocate blob storage
+    status = WdfMemoryCreate(
+        &attributes,
+        NonPagedPoolNx,
+        XUSB_POOL_TAG,
+        XUSB_BLOB_STORAGE_SIZE,
+        &xusb->InterruptBlobStorage,
+        &blobBuffer
+    );
+    if (!NT_SUCCESS(status))
     {
-        // If even one allocation failed...
-        if (!xusb->InterruptInitStageBlobs[index])
-        {
-            // ...re-enumerate...
-            for (index = 0; index < XUSB_INIT_BLOB_COUNT; index++)
-            {
-                // ...and free the ones who succeeded...
-                if (xusb->InterruptInitStageBlobs[index])
-                    // ...to not leak memory...
-                    ExFreePoolWithTag(xusb->InterruptInitStageBlobs[index], VIGEM_POOL_TAG);
-            }
-
-            // ...and abort with error
-            return STATUS_INSUFFICIENT_RESOURCES;
-        }
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_XUSB,
+            "WdfMemoryCreate failed with status %!STATUS!",
+            status);
+        return status;
     }
 
-    /*
-     * Fill blobs
-     *
-     * Values obtained by reversing the communication of a physical pad.
-     */
-    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[0], P99_PROTECT({
-        0x01, 0x03, 0x0E
-        }));
-    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[1], P99_PROTECT({
-        0x02, 0x03, 0x00
-        }));
-    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[2], P99_PROTECT({
-        0x03, 0x03, 0x03
-        }));
-    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[3], P99_PROTECT({
-        0x08, 0x03, 0x00
-        }));
-    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[4], P99_PROTECT({
+    // Fill blob storage
+    COPY_BYTE_ARRAY(blobBuffer, P99_PROTECT({
+        // 0
+        0x01, 0x03, 0x0E,
+        // 1
+        0x02, 0x03, 0x00,
+        // 2
+        0x03, 0x03, 0x03,
+        // 3
+        0x08, 0x03, 0x00,
+        // 4
         0x00, 0x14, 0x00, 0x00, 0x00, 0x00, 0xe4, 0xf2,
         0xb3, 0xf8, 0x49, 0xf3, 0xb0, 0xfc, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00
-        }));
-    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[5], P99_PROTECT({
-        0x01, 0x03, 0x03
-        }));
-    COPY_BYTE_ARRAY(xusb->InterruptInitStageBlobs[6], P99_PROTECT({
+        0x00, 0x00, 0x00, 0x00,
+        // 5
+        0x01, 0x03, 0x03,
+        // 6
         0x05, 0x03, 0x00
         }));
 

@@ -509,6 +509,7 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
     NTSTATUS                                    status;
     PPDO_DEVICE_DATA                            pdoData;
     WDFREQUEST                                  notifyRequest;
+    PUCHAR                                      blobBuffer;
 
     pdoData = PdoGetData(Device);
 
@@ -544,6 +545,8 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                 TRACE_USBPDO,
                 ">> >> >> Incoming request, queuing...");
 
+            blobBuffer = WdfMemoryGetBuffer(xusb->InterruptBlobStorage, NULL);
+
             if (XUSB_IS_DATA_PIPE(pTransfer))
             {
                 //
@@ -553,57 +556,57 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                 {
                 case 0:
                     pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
+                    xusb->InterruptInitStage++;
                     RtlCopyMemory(
                         pTransfer->TransferBuffer, 
-                        xusb->InterruptInitStageBlobs[xusb->InterruptInitStage],
+                        &blobBuffer[XUSB_BLOB_00_OFFSET],
                         XUSB_INIT_STAGE_SIZE
-                    );
-                    xusb->InterruptInitStage++;
+                        );
                     return STATUS_SUCCESS;
                 case 1:
                     pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
-                    RtlCopyMemory(
-                        pTransfer->TransferBuffer,
-                        xusb->InterruptInitStageBlobs[xusb->InterruptInitStage],
-                        XUSB_INIT_STAGE_SIZE
-                    );
                     xusb->InterruptInitStage++;
+                    RtlCopyMemory(
+                        pTransfer->TransferBuffer, 
+                        &blobBuffer[XUSB_BLOB_01_OFFSET],
+                        XUSB_INIT_STAGE_SIZE
+                        );
                     return STATUS_SUCCESS;
                 case 2:
                     pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
-                    RtlCopyMemory(
-                        pTransfer->TransferBuffer,
-                        xusb->InterruptInitStageBlobs[xusb->InterruptInitStage],
-                        XUSB_INIT_STAGE_SIZE
-                    );
                     xusb->InterruptInitStage++;
+                    RtlCopyMemory(
+                        pTransfer->TransferBuffer, 
+                        &blobBuffer[XUSB_BLOB_02_OFFSET],
+                        XUSB_INIT_STAGE_SIZE
+                        );
                     return STATUS_SUCCESS;
                 case 3:
                     pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
-                    RtlCopyMemory(
-                        pTransfer->TransferBuffer,
-                        xusb->InterruptInitStageBlobs[xusb->InterruptInitStage],
-                        XUSB_INIT_STAGE_SIZE
-                    );
                     xusb->InterruptInitStage++;
+                    RtlCopyMemory(
+                        pTransfer->TransferBuffer, 
+                        &blobBuffer[XUSB_BLOB_03_OFFSET],
+                        XUSB_INIT_STAGE_SIZE
+                        );
                     return STATUS_SUCCESS;
                 case 4:
                     pTransfer->TransferBufferLength = sizeof(XUSB_INTERRUPT_IN_PACKET);
-                    RtlCopyMemory(
-                        pTransfer->TransferBuffer,
-                        xusb->InterruptInitStageBlobs[xusb->InterruptInitStage],
-                        sizeof(XUSB_INTERRUPT_IN_PACKET)
-                    );
                     xusb->InterruptInitStage++;
+                    RtlCopyMemory(
+                        pTransfer->TransferBuffer, 
+                        &blobBuffer[XUSB_BLOB_04_OFFSET],
+                        sizeof(XUSB_INTERRUPT_IN_PACKET)
+                        );
                     return STATUS_SUCCESS;
                 case 5:
                     pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
-                    RtlCopyMemory(
-                        pTransfer->TransferBuffer,
-                        xusb->InterruptInitStageBlobs[xusb->InterruptInitStage],
-                        XUSB_INIT_STAGE_SIZE
-                    );
                     xusb->InterruptInitStage++;
+                    RtlCopyMemory(
+                        pTransfer->TransferBuffer, 
+                        &blobBuffer[XUSB_BLOB_05_OFFSET],
+                        XUSB_INIT_STAGE_SIZE
+                        );
                     return STATUS_SUCCESS;
                 default:
                     /* This request is sent periodically and relies on data the "feeder"
@@ -620,10 +623,10 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                 if (!xusb->ReportedCapabilities && pTransfer->TransferBufferLength >= XUSB_INIT_STAGE_SIZE)
                 {
                     RtlCopyMemory(
-                        pTransfer->TransferBuffer,
-                        xusb->InterruptInitStageBlobs[0x06],
+                        pTransfer->TransferBuffer, 
+                        &blobBuffer[XUSB_BLOB_06_OFFSET],
                         XUSB_INIT_STAGE_SIZE
-                    );
+                        );
 
                     xusb->ReportedCapabilities = TRUE;
 
