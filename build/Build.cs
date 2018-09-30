@@ -1,45 +1,45 @@
 using System;
 using System.IO;
-using System.Linq;
+using JsonConfig;
 using Nuke.Common;
+using Nuke.Common.BuildServers;
 using Nuke.Common.Git;
 using Nuke.Common.ProjectModel;
+using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Tools.MSBuild;
+using Vestris.ResourceLib;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
 
-class Build : NukeBuild
+internal class Build : NukeBuild
 {
-    public static int Main () => Execute<Build>(x => x.Compile);
+    [GitRepository] private readonly GitRepository GitRepository;
+    [GitVersion] private readonly GitVersion GitVersion;
 
-    [Solution] readonly Solution Solution;
-    [GitRepository] readonly GitRepository GitRepository;
+    [Solution("ViGEmBus.sln")] private readonly Solution Solution;
 
-    AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+    private AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
 
-    Target Clean => _ => _
-        .Executes(() =>
-        {
-            EnsureCleanDirectory(ArtifactsDirectory);
-        });
+    private Target Clean => _ => _
+        .Executes(() => { EnsureCleanDirectory(ArtifactsDirectory); });
 
-    Target Restore => _ => _
+    private Target Restore => _ => _
         .DependsOn(Clean)
         .Executes(() =>
         {
             MSBuild(s => s
-                .SetTargetPath(SolutionFile)
+                .SetTargetPath(Solution)
                 .SetTargets("Restore"));
         });
 
-    Target Compile => _ => _
+    private Target Compile => _ => _
         .DependsOn(Restore)
         .Executes(() =>
         {
             MSBuild(s => s
-                .SetTargetPath(SolutionFile)
+                .SetTargetPath(Solution)
                 .SetTargets("Rebuild")
                 .SetConfiguration(Configuration)
                 .SetMaxCpuCount(Environment.ProcessorCount)
@@ -47,7 +47,7 @@ class Build : NukeBuild
                 .SetTargetPlatform(MSBuildTargetPlatform.x64));
 
             MSBuild(s => s
-                .SetTargetPath(SolutionFile)
+                .SetTargetPath(Solution)
                 .SetTargets("Rebuild")
                 .SetConfiguration(Configuration)
                 .SetMaxCpuCount(Environment.ProcessorCount)
@@ -55,6 +55,7 @@ class Build : NukeBuild
                 .SetTargetPlatform(MSBuildTargetPlatform.x86));
 
             #region Ugly hack, fix me!
+
             EnsureExistingDirectory(Path.Combine(ArtifactsDirectory, @"x64"));
             EnsureExistingDirectory(Path.Combine(ArtifactsDirectory, @"x86"));
 
@@ -88,7 +89,22 @@ class Build : NukeBuild
                 Path.Combine(WorkingDirectory, @"bin\x86\ViGEmBus\WdfCoinstaller01009.dll"),
                 Path.Combine(ArtifactsDirectory, @"x86\WdfCoinstaller01009.dll")
             );
+
             #endregion
+
+            if (Configuration.Equals("release", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var version =
+                    new Version(IsLocalBuild ? GitVersion.GetNormalizedFileVersion() : AppVeyor.Instance.BuildVersion);
+
+                StampVersion(
+                    Path.Combine(ArtifactsDirectory, @"x64\ViGEmBus.sys"),
+                    version);
+
+                StampVersion(
+                    Path.Combine(ArtifactsDirectory, @"x86\ViGEmBus.sys"),
+                    version);
+            }
         });
 
     private Target Pack => _ => _
@@ -96,10 +112,49 @@ class Build : NukeBuild
         .Executes(() =>
         {
             MSBuild(s => s
-                .SetTargetPath(SolutionFile)
+                .SetTargetPath(Solution)
                 .SetTargets("Restore", "Pack")
                 .SetPackageOutputPath(ArtifactsDirectory)
                 .SetConfiguration(Configuration)
                 .EnableIncludeSymbols());
         });
+
+    public static int Main()
+    {
+        return Execute<Build>(x => x.Compile);
+    }
+
+    private static void StampVersion(string path, Version version)
+    {
+        var versionResource = new VersionResource
+        {
+            FileVersion = version.ToString(),
+            ProductVersion = version.ToString()
+        };
+
+        var stringFileInfo = new StringFileInfo();
+        versionResource[stringFileInfo.Key] = stringFileInfo;
+        var stringFileInfoStrings = new StringTable
+        {
+            LanguageID = 1033,
+            CodePage = 1200
+        };
+        stringFileInfo.Strings.Add(stringFileInfoStrings.Key, stringFileInfoStrings);
+        stringFileInfoStrings["CompanyName"] = Config.Global.Version.CompanyName;
+        stringFileInfoStrings["FileDescription"] = Config.Global.Version.FileDescription;
+        stringFileInfoStrings["FileVersion"] = version.ToString();
+        stringFileInfoStrings["InternalName"] = Config.Global.Version.InternalName;
+        stringFileInfoStrings["LegalCopyright"] = Config.Global.Version.LegalCopyright;
+        stringFileInfoStrings["OriginalFilename"] = Config.Global.Version.OriginalFilename;
+        stringFileInfoStrings["ProductName"] = Config.Global.Version.ProductName;
+        stringFileInfoStrings["ProductVersion"] = version.ToString();
+
+        var varFileInfo = new VarFileInfo();
+        versionResource[varFileInfo.Key] = varFileInfo;
+        var varFileInfoTranslation = new VarTable("Translation");
+        varFileInfo.Vars.Add(varFileInfoTranslation.Key, varFileInfoTranslation);
+        varFileInfoTranslation[ResourceUtil.USENGLISHLANGID] = 1300;
+
+        versionResource.SaveTo(path);
+    }
 }
