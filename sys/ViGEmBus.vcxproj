@@ -185,15 +185,11 @@
     <ClInclude Include="Context.h" />
     <ClInclude Include="Ds4.h" />
     <ClInclude Include="Queue.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="trace.h" />
     <ClInclude Include="UsbPdo.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="Xgip.h" />
     <ClInclude Include="Xusb.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="ViGEmBus.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="busenum.c" />

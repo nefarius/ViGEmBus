@@ -10,14 +10,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="0.9.0" />
+    <PackageReference Include="Nefarius.JsonConfig" Version="1.0.2" />
+    <PackageReference Include="Nuke.Common" Version="0.9.1" />
     <PackageReference Include="GitVersion.CommandLine" Version="3.6.5" />
+    <PackageReference Include="Vestris.ResourceLib" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <NukeMetadata Include="**\*.json" Exclude="bin\**;obj\**" />
     <NukeExternalFiles Include="**\*.*.ext" Exclude="bin\**;obj\**" />
     <None Remove="*.csproj.DotSettings;*.ref.*.txt" />
+    <None Remove="default.json" />
+    <NukeMetadata Remove="default.json" />
+    <EmbeddedResource Include="default.json" />
     
     <!-- Common build related files -->
     <None Include="..\build.ps1" />
