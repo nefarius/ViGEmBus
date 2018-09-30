@@ -49,6 +49,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_XUSB_UNKNOWN_2,
 #define XUSB_LEDSET_SIZE                0x03
 #define XUSB_LEDNUM_SIZE                0x01
 #define XUSB_INIT_STAGE_SIZE            0x03
+#define XUSB_INIT_BLOB_COUNT			0x07
 
 #define XUSB_IS_DATA_PIPE(_x_)          ((BOOLEAN)(_x_->PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0081))
 #define XUSB_IS_CONTROL_PIPE(_x_)       ((BOOLEAN)(_x_->PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0083))
@@ -98,6 +99,11 @@ typedef struct _XUSB_DEVICE_DATA
     // 
     ULONG InterruptInitStage;
 
+	//
+	// Storage of binary blobs (packets) for PDO initialization
+	// 
+	PVOID InterruptInitStageBlobs[XUSB_INIT_BLOB_COUNT];
+
 } XUSB_DEVICE_DATA, *PXUSB_DEVICE_DATA;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(XUSB_DEVICE_DATA, XusbGetData)
@@ -116,6 +122,7 @@ Bus_XusbSubmitReport(
 // 
 NTSTATUS Xusb_PreparePdo(PWDFDEVICE_INIT DeviceInit, USHORT VendorId, USHORT ProductId, PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription);
 NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device);
+NTSTATUS Xusb_ReleaseHardware(WDFDEVICE Device);
 NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device);
 VOID Xusb_GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length);
 VOID Xusb_GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, PPDO_DEVICE_DATA pCommon);

@@ -25,7 +25,8 @@
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(PAGE, Bus_CreatePdo)
 #pragma alloc_text(PAGE, Bus_EvtDeviceListCreatePdo)
-#pragma alloc_text(PAGE, Bus_EvtDevicePrepareHardware)
+#pragma alloc_text(PAGE, Pdo_EvtDevicePrepareHardware)
+#pragma alloc_text(PAGE, Pdo_EvtDeviceReleaseHardware)
 #endif
 
 NTSTATUS Bus_EvtDeviceListCreatePdo(
@@ -260,7 +261,8 @@ NTSTATUS Bus_CreatePdo(
 
     WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
 
-    pnpPowerCallbacks.EvtDevicePrepareHardware = Bus_EvtDevicePrepareHardware;
+    pnpPowerCallbacks.EvtDevicePrepareHardware = Pdo_EvtDevicePrepareHardware;
+	pnpPowerCallbacks.EvtDeviceReleaseHardware = Pdo_EvtDeviceReleaseHardware;
 
     WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
@@ -520,9 +522,9 @@ NTSTATUS Bus_CreatePdo(
 }
 
 //
-// Exposes necessary interfaces on PDO power-up.
+// PDO power-up.
 // 
-NTSTATUS Bus_EvtDevicePrepareHardware(
+NTSTATUS Pdo_EvtDevicePrepareHardware(
     _In_ WDFDEVICE Device,
     _In_ WDFCMRESLIST ResourcesRaw,
     _In_ WDFCMRESLIST ResourcesTranslated
@@ -575,6 +577,45 @@ NTSTATUS Bus_EvtDevicePrepareHardware(
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
 
     return status;
+}
+
+//
+// PDO power-down.
+// 
+_Use_decl_annotations_
+NTSTATUS
+Pdo_EvtDeviceReleaseHardware(
+	WDFDEVICE  Device,
+	WDFCMRESLIST  ResourcesTranslated
+)
+{
+	PPDO_DEVICE_DATA    pdoData;
+	NTSTATUS            status = STATUS_UNSUCCESSFUL;
+
+	PAGED_CODE();
+
+	UNREFERENCED_PARAMETER(ResourcesTranslated);
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Entry");
+
+	pdoData = PdoGetData(Device);
+
+	switch (pdoData->TargetType)
+	{
+		// Free XUSB resources
+	case Xbox360Wired:
+
+		status = Xusb_ReleaseHardware(Device);
+
+		break;
+
+	default:
+		break;
+	}
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
+
+	return status;
 }
 
 //
