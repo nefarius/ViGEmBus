@@ -33,3 +33,5 @@
 /Debug
 /sys/Debug
 /sys/ARM/Debug
+/lib/Debug (dynamic)/*.log
+/sys/RCa25584

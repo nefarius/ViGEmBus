@@ -598,6 +598,8 @@ VOID Pdo_EvtIoInternalDeviceControl(
     PURB                    urb;
     PPDO_DEVICE_DATA        pdoData;
     PIO_STACK_LOCATION      irpStack;
+    PXUSB_DEVICE_DATA       pXusbData;
+    PUCHAR                  blobBuffer;
 
 
     TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Entry");
@@ -629,13 +631,20 @@ VOID Pdo_EvtIoInternalDeviceControl(
             switch (urb->UrbControlTransfer.SetupPacket[6])
             {
             case 0x04:
-                //
-                // Xenon magic
-                // 
-                COPY_BYTE_ARRAY(urb->UrbControlTransfer.TransferBuffer, P99_PROTECT({
-                    0x31, 0x3F, 0xCF, 0xDC
-                    }));
-                status = STATUS_SUCCESS;
+                if (pdoData->TargetType == Xbox360Wired)
+                {
+                    pXusbData = XusbGetData(hDevice);
+                    blobBuffer = WdfMemoryGetBuffer(pXusbData->InterruptBlobStorage, NULL);
+                    //
+                    // Xenon magic
+                    // 
+                    RtlCopyMemory(
+                        urb->UrbControlTransfer.TransferBuffer,
+                        &blobBuffer[XUSB_BLOB_07_OFFSET],
+                        0x04
+                    );
+                    status = STATUS_SUCCESS;
+                }
                 break;
             case 0x14:
                 //

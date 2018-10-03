@@ -295,7 +295,9 @@ NTSTATUS Xusb_AssignPdoContext(WDFDEVICE Device)
         // 5
         0x01, 0x03, 0x03,
         // 6
-        0x05, 0x03, 0x00
+        0x05, 0x03, 0x00,
+        // 7
+        0x31, 0x3F, 0xCF, 0xDC
         }));
 
     // I/O Queue for pending IRPs

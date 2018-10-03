@@ -49,7 +49,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_XUSB_UNKNOWN_2,
 #define XUSB_LEDSET_SIZE                0x03
 #define XUSB_LEDNUM_SIZE                0x01
 #define XUSB_INIT_STAGE_SIZE            0x03
-#define XUSB_BLOB_STORAGE_SIZE          0x26
+#define XUSB_BLOB_STORAGE_SIZE          0x2A
 
 #define XUSB_BLOB_00_OFFSET             0x00
 #define XUSB_BLOB_01_OFFSET             0x03
@@ -58,6 +58,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_XUSB_UNKNOWN_2,
 #define XUSB_BLOB_04_OFFSET             0x0C
 #define XUSB_BLOB_05_OFFSET             0x20
 #define XUSB_BLOB_06_OFFSET             0x23
+#define XUSB_BLOB_07_OFFSET             0x26
 
 #define XUSB_IS_DATA_PIPE(_x_)          ((BOOLEAN)(_x_->PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0081))
 #define XUSB_IS_CONTROL_PIPE(_x_)       ((BOOLEAN)(_x_->PipeHandle == (USBD_PIPE_HANDLE)0xFFFF0083))
