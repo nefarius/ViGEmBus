@@ -429,7 +429,7 @@ NTSTATUS Bus_CreatePdo(
     // Create and assign queue for incoming interrupt transfer
     WDF_IO_QUEUE_CONFIG_INIT(&usbInQueueConfig, WdfIoQueueDispatchManual);
 
-    status = WdfIoQueueCreate(Device, &usbInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &pdoData->PendingUsbInRequests);
+    status = WdfIoQueueCreate(hChild, &usbInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &pdoData->PendingUsbInRequests);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
@@ -442,7 +442,7 @@ NTSTATUS Bus_CreatePdo(
     // Create and assign queue for user-land notification requests
     WDF_IO_QUEUE_CONFIG_INIT(&notificationsQueueConfig, WdfIoQueueDispatchManual);
 
-    status = WdfIoQueueCreate(Device, &notificationsQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &pdoData->PendingNotificationRequests);
+    status = WdfIoQueueCreate(hChild, &notificationsQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &pdoData->PendingNotificationRequests);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
