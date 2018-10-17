@@ -91,20 +91,6 @@ internal class Build : NukeBuild
             );
 
             #endregion
-
-            if (Configuration.Equals("release", StringComparison.InvariantCultureIgnoreCase))
-            {
-                var version =
-                    new Version(IsLocalBuild ? GitVersion.GetNormalizedFileVersion() : AppVeyor.Instance.BuildVersion);
-
-                StampVersion(
-                    Path.Combine(ArtifactsDirectory, @"x64\ViGEmBus.sys"),
-                    version);
-
-                StampVersion(
-                    Path.Combine(ArtifactsDirectory, @"x86\ViGEmBus.sys"),
-                    version);
-            }
         });
 
     private Target Pack => _ => _
@@ -122,39 +108,5 @@ internal class Build : NukeBuild
     public static int Main()
     {
         return Execute<Build>(x => x.Compile);
-    }
-
-    private static void StampVersion(string path, Version version)
-    {
-        var versionResource = new VersionResource
-        {
-            FileVersion = version.ToString(),
-            ProductVersion = version.ToString()
-        };
-
-        var stringFileInfo = new StringFileInfo();
-        versionResource[stringFileInfo.Key] = stringFileInfo;
-        var stringFileInfoStrings = new StringTable
-        {
-            LanguageID = 1033,
-            CodePage = 1200
-        };
-        stringFileInfo.Strings.Add(stringFileInfoStrings.Key, stringFileInfoStrings);
-        stringFileInfoStrings["CompanyName"] = Config.Global.Version.CompanyName;
-        stringFileInfoStrings["FileDescription"] = Config.Global.Version.FileDescription;
-        stringFileInfoStrings["FileVersion"] = version.ToString();
-        stringFileInfoStrings["InternalName"] = Config.Global.Version.InternalName;
-        stringFileInfoStrings["LegalCopyright"] = Config.Global.Version.LegalCopyright;
-        stringFileInfoStrings["OriginalFilename"] = Config.Global.Version.OriginalFilename;
-        stringFileInfoStrings["ProductName"] = Config.Global.Version.ProductName;
-        stringFileInfoStrings["ProductVersion"] = version.ToString();
-
-        var varFileInfo = new VarFileInfo();
-        versionResource[varFileInfo.Key] = varFileInfo;
-        var varFileInfoTranslation = new VarTable("Translation");
-        varFileInfo.Vars.Add(varFileInfoTranslation.Key, varFileInfoTranslation);
-        varFileInfoTranslation[ResourceUtil.USENGLISHLANGID] = 1300;
-
-        versionResource.SaveTo(path);
     }
 }
