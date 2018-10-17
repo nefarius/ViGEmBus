@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using JsonConfig;
 using Nuke.Common;
 using Nuke.Common.BuildServers;
 using Nuke.Common.Git;
