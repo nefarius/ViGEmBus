@@ -34,10 +34,10 @@ WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll = 1
 %ManufacturerName%=Standard,NTamd64,NTx86
 
 [Standard.NTamd64]
-%ViGEmBus.DeviceDesc%=ViGEmBus_Device, Root\ViGEmBus
+%ViGEmBus.DeviceDesc%=ViGEmBus_Device, Nefarius\ViGEmBus\Gen1
 
 [Standard.NTx86]
-%ViGEmBus.DeviceDesc%=ViGEmBus_Device, Root\ViGEmBus
+%ViGEmBus.DeviceDesc%=ViGEmBus_Device, Nefarius\ViGEmBus\Gen1
 
 [ViGEmBus_Device.NT]
 CopyFiles=Drivers_Dir
@@ -78,7 +78,7 @@ KmdfLibraryVersion = $KMDFVERSION$
 
 [Strings]
 SPSVCINST_ASSOCSERVICE= 0x00000002
-ManufacturerName="Benjamin Höglinger-Stelzer"
+ManufacturerName="Benjamin Hoeglinger-Stelzer"
 DiskName = "ViGEmBus Installation Disk"
 ViGEmBus.DeviceDesc = "Virtual Gamepad Emulation Bus"
 ViGEmBus.SVCDESC = "Virtual Gamepad Emulation Service"
