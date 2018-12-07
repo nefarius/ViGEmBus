@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ViGEmCommon.h"
+#include "ViGEm/Common.h"
 #include <limits.h>
 
 VOID FORCEINLINE XUSB_TO_DS4_REPORT(
