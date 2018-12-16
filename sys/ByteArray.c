@@ -32,7 +32,7 @@ ULONG_PTR align_to_page_size(ULONG_PTR val)
 
 
 //
-// Forward decalarations
+// Forward declarations
 //
 
 NTSTATUS IncreaseCapacityByteArray(IN PBYTE_ARRAY Array, IN ULONG NumElements);
