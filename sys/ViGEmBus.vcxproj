@@ -181,13 +181,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(SolutionDir)\Include\ViGEmBusDriver.h" />
-    <ClInclude Include="..\client\include\km\ViGEmBusShared.h" />
+    <ClInclude Include="..\client\include\ViGEm\km\BusShared.h" />
     <ClInclude Include="busenum.h" />
     <ClInclude Include="ByteArray.h" />
     <ClInclude Include="Context.h" />
     <ClInclude Include="Ds4.h" />
     <ClInclude Include="Queue.h" />
-	<ClInclude Include="resource.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="trace.h" />
     <ClInclude Include="UsbPdo.h" />
     <ClInclude Include="Util.h" />
