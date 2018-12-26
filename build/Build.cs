@@ -12,22 +12,19 @@ using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
 
-internal class Build : NukeBuild
+class Build : NukeBuild
 {
+    [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
+    private readonly string Configuration = IsLocalBuild ? "Debug" : "Release";
+
     [GitRepository] private readonly GitRepository GitRepository;
     [GitVersion] private readonly GitVersion GitVersion;
 
     [Solution("ViGEmClient.sln")] private readonly Solution Solution;
-
-    private AbsolutePath SourceDirectory => RootDirectory / "src";
     private AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
 
     private Target Clean => _ => _
-        .Executes(() =>
-        {
-            DeleteDirectories(GlobDirectories(SourceDirectory, "**/bin", "**/obj"));
-            EnsureCleanDirectory(ArtifactsDirectory);
-        });
+        .Executes(() => { EnsureCleanDirectory(ArtifactsDirectory); });
 
     private Target Restore => _ => _
         .DependsOn(Clean)
@@ -45,7 +42,7 @@ internal class Build : NukeBuild
             MSBuild(s => s
                 .SetTargetPath(Solution)
                 .SetTargets("Rebuild")
-                .SetConfiguration(Configuration)
+                .SetConfiguration($"{Configuration}_DLL")
                 .SetMaxCpuCount(Environment.ProcessorCount)
                 .SetNodeReuse(IsLocalBuild)
                 .SetTargetPlatform(MSBuildTargetPlatform.x64));
@@ -53,22 +50,22 @@ internal class Build : NukeBuild
             MSBuild(s => s
                 .SetTargetPath(Solution)
                 .SetTargets("Rebuild")
-                .SetConfiguration(Configuration)
+                .SetConfiguration($"{Configuration}_DLL")
                 .SetMaxCpuCount(Environment.ProcessorCount)
                 .SetNodeReuse(IsLocalBuild)
                 .SetTargetPlatform(MSBuildTargetPlatform.x86));
 
-            if (Configuration.Equals("release_dll", StringComparison.InvariantCultureIgnoreCase))
+            if (Configuration.Equals($"{Configuration}_dll", StringComparison.InvariantCultureIgnoreCase))
             {
                 var version =
                     new Version(IsLocalBuild ? GitVersion.GetNormalizedFileVersion() : AppVeyor.Instance.BuildVersion);
 
                 StampVersion(
-                    Path.Combine(RootDirectory, @"bin\release\x64\ViGEmClient.dll"),
+                    Path.Combine(RootDirectory, $@"bin\{Configuration}\x64\ViGEmClient.dll"),
                     version);
 
                 StampVersion(
-                    Path.Combine(RootDirectory, @"bin\release\x86\ViGEmClient.dll"),
+                    Path.Combine(RootDirectory, $@"bin\{Configuration}\x86\ViGEmClient.dll"),
                     version);
             }
         });
