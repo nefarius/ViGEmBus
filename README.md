@@ -66,12 +66,16 @@ To grab the latest signed binaries for use or redistribution [follow the install
 
 ## Sponsors
 
+Sponsors listed here have helped the project flourish by either financial support or by gifting licenses:
+
 - [3dRudder](https://www.3drudder.com/)
-- [Wohlfeil.IT e.U.](https://wohlfeil.it/)
 - [Parsec](https://parsecgaming.com/)
 - [Rainway, Inc](https://rainway.io/)
+- [JetBrains](https://www.jetbrains.com/resharper/)
 
 ## Known users of ViGEm
+
+A brief listing of projects/companies/vendors known to build upon the powers of ViGEm. This list is non-exhaustive, if you'd like to see your project included, contact us!
 
 - [3dRudder](https://www.3drudder.com/)
 - [Parsec](https://parsecgaming.com/)
