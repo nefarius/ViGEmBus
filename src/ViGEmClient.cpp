@@ -487,7 +487,7 @@ VIGEM_ERROR vigem_target_x360_register_notification(
                     return;
                 }
 
-                reinterpret_cast<PFN_VIGEM_X360_NOTIFICATION>(_Target->Notification)(
+                PFN_VIGEM_X360_NOTIFICATION(_Target->Notification)(
                     _Client,
                     _Target,
                     notify.LargeMotor,
@@ -563,7 +563,7 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
                     return;
                 }
 
-                reinterpret_cast<PFN_VIGEM_DS4_NOTIFICATION>(_Target->Notification)(
+                PFN_VIGEM_DS4_NOTIFICATION(_Target->Notification)(
                     _Client,
                     _Target,
                     notify.Report.LargeMotor,

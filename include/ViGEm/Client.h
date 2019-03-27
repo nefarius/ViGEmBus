@@ -94,7 +94,7 @@ extern "C" {
 
     typedef
         _Function_class_(EVT_VIGEM_TARGET_ADD_RESULT)
-        VOID
+        VOID CALLBACK
         EVT_VIGEM_TARGET_ADD_RESULT(
             PVIGEM_CLIENT Client,
             PVIGEM_TARGET Target,
@@ -105,7 +105,7 @@ extern "C" {
 
     typedef
         _Function_class_(EVT_VIGEM_X360_NOTIFICATION)
-        VOID
+        VOID CALLBACK
         EVT_VIGEM_X360_NOTIFICATION(
             PVIGEM_CLIENT Client,
             PVIGEM_TARGET Target,
