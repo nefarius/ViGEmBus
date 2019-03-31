@@ -728,6 +728,13 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                     status);
             }
         }
+        else
+        {
+            TraceEvents(TRACE_LEVEL_WARNING,
+                    TRACE_USBPDO,
+                    "!! [XUSB] WdfIoQueueRetrieveNextRequest failed with status %!STATUS!",
+                    status);
+        }
 
         break;
     }
