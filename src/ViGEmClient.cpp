@@ -48,6 +48,8 @@ SOFTWARE.
 // 
 #define VIGEM_TARGETS_MAX   USHRT_MAX
 
+#define VIGEM_INVERTED_CALL_THREAD_COUNT    20
+
 
 typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType, CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam, CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
 
@@ -507,7 +509,7 @@ VIGEM_ERROR vigem_target_x360_register_notification(
 
     std::vector<std::thread> threadList;
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < VIGEM_INVERTED_CALL_THREAD_COUNT; i++)
     {
         threadList.emplace_back(std::thread([](
             PVIGEM_TARGET _Target,
@@ -590,7 +592,7 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
 
     std::vector<std::thread> threadList;
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < VIGEM_INVERTED_CALL_THREAD_COUNT; i++)
     {
         threadList.emplace_back(std::thread([](
             PVIGEM_TARGET _Target,
