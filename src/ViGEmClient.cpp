@@ -28,6 +28,7 @@ SOFTWARE.
 #include <cstdlib>
 #include <SetupAPI.h>
 #include <initguid.h>
+#include <Dbghelp.h>
 
 #include "ViGEm/km/BusShared.h"
 #include "ViGEm/Client.h"
@@ -38,6 +39,11 @@ SOFTWARE.
 #include <iostream>
 
 #define VIGEM_TARGETS_MAX   USHRT_MAX
+
+
+typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType, CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam, CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
+
+LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExceptionInfo);
 
 //
 // Represents a driver connection object.
@@ -92,8 +98,39 @@ PVIGEM_TARGET FORCEINLINE VIGEM_TARGET_ALLOC_INIT(
 }
 
 
+LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExceptionInfo)
+{
+	const auto mhLib = LoadLibrary(L"dbghelp.dll");
+	const auto pDump = reinterpret_cast<MINIDUMPWRITEDUMP>(GetProcAddress(mhLib, "MiniDumpWriteDump"));
+
+	const auto hFile = CreateFile(
+		L"ViGEmClient.dmp", 
+		GENERIC_WRITE, 
+		FILE_SHARE_WRITE, 
+		nullptr, 
+		CREATE_ALWAYS,
+		FILE_ATTRIBUTE_NORMAL, 
+		nullptr
+	);
+
+	if (hFile != INVALID_HANDLE_VALUE)
+	{
+		_MINIDUMP_EXCEPTION_INFORMATION ExInfo;
+		ExInfo.ThreadId = GetCurrentThreadId();
+		ExInfo.ExceptionPointers = apExceptionInfo;
+		ExInfo.ClientPointers = FALSE;
+
+		pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &ExInfo, nullptr, nullptr);
+		CloseHandle(hFile);
+	}
+
+	return EXCEPTION_CONTINUE_SEARCH;
+}
+
 PVIGEM_CLIENT vigem_alloc()
 {
+	SetUnhandledExceptionFilter(vigem_internal_exception_handler);
+
     const auto driver = static_cast<PVIGEM_CLIENT>(malloc(sizeof(VIGEM_CLIENT)));
 
     if (!driver)
