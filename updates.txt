@@ -5,4 +5,4 @@ Name = ViGEm Bus Driver 1.16.112
 URL = http://localhost
 Size = 1337
 RegistryKey = HKLM\Software\Nefarius Software Solutions e.U.\Virtual Gamepad Emulation Framework Bus Driver\Version
-Version = 1.16.113
+Version = 1.16.112
