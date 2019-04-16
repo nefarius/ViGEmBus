@@ -427,7 +427,7 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
     if (target->State == VIGEM_TARGET_CONNECTED)
         return VIGEM_ERROR_ALREADY_CONNECTED;
 
-    DWORD transfered = 0;
+    DWORD transferred = 0;
     VIGEM_PLUGIN_TARGET plugin;
     OVERLAPPED lOverlapped = { 0 };
     lOverlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
@@ -446,11 +446,11 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
             plugin.Size,
             nullptr,
             0,
-            &transfered,
+            &transferred,
             &lOverlapped
         );
 
-        if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transfered, TRUE) != 0)
+        if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transferred, TRUE) != 0)
         {
             target->State = VIGEM_TARGET_CONNECTED;
             CloseHandle(lOverlapped.hEvent);

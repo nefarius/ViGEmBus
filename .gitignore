@@ -45,3 +45,5 @@
 /src/x64
 /src/Debug_DLL
 /src/Release_DLL
+/app/Tester/Debug
+/Debug
