@@ -5,7 +5,12 @@
 #include <Windows.h>
 #include <ViGEm/Client.h>
 
+#include <mutex>
 #include <iostream>
+#include "../../../vcpkg/installed/x86-windows-static/include/boost/thread/thread_only.hpp"
+#include "../../../vcpkg/installed/x86-windows-static/include/boost/thread/once.hpp"
+
+static std::mutex m;
 
 VOID CALLBACK notification(
     PVIGEM_CLIENT Client,
@@ -15,20 +20,37 @@ VOID CALLBACK notification(
     UCHAR LedNumber
 )
 {
-    std::cout << LargeMotor << " " << SmallMotor << std::endl;
+    m.lock();
+
+    //std::cout.width(3);
+    //std::cout << (int)LargeMotor << " ";
+    //std::cout.width(3);
+    //std::cout << (int)SmallMotor << std::endl;
+
+    m.unlock();
 }
 
 int main()
 {
     const auto client = vigem_alloc();
 
+    auto ret = vigem_connect(client);
+
     const auto x360 = vigem_target_x360_alloc();
 
-    auto ret = vigem_target_add(client, x360);
+    ret = vigem_target_add(client, x360);
 
     ret = vigem_target_x360_register_notification(client, x360, &notification);
 
-    getchar();
+    XUSB_REPORT report;
+    XUSB_REPORT_INIT(&report);
+
+    while(true)
+    {
+        ret = vigem_target_x360_update(client, x360, report);
+        report.bLeftTrigger++;
+        boost::detail::win32::sleep(10);
+    }
 
     vigem_target_remove(client, x360);
     vigem_target_free(x360);
