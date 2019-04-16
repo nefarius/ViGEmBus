@@ -8,6 +8,8 @@ build_script:
 - ps: .\build.ps1
 artifacts:
 - path: 'bin**\*.dll'
+cache:
+- c:\tools\vcpkg\installed\
 deploy:
 - provider: Environment
   name: BUILDBOT
