@@ -38,10 +38,17 @@ SOFTWARE.
 // 
 #include <cstdlib>
 #include <climits>
-#include <mutex>
-#include <iostream>
 #include <vector>
 #include <algorithm>
+
+//
+// Boost
+//
+#include <boost/asio.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/bind.hpp>
 
 //
 // TODO: this is... not optimal. Improve in the future.
@@ -51,7 +58,15 @@ SOFTWARE.
 #define VIGEM_INVERTED_CALL_THREAD_COUNT    20
 
 
-typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType, CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam, CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
+typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(
+    HANDLE hProcess, 
+    DWORD dwPid, 
+    HANDLE hFile, 
+    MINIDUMP_TYPE DumpType, 
+    CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, 
+    CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam, 
+    CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam
+);
 
 LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExceptionInfo);
 
@@ -87,6 +102,10 @@ typedef struct _VIGEM_TARGET_T
     USHORT ProductId;
     VIGEM_TARGET_TYPE Type;
     DWORD_PTR Notification;
+    
+    boost::shared_ptr<boost::asio::io_service> io_svc;
+    boost::shared_ptr<boost::asio::io_service::work> worker;
+    boost::thread_group worker_threads;
 
 } VIGEM_TARGET;
 
@@ -107,6 +126,9 @@ PVIGEM_TARGET FORCEINLINE VIGEM_TARGET_ALLOC_INIT(
     target->Size = sizeof(VIGEM_TARGET);
     target->State = VIGEM_TARGET_INITIALIZED;
     target->Type = Type;
+
+    target->io_svc.reset(new boost::asio::io_service());
+    target->worker.reset(new boost::asio::io_service::work(*target->io_svc));
 
     return target;
 }
@@ -139,6 +161,68 @@ LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExcep
 	}
 
 	return EXCEPTION_CONTINUE_SEARCH;
+}
+
+void vigem_internal_x360_notification_worker(
+    PVIGEM_TARGET target,
+    PVIGEM_CLIENT client
+)
+{
+    DWORD error = ERROR_SUCCESS;
+    DWORD transferred = 0;
+    OVERLAPPED lOverlapped = { 0 };
+    lOverlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+    boost::asio::io_service::strand strand(*target->io_svc);
+
+    XUSB_REQUEST_NOTIFICATION notify;
+    XUSB_REQUEST_NOTIFICATION_INIT(&notify, target->SerialNo);
+
+    do
+    {
+        DeviceIoControl(client->hBusDevice,
+            IOCTL_XUSB_REQUEST_NOTIFICATION,
+            &notify,
+            notify.Size,
+            &notify,
+            notify.Size,
+            &transferred,
+            &lOverlapped);
+
+        if (GetOverlappedResult(client->hBusDevice, &lOverlapped, &transferred, TRUE) != 0)
+        {
+            if (target->Notification == NULL)
+            {
+                if (lOverlapped.hEvent)
+                    CloseHandle(lOverlapped.hEvent);
+                return;
+            }
+
+            const boost::function<void(
+                PVIGEM_CLIENT, 
+                PVIGEM_TARGET, 
+                UCHAR, 
+                UCHAR,
+                UCHAR
+                )> pfn = PFN_VIGEM_X360_NOTIFICATION(target->Notification);
+
+            strand.post(boost::bind(pfn,
+                client,
+                target,
+                notify.LargeMotor,
+                notify.SmallMotor,
+                notify.LedNumber
+            ));
+
+            target->io_svc->poll();
+        }
+        else
+        {
+            error = GetLastError();
+        }
+    } while (error != ERROR_OPERATION_ABORTED && error != ERROR_ACCESS_DENIED);
+
+    if (lOverlapped.hEvent)
+        CloseHandle(lOverlapped.hEvent);
 }
 
 PVIGEM_CLIENT vigem_alloc()
@@ -319,7 +403,11 @@ PVIGEM_TARGET vigem_target_ds4_alloc(void)
 void vigem_target_free(PVIGEM_TARGET target)
 {
     if (target)
+    {
+        target->io_svc->stop();
+
         free(target);
+    }
 }
 
 VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
@@ -507,62 +595,8 @@ VIGEM_ERROR vigem_target_x360_register_notification(
 
     target->Notification = reinterpret_cast<DWORD_PTR>(notification);
 
-    std::vector<std::thread> threadList;
-
-    for (int i = 0; i < VIGEM_INVERTED_CALL_THREAD_COUNT; i++)
-    {
-        threadList.emplace_back(std::thread([](
-            PVIGEM_TARGET _Target,
-            PVIGEM_CLIENT _Client)
-        {
-            DWORD error = ERROR_SUCCESS;
-            DWORD transferred = 0;
-            OVERLAPPED lOverlapped = { 0 };
-            lOverlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-
-            XUSB_REQUEST_NOTIFICATION notify;
-            XUSB_REQUEST_NOTIFICATION_INIT(&notify, _Target->SerialNo);
-
-            do
-            {
-                DeviceIoControl(_Client->hBusDevice,
-                    IOCTL_XUSB_REQUEST_NOTIFICATION,
-                    &notify,
-                    notify.Size,
-                    &notify,
-                    notify.Size,
-                    &transferred,
-                    &lOverlapped);
-
-                if (GetOverlappedResult(_Client->hBusDevice, &lOverlapped, &transferred, TRUE) != 0)
-                {
-                    if (_Target->Notification == NULL)
-                    {
-                        if (lOverlapped.hEvent)
-                            CloseHandle(lOverlapped.hEvent);
-                        return;
-                    }
-
-                    PFN_VIGEM_X360_NOTIFICATION(_Target->Notification)(
-                        _Client,
-                        _Target,
-                        notify.LargeMotor,
-                        notify.SmallMotor,
-                        notify.LedNumber);
-                }
-                else
-                {
-                    error = GetLastError();
-                }
-            } while (error != ERROR_OPERATION_ABORTED && error != ERROR_ACCESS_DENIED);
-
-            if (lOverlapped.hEvent)
-                CloseHandle(lOverlapped.hEvent);
-
-        }, target, vigem));
-    }
-
-    std::for_each(threadList.begin(), threadList.end(), std::mem_fn(&std::thread::detach));
+    for (int i = 1; i <= VIGEM_INVERTED_CALL_THREAD_COUNT; i++)
+        target->worker_threads.create_thread(boost::bind(&vigem_internal_x360_notification_worker, target, vigem));
 
     return VIGEM_ERROR_NONE;
 }

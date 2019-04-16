@@ -38,6 +38,8 @@
     <ProjectGuid>{7DB06674-1F4F-464B-8E1C-172E9587F9DC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ViGEmClient</RootNamespace>
+	<VcpkgTriplet Condition="'$(Platform)'=='Win32'">x86-windows-static</VcpkgTriplet>
+    <VcpkgTriplet Condition="'$(Platform)'=='x64'">x64-windows-static</VcpkgTriplet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(WindowsTargetPlatformVersion)'==''">
     <!-- Latest Target Version property -->
