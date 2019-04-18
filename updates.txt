@@ -2,7 +2,7 @@
 
 [ViGEmBus_1.16.112]
 Name = ViGEm Bus Driver 1.16.112
-URL = http://localhost
-Size = 1337
+URL = https://github.com/ViGEm/ViGEmBus/releases/download/v1.16.112/ViGEmBus_Setup_1.16.112.exe
+Size = 14308440
 RegistryKey = HKLM\Software\Nefarius Software Solutions e.U.\ViGEm Bus Driver\Version
 Version = 1.16.112
