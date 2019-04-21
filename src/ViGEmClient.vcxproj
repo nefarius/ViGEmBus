@@ -38,7 +38,7 @@
     <ProjectGuid>{7DB06674-1F4F-464B-8E1C-172E9587F9DC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ViGEmClient</RootNamespace>
-	<VcpkgTriplet Condition="'$(Platform)'=='Win32'">x86-windows-static</VcpkgTriplet>
+    <VcpkgTriplet Condition="'$(Platform)'=='Win32'">x86-windows-static</VcpkgTriplet>
     <VcpkgTriplet Condition="'$(Platform)'=='x64'">x64-windows-static</VcpkgTriplet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(WindowsTargetPlatformVersion)'==''">
@@ -305,9 +305,11 @@
     <ClInclude Include="$(SolutionDir)\include\ViGEm\Common.h" />
     <ClInclude Include="$(SolutionDir)\include\ViGEm\Util.h" />
     <ClInclude Include="$(SolutionDir)\include\ViGEm\km\BusShared.h" />
+    <ClInclude Include="XusbNotificationRequest.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ViGEmClient.cpp" />
+    <ClCompile Include="XusbNotificationRequest.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
