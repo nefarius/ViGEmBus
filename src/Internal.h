@@ -1,6 +1,10 @@
 #pragma once
-#include "XusbNotificationRequest.h"
-#include "NotificationRequestPool.h"
+
+//
+// TODO: this is... not optimal. Improve in the future.
+// 
+#define VIGEM_TARGETS_MAX   USHRT_MAX
+
 
 //
 // Represents a driver connection object.

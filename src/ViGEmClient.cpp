@@ -47,23 +47,13 @@ SOFTWARE.
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
 
-#include <iostream>
-#include <chrono>
-#include <ratio>
 #include <thread>
 
 #include "Internal.h"
 
 #include "NotificationRequestPool.h"
-
-//
-// TODO: this is... not optimal. Improve in the future.
-// 
-#define VIGEM_TARGETS_MAX   USHRT_MAX
-
 
 
 typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(
@@ -77,7 +67,6 @@ typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(
     );
 
 LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExceptionInfo);
-
 
 
 //
@@ -504,28 +493,15 @@ VIGEM_ERROR vigem_target_x360_register_notification(
     if (target->Notification == reinterpret_cast<DWORD_PTR>(notification))
         return VIGEM_ERROR_CALLBACK_ALREADY_REGISTERED;
 
-    target->Notification = reinterpret_cast<DWORD_PTR>(notification);
+    // TODO: tidy up this mess
 
-    //for (auto i = 0; i < /* VIGEM_INVERTED_CALL_THREAD_COUNT */ 1; i++)
-    //{
-    //    auto req = new XusbNotificationRequest(
-    //        vigem->hBusDevice,
-    //        target->SerialNo,
-    //        target->WaitHandles[i]
-    //    );
-    //    target->notify_req.emplace_back(req);
-    //    //target->worker_threads->create_thread(*req);
-    //}
+    target->Notification = reinterpret_cast<DWORD_PTR>(notification);
 
     target->pool = std::make_shared<NotificationRequestPool>(
         vigem,
         target,
         PFN_VIGEM_X360_NOTIFICATION(target->Notification)
         );
-
-
-    //for (int i = 1; i <= VIGEM_INVERTED_CALL_THREAD_COUNT; i++)
-    //    target->worker_threads->create_thread(boost::bind(&vigem_internal_x360_notification_worker, target, vigem));
 
     return VIGEM_ERROR_NONE;
 }
