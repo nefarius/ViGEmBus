@@ -98,14 +98,6 @@ PVIGEM_TARGET FORCEINLINE VIGEM_TARGET_ALLOC_INIT(
     target->State = VIGEM_TARGET_INITIALIZED;
     target->Type = Type;
 
-    target->io_svc.reset(new boost::asio::io_service());
-    target->worker.reset(new boost::asio::io_service::work(*target->io_svc));
-    target->worker_threads.reset(new boost::thread_group());
-    target->enqueue_lock.reset(new boost::mutex());
-
-    for (auto& WaitHandle : target->WaitHandles)
-        WaitHandle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-
     return target;
 }
 
@@ -137,81 +129,6 @@ LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExcep
     }
 
     return EXCEPTION_CONTINUE_SEARCH;
-}
-
-void vigem_internal_x360_notification_worker(
-    PVIGEM_TARGET target,
-    PVIGEM_CLIENT client
-)
-{
-    DWORD error = ERROR_SUCCESS;
-    DWORD transferred = 0;
-    OVERLAPPED lOverlapped = { 0 };
-    lOverlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-    boost::asio::io_service::strand strand(*target->io_svc);
-
-    XUSB_REQUEST_NOTIFICATION notify;
-    XUSB_REQUEST_NOTIFICATION_INIT(&notify, target->SerialNo);
-
-    static std::mutex m;
-
-    do
-    {
-        DeviceIoControl(client->hBusDevice,
-            IOCTL_XUSB_REQUEST_NOTIFICATION,
-            &notify,
-            notify.Size,
-            &notify,
-            notify.Size,
-            &transferred,
-            &lOverlapped);
-
-        if (GetOverlappedResult(client->hBusDevice, &lOverlapped, &transferred, TRUE) != 0)
-        {
-            m.lock();
-            auto timestamp = std::chrono::high_resolution_clock::now();
-            std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(timestamp.time_since_epoch()).count() << " ";
-            std::cout.width(3);
-            std::cout << (int)notify.LargeMotor << " ";
-            std::cout.width(3);
-            std::cout << (int)notify.SmallMotor << std::endl;
-            m.unlock();
-
-            if (target->Notification == NULL)
-            {
-                if (lOverlapped.hEvent)
-                    CloseHandle(lOverlapped.hEvent);
-                return;
-            }
-
-            target->enqueue_lock->lock();
-            const boost::function<void(
-                PVIGEM_CLIENT,
-                PVIGEM_TARGET,
-                UCHAR,
-                UCHAR,
-                UCHAR
-                )> pfn = PFN_VIGEM_X360_NOTIFICATION(target->Notification);
-
-            strand.post(boost::bind(pfn,
-                client,
-                target,
-                notify.LargeMotor,
-                notify.SmallMotor,
-                notify.LedNumber
-            ));
-            target->enqueue_lock->unlock();
-
-            target->io_svc->poll();
-        }
-        else
-        {
-            error = GetLastError();
-        }
-    } while (error != ERROR_OPERATION_ABORTED && error != ERROR_ACCESS_DENIED);
-
-    if (lOverlapped.hEvent)
-        CloseHandle(lOverlapped.hEvent);
 }
 
 PVIGEM_CLIENT vigem_alloc()
@@ -392,11 +309,7 @@ PVIGEM_TARGET vigem_target_ds4_alloc(void)
 void vigem_target_free(PVIGEM_TARGET target)
 {
     if (target)
-    {
-        target->io_svc->stop();
-
         free(target);
-    }
 }
 
 VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
@@ -605,8 +518,8 @@ VIGEM_ERROR vigem_target_x360_register_notification(
     //}
 
     target->pool = std::make_shared<NotificationRequestPool>(
-        vigem->hBusDevice,
-        target->SerialNo,
+        vigem,
+        target,
         PFN_VIGEM_X360_NOTIFICATION(target->Notification)
         );
 

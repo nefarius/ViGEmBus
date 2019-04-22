@@ -5,10 +5,9 @@
 
 class XusbNotificationRequest
 {
-    HANDLE parent_bus;
-    XUSB_REQUEST_NOTIFICATION payload;
-    DWORD transferred;
-    OVERLAPPED overlapped;
+    HANDLE parent_bus_;
+    XUSB_REQUEST_NOTIFICATION payload_;
+    OVERLAPPED overlapped_;
 
 public:
     XusbNotificationRequest(HANDLE bus, ULONG serial, HANDLE notification);

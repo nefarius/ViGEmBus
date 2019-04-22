@@ -22,10 +22,14 @@ VOID CALLBACK notification(
 {
     m.lock();
 
-    //std::cout.width(3);
-    //std::cout << (int)LargeMotor << " ";
-    //std::cout.width(3);
-    //std::cout << (int)SmallMotor << std::endl;
+    static int count = 1;
+
+    std::cout.width(3);
+    std::cout << count++ << " ";
+    std::cout.width(3);
+    std::cout << (int)LargeMotor << " ";
+    std::cout.width(3);
+    std::cout << (int)SmallMotor << std::endl;
 
     m.unlock();
 }

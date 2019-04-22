@@ -1,27 +1,48 @@
 ﻿#include "NotificationRequestPool.h"
 
+void NotificationRequestPool::strand_dispatch_worker() const
+{
+    io_svc_->run();
+}
+
 NotificationRequestPool::NotificationRequestPool(
-    HANDLE bus,
-    const ULONG serial,
-    PFN_VIGEM_X360_NOTIFICATION callback) :
+    PVIGEM_CLIENT client,
+    PVIGEM_TARGET target,
+    PFN_VIGEM_X360_NOTIFICATION callback
+) :
+    client_(client),
+    target_(target),
     callback_(callback),
     stop_(false)
 {
+    // prepare array of handles and request wrappers
     for (auto& wait_handle : wait_handles_)
     {
+        // create auto-reset event
         wait_handle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-        XusbNotificationRequest req(bus, serial, wait_handle);
-        requests_.push_back(std::ref(req));
+        // create async pending I/O request wrapper
+        auto req = new XusbNotificationRequest(
+            client_->hBusDevice,
+            target_->SerialNo,
+            wait_handle
+        );
+        requests_.push_back(req);
     }
 
+    // init ASIO
     io_svc_.reset(new boost::asio::io_service());
     worker_.reset(new boost::asio::io_service::work(*io_svc_));
-    worker_threads_.reset(new boost::thread_group());
 
+    // launch notification completion thread
     thread_ = std::make_shared<boost::thread>(boost::ref(*this));
 
+    // launch boost I/O service dispatcher thread
+    worker_thread_ = std::make_shared<boost::thread>(
+        boost::bind(&NotificationRequestPool::strand_dispatch_worker, this));
+
+    // submit pending I/O to driver
     for (auto& request : requests_)
-        request.get().request_async();
+        request->request_async();
 }
 
 NotificationRequestPool::~NotificationRequestPool()
@@ -29,46 +50,64 @@ NotificationRequestPool::~NotificationRequestPool()
     for (auto& wait_handle : wait_handles_)
         CloseHandle(wait_handle);
 
+    io_svc_->stop();
+    worker_thread_->join();
+
     thread_->join();
 }
 
 void NotificationRequestPool::operator()()
 {
+    // used to dispatch notification callback
     boost::asio::io_service::strand strand(*io_svc_);
 
     while (true)
     {
+        // wait for the first pending I/O to signal its event
         const auto ret = WaitForMultipleObjects(
             requests_.size(),
             wait_handles_,
             FALSE,
-            INFINITE
+            25
         );
 
+        // timeout has occurred...
+        if (ret == WAIT_TIMEOUT)
+        {
+            // ...check for termination request
+            boost::mutex::scoped_lock lock(m_);
+            if (stop_)
+                // exits function (terminates thread)
+                break;
+
+            // go for another round
+            continue;
+        }
+
+        // index of the request which just got completed
         const auto index = ret - WAIT_OBJECT_0;
-        auto& req = requests_[index].get();
+        // grab associated request
+        const auto req = requests_[index];
 
-        //const boost::function<void(
-        //    PVIGEM_CLIENT,
-        //    PVIGEM_TARGET,
-        //    UCHAR,
-        //    UCHAR,
-        //    UCHAR
-        //    )> pfn = callback_;
+        // prepare queueing library caller notification callback
+        const boost::function<void(
+            PVIGEM_CLIENT,
+            PVIGEM_TARGET,
+            UCHAR,
+            UCHAR,
+            UCHAR)> pfn = callback_;
 
-        //strand.post(boost::bind(pfn,
-        //    client,
-        //    target,
-        //    notify.LargeMotor,
-        //    notify.SmallMotor,
-        //    notify.LedNumber
-        //));
+        // submit callback for async yet ordered invocation
+        strand.post(boost::bind(pfn,
+                                client_,
+                                target_,
+                                req->get_large_motor(),
+                                req->get_small_motor(),
+                                req->get_led_number()
+        ));
 
-        req.request_async();
-
-        boost::mutex::scoped_lock lock(m_);
-        if (stop_)
-            break;
+        // submit another pending I/O
+        req->request_async();
     }
 }
 

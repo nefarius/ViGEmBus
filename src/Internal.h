@@ -22,6 +22,8 @@ typedef enum _VIGEM_TARGET_STATE
     VIGEM_TARGET_DISCONNECTED
 } VIGEM_TARGET_STATE, *PVIGEM_TARGET_STATE;
 
+class NotificationRequestPool;
+
 //
 // Represents a virtual gamepad object.
 // 
@@ -35,14 +37,6 @@ typedef struct _VIGEM_TARGET_T
     VIGEM_TARGET_TYPE Type;
     DWORD_PTR Notification;
 
-    boost::shared_ptr<boost::asio::io_service> io_svc;
-    boost::shared_ptr<boost::asio::io_service::work> worker;
-    boost::shared_ptr<boost::thread_group> worker_threads;
-    boost::shared_ptr<boost::mutex> enqueue_lock;
-
     std::shared_ptr<NotificationRequestPool> pool;
-
-    HANDLE WaitHandles[VIGEM_INVERTED_CALL_THREAD_COUNT];
-    std::vector<XusbNotificationRequest*> notify_req;
 
 } VIGEM_TARGET;
