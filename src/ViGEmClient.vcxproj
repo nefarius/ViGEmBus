@@ -305,9 +305,12 @@
     <ClInclude Include="$(SolutionDir)\include\ViGEm\Common.h" />
     <ClInclude Include="$(SolutionDir)\include\ViGEm\Util.h" />
     <ClInclude Include="$(SolutionDir)\include\ViGEm\km\BusShared.h" />
+    <ClInclude Include="Internal.h" />
+    <ClInclude Include="NotificationRequestPool.h" />
     <ClInclude Include="XusbNotificationRequest.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="NotificationRequestPool.cpp" />
     <ClCompile Include="ViGEmClient.cpp" />
     <ClCompile Include="XusbNotificationRequest.cpp" />
   </ItemGroup>
