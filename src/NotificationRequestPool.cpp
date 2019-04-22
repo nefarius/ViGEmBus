@@ -67,8 +67,8 @@ void NotificationRequestPool::operator()()
         const auto ret = WaitForMultipleObjects(
             requests_.size(),
             wait_handles_,
-            FALSE,
-            25
+            FALSE, // first one to be signaled wins
+            25 // don't block indefinitely so worker can be canceled
         );
 
         // timeout has occurred...
