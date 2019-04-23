@@ -20,7 +20,7 @@ class NotificationRequestPool
     PVIGEM_TARGET target_;
     PFN_VIGEM_X360_NOTIFICATION callback_;
 
-    std::vector<XusbNotificationRequest*> requests_;
+    std::vector<std::unique_ptr<XusbNotificationRequest>> requests_;
     std::shared_ptr<boost::thread> thread_;
     boost::mutex m_;
     boost::condition_variable cv_;

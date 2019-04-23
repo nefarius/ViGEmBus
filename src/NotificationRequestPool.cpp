@@ -21,12 +21,11 @@ NotificationRequestPool::NotificationRequestPool(
         // create auto-reset event
         wait_handle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
         // create async pending I/O request wrapper
-        auto req = new XusbNotificationRequest(
+        requests_.push_back(std::make_unique<XusbNotificationRequest>(
             client_->hBusDevice,
             target_->SerialNo,
             wait_handle
-        );
-        requests_.push_back(req);
+            ));
     }
 
     // init ASIO
@@ -87,7 +86,7 @@ void NotificationRequestPool::operator()()
         // index of the request which just got completed
         const auto index = ret - WAIT_OBJECT_0;
         // grab associated request
-        const auto req = requests_[index];
+        const auto req = requests_[index].get();
 
         // prepare queueing library caller notification callback
         const boost::function<void(
