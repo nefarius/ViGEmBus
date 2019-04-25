@@ -9,12 +9,11 @@
 #include "ViGEm/Client.h"
 #include "Internal.h"
 
-#define VIGEM_INVERTED_CALL_THREAD_COUNT    20
-
 
 class NotificationRequestPool
 {
-    HANDLE wait_handles_[VIGEM_INVERTED_CALL_THREAD_COUNT]{};
+    static const int thread_count = 20;
+    HANDLE wait_handles_[thread_count]{};
 
     PVIGEM_CLIENT client_;
     PVIGEM_TARGET target_;

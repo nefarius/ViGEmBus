@@ -531,7 +531,7 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
 
     std::vector<std::thread> threadList;
 
-    for (int i = 0; i < VIGEM_INVERTED_CALL_THREAD_COUNT; i++)
+    for (int i = 0; i < 20 /* TODO: legacy, remove */; i++)
     {
         threadList.emplace_back(std::thread([](
             PVIGEM_TARGET _Target,
