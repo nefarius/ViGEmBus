@@ -72,6 +72,7 @@ Sponsors listed here have helped the project flourish by either financial suppor
 - [Parsec](https://parsecgaming.com/)
 - [Rainway, Inc](https://rainway.io/)
 - [JetBrains](https://www.jetbrains.com/resharper/)
+- [ICAROS](https://www.icaros.com/)
 
 ## Known users of ViGEm
 
