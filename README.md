@@ -2,7 +2,7 @@
 
 Windows kernel-mode driver emulating well-known USB game controllers.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/rv74ufluwib52dq2?svg=true)](https://ci.appveyor.com/project/nefarius/vigembus) [![Discord](https://img.shields.io/discord/346756263763378176.svg)](https://discord.gg/QTJpBX5)  [![Website](https://img.shields.io/website-up-down-green-red/https/vigem.org.svg?label=ViGEm.org)](https://vigem.org/) [![PayPal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](<https://paypal.me/NefariusMaximus>) [![Support on Patreon](https://img.shields.io/badge/patreon-donate-orange.svg)](<https://www.patreon.com/nefarius>) [![GitHub followers](https://img.shields.io/github/followers/nefarius.svg?style=social&label=Follow)](https://github.com/nefarius) [![Twitter Follow](https://img.shields.io/twitter/follow/nefariusmaximus.svg?style=social&label=Follow)](https://twitter.com/nefariusmaximus)
+[![Build status](https://ci.appveyor.com/api/projects/status/rv74ufluwib52dq2?svg=true)](https://ci.appveyor.com/project/nefarius/vigembus) [![Discord](https://img.shields.io/discord/346756263763378176.svg)](https://discord.vigem.org) [![Website](https://img.shields.io/website-up-down-green-red/https/vigem.org.svg?label=ViGEm.org)](https://vigem.org/) [![PayPal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](<https://paypal.me/NefariusMaximus>) [![Support on Patreon](https://img.shields.io/badge/patreon-donate-orange.svg)](<https://www.patreon.com/nefarius>) [![GitHub followers](https://img.shields.io/github/followers/nefarius.svg?style=social&label=Follow)](https://github.com/nefarius) [![Twitter Follow](https://img.shields.io/twitter/follow/nefariusmaximus.svg?style=social&label=Follow)](https://twitter.com/nefariusmaximus)
 
 ## About
 
@@ -23,14 +23,14 @@ A few examples of the most common use cases for `ViGEm` are:
 
 - You have an unsupported input device you'd like to use within games without modifying said game.
 - You want the freedom to use a different controller of your choice in [PS4 Remote Play](<https://remoteplay.dl.playstation.net/remoteplay/>).
-- You encountered a game not compatible with [x360ce](<https://www.x360ce.com/>).
+- You encountered a game not compatible with [x360ce](<https://www.x360ce.com/>) (prior to version 4.x).
 - You want to extend the reach of your input device (like send traffic to a different machine over a network).
 - You want to test/benchmark your game and need a replay mechanism for your user inputs.
 - You want to work around player slot assignment order issues in `XInput`.
 
 ## Supported Systems
 
-The driver is built for Windows 7/8/8.1/10 (x86 and amd64).
+The driver is built for Windows 7/8.1/10 (x86 and amd64).
 
 ## How to build
 
@@ -62,7 +62,7 @@ Please respect that the GitHub issue tracker isn't a helpdesk. We offer a [Disco
 
 ## Installation
 
-To grab the latest signed binaries for use or redistribution [follow the installation instructions](<https://docs.vigem.org/#!vigem-bus-driver-installation.md>).
+To grab the latest signed binaries for use or redistribution [head over to releases](../../releases/latest) and download the latest setup. It will take care of everything.
 
 ## Sponsors
 
