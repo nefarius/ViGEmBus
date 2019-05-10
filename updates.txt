@@ -1,13 +1,13 @@
 ;aiu;
 
-[ViGEmBus_1.16.113]
-Name = ViGEm Bus Driver 1.16.113
-URL = https://github.com/ViGEm/ViGEmBus/releases/download/v1.16.113/ViGEmBus_Setup_1.16.113.exe
-Size = 14306600
+[ViGEmBus_1.16.115]
+Name = ViGEm Bus Driver 1.16.115
+URL = https://github.com/ViGEm/ViGEmBus/releases/download/v1.16.112/ViGEmBus_Setup_1.16.115.exe
+Size = 14310704
 Description = This release fixes a few issues with the setup itself. It contains no newer driver than the previous version.
 BugFix = Setup can fail on Windows 7 due to unhandled exception in removal action
 RegistryKey = HKLM\Software\Nefarius Software Solutions e.U.\ViGEm Bus Driver\Version
-Version = 1.16.113
+Version = 1.16.115
 
 [ViGEmBus_1.16.112]
 Name = ViGEm Bus Driver 1.16.112
