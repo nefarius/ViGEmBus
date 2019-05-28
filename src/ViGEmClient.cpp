@@ -23,7 +23,6 @@ SOFTWARE.
 */
 
 
-#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <SetupAPI.h>
 #include <initguid.h>
@@ -40,14 +39,6 @@ SOFTWARE.
 #include <climits>
 #include <vector>
 #include <algorithm>
-
-//
-// Boost
-//
-#include <boost/asio.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread.hpp>
-#include <boost/bind.hpp>
 
 #include <thread>
 

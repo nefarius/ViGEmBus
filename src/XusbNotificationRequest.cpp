@@ -1,4 +1,5 @@
 ﻿#include "XusbNotificationRequest.h"
+#include <winioctl.h>
 
 
 XusbNotificationRequest::XusbNotificationRequest(
