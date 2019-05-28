@@ -83,18 +83,3 @@ void XusbNotificationRequest::post(boost::asio::io_service::strand strand) const
         payload_.LedNumber
     ));
 }
-
-UCHAR XusbNotificationRequest::get_led_number() const
-{
-    return payload_.LedNumber;
-}
-
-UCHAR XusbNotificationRequest::get_large_motor() const
-{
-    return payload_.LargeMotor;
-}
-
-UCHAR XusbNotificationRequest::get_small_motor() const
-{
-    return payload_.SmallMotor;
-}

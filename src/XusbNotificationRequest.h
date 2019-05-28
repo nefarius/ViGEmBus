@@ -41,8 +41,4 @@ public:
     XusbNotificationRequest(PVIGEM_CLIENT client, PVIGEM_TARGET target, HANDLE notification);
     bool request_async();
     void post(boost::asio::io_service::strand strand) const;
-
-    UCHAR get_led_number() const;
-    UCHAR get_large_motor() const;
-    UCHAR get_small_motor() const;
 };
