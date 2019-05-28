@@ -37,7 +37,6 @@ NotificationRequestPool::NotificationRequestPool(
 ) :
     client_(client),
     target_(target),
-    callback_(callback),
     stop_(false)
 {
     // prepare array of handles and request wrappers

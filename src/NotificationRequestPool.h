@@ -41,7 +41,6 @@ class NotificationRequestPool
 
     PVIGEM_CLIENT client_;
     PVIGEM_TARGET target_;
-    FARPROC callback_;
 
     std::vector<std::unique_ptr<XusbNotificationRequest>> requests_;
     std::shared_ptr<boost::thread> thread_;
