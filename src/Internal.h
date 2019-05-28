@@ -64,7 +64,7 @@ typedef struct _VIGEM_TARGET_T
     USHORT VendorId;
     USHORT ProductId;
     VIGEM_TARGET_TYPE Type;
-    DWORD_PTR Notification;
+    FARPROC Notification;
 
     std::shared_ptr<NotificationRequestPool> pool;
 

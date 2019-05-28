@@ -27,16 +27,20 @@ SOFTWARE.
 
 #include <Windows.h>
 #include "ViGEm/km/BusShared.h"
+#include <boost/asio.hpp>
+#include "ViGEm/Client.h"
 
 class XusbNotificationRequest
 {
-    HANDLE parent_bus_;
+    PVIGEM_CLIENT client_;
+    PVIGEM_TARGET target_;
     XUSB_REQUEST_NOTIFICATION payload_;
     OVERLAPPED overlapped_;
 
 public:
-    XusbNotificationRequest(HANDLE bus, ULONG serial, HANDLE notification);
+    XusbNotificationRequest(PVIGEM_CLIENT client, PVIGEM_TARGET target, HANDLE notification);
     bool request_async();
+    void post(boost::asio::io_service::strand strand) const;
 
     UCHAR get_led_number() const;
     UCHAR get_large_motor() const;

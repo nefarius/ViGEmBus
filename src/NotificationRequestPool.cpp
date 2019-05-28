@@ -47,8 +47,8 @@ NotificationRequestPool::NotificationRequestPool(
         wait_handle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
         // create async pending I/O request wrapper
         requests_.push_back(std::make_unique<XusbNotificationRequest>(
-            client_->hBusDevice,
-            target_->SerialNo,
+            client_,
+            target_,
             wait_handle
             ));
     }
@@ -113,22 +113,8 @@ void NotificationRequestPool::operator()()
         // grab associated request
         const auto req = requests_[index].get();
 
-        // prepare queueing library caller notification callback
-        const boost::function<void(
-            PVIGEM_CLIENT,
-            PVIGEM_TARGET,
-            UCHAR,
-            UCHAR,
-            UCHAR)> pfn = PFN_VIGEM_X360_NOTIFICATION(callback_);
-
         // submit callback for async yet ordered invocation
-        strand.post(boost::bind(pfn,
-                                client_,
-                                target_,
-                                req->get_large_motor(),
-                                req->get_small_motor(),
-                                req->get_led_number()
-        ));
+        req->post(std::move(strand));
 
         // submit another pending I/O
         req->request_async();

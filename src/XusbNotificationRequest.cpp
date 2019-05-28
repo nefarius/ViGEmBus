@@ -25,26 +25,31 @@ SOFTWARE.
 
 #include "XusbNotificationRequest.h"
 #include <winioctl.h>
+#include <ViGEm/Client.h>
+#include "Internal.h"
+#include <boost/bind/bind.hpp>
+#include <boost/function.hpp>
 
 
 XusbNotificationRequest::XusbNotificationRequest(
-    HANDLE bus,
-    ULONG serial,
+    PVIGEM_CLIENT client,
+    PVIGEM_TARGET target,
     HANDLE notification
-) : parent_bus_(bus),
+) : client_(client),
+    target_(target),
     payload_(),
     overlapped_()
 {
     memset(&overlapped_, 0, sizeof(OVERLAPPED));
     overlapped_.hEvent = notification;
-    XUSB_REQUEST_NOTIFICATION_INIT(&payload_, serial);
+    XUSB_REQUEST_NOTIFICATION_INIT(&payload_, target_->SerialNo);
 }
 
 bool XusbNotificationRequest::request_async()
 {
     // queue request in driver
     const auto ret = DeviceIoControl(
-        parent_bus_,
+        client_->hBusDevice,
         IOCTL_XUSB_REQUEST_NOTIFICATION,
         &payload_,
         payload_.Size,
@@ -57,6 +62,26 @@ bool XusbNotificationRequest::request_async()
     const auto error = GetLastError();
 
     return (!ret && error == ERROR_IO_PENDING);
+}
+
+void XusbNotificationRequest::post(boost::asio::io_service::strand strand) const
+{
+    // prepare queueing library caller notification callback
+    const boost::function<void(
+        PVIGEM_CLIENT,
+        PVIGEM_TARGET,
+        UCHAR,
+        UCHAR,
+        UCHAR)> pfn = PFN_VIGEM_X360_NOTIFICATION(target_->Notification);
+
+    // submit callback for async yet ordered invocation
+    strand.post(boost::bind(pfn,
+        client_,
+        target_,
+        payload_.LargeMotor,
+        payload_.SmallMotor,
+        payload_.LedNumber
+    ));
 }
 
 UCHAR XusbNotificationRequest::get_led_number() const

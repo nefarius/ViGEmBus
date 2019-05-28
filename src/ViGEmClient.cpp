@@ -481,12 +481,10 @@ VIGEM_ERROR vigem_target_x360_register_notification(
     if (target->SerialNo == 0 || notification == nullptr)
         return VIGEM_ERROR_INVALID_TARGET;
 
-    if (target->Notification == reinterpret_cast<DWORD_PTR>(notification))
+    if (target->Notification == reinterpret_cast<FARPROC>(notification))
         return VIGEM_ERROR_CALLBACK_ALREADY_REGISTERED;
 
-    // TODO: tidy up this mess
-
-    target->Notification = reinterpret_cast<DWORD_PTR>(notification);
+    target->Notification = reinterpret_cast<FARPROC>(notification);
 
     target->pool = std::make_shared<NotificationRequestPool>(
         vigem,
@@ -515,10 +513,10 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
     if (target->SerialNo == 0 || notification == nullptr)
         return VIGEM_ERROR_INVALID_TARGET;
 
-    if (target->Notification == reinterpret_cast<DWORD_PTR>(notification))
+    if (target->Notification == reinterpret_cast<FARPROC>(notification))
         return VIGEM_ERROR_CALLBACK_ALREADY_REGISTERED;
 
-    target->Notification = reinterpret_cast<DWORD_PTR>(notification);
+    target->Notification = reinterpret_cast<FARPROC>(notification);
 
     std::vector<std::thread> threadList;
 
