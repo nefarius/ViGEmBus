@@ -47,7 +47,7 @@ int main()
     XUSB_REPORT report;
     XUSB_REPORT_INIT(&report);
 
-    while(true)
+    while(!(GetAsyncKeyState(VK_ESCAPE) & 0x8000))
     {
         ret = vigem_target_x360_update(client, x360, report);
         report.bLeftTrigger++;
