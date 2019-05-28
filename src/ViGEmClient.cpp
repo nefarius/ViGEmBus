@@ -500,7 +500,7 @@ VIGEM_ERROR vigem_target_x360_register_notification(
     target->pool = std::make_shared<NotificationRequestPool>(
         vigem,
         target,
-        PFN_VIGEM_X360_NOTIFICATION(target->Notification)
+        reinterpret_cast<FARPROC>(target->Notification)
         );
 
     return VIGEM_ERROR_NONE;

@@ -8,7 +8,7 @@ void NotificationRequestPool::strand_dispatch_worker() const
 NotificationRequestPool::NotificationRequestPool(
     PVIGEM_CLIENT client,
     PVIGEM_TARGET target,
-    PFN_VIGEM_X360_NOTIFICATION callback
+    FARPROC callback
 ) :
     client_(client),
     target_(target),
@@ -44,7 +44,7 @@ NotificationRequestPool::NotificationRequestPool(
         request->request_async();
 }
 
-NotificationRequestPool::~NotificationRequestPool()
+NotificationRequestPool::~NotificationRequestPool() noexcept(false)
 {
     for (auto& wait_handle : wait_handles_)
         CloseHandle(wait_handle);
@@ -94,7 +94,7 @@ void NotificationRequestPool::operator()()
             PVIGEM_TARGET,
             UCHAR,
             UCHAR,
-            UCHAR)> pfn = callback_;
+            UCHAR)> pfn = PFN_VIGEM_X360_NOTIFICATION(callback_);
 
         // submit callback for async yet ordered invocation
         strand.post(boost::bind(pfn,
