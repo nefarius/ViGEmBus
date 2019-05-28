@@ -54,6 +54,7 @@ int main()
         Sleep(10);
     }
 
+    vigem_target_x360_unregister_notification(x360);
     vigem_target_remove(client, x360);
     vigem_target_free(x360);
     vigem_free(client);

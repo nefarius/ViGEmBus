@@ -64,7 +64,7 @@ bool XusbNotificationRequest::request_async()
     return (!ret && error == ERROR_IO_PENDING);
 }
 
-void XusbNotificationRequest::post(boost::asio::io_service::strand strand) const
+void XusbNotificationRequest::post(boost::asio::io_service::strand strand)
 {
     // prepare queueing library caller notification callback
     const boost::function<void(

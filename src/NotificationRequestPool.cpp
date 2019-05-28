@@ -32,8 +32,7 @@ void NotificationRequestPool::strand_dispatch_worker() const
 
 NotificationRequestPool::NotificationRequestPool(
     PVIGEM_CLIENT client,
-    PVIGEM_TARGET target,
-    FARPROC callback
+    PVIGEM_TARGET target
 ) :
     client_(client),
     target_(target),
@@ -73,10 +72,11 @@ NotificationRequestPool::~NotificationRequestPool() noexcept(false)
     for (auto& wait_handle : wait_handles_)
         CloseHandle(wait_handle);
 
+    for (auto& request : requests_)
+        request.reset();
+
     io_svc_->stop();
     worker_thread_->join();
-
-    thread_->join();
 }
 
 void NotificationRequestPool::operator()()

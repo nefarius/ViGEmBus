@@ -66,6 +66,6 @@ typedef struct _VIGEM_TARGET_T
     VIGEM_TARGET_TYPE Type;
     FARPROC Notification;
 
-    std::shared_ptr<NotificationRequestPool> pool;
+    std::unique_ptr<NotificationRequestPool> NotificationPool;
 
 } VIGEM_TARGET;

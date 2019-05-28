@@ -486,10 +486,9 @@ VIGEM_ERROR vigem_target_x360_register_notification(
 
     target->Notification = reinterpret_cast<FARPROC>(notification);
 
-    target->pool = std::make_shared<NotificationRequestPool>(
+    target->NotificationPool = std::make_unique<NotificationRequestPool>(
         vigem,
-        target,
-        reinterpret_cast<FARPROC>(target->Notification)
+        target
         );
 
     return VIGEM_ERROR_NONE;
@@ -580,7 +579,8 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
 
 void vigem_target_x360_unregister_notification(PVIGEM_TARGET target)
 {
-    target->Notification = NULL;
+    target->NotificationPool.reset();
+    target->Notification = nullptr;
 }
 
 void vigem_target_ds4_unregister_notification(PVIGEM_TARGET target)
