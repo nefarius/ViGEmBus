@@ -107,6 +107,13 @@ void NotificationRequestPool::operator()()
             continue;
         }
 
+        // handles are closed...?
+        if (ret == WAIT_FAILED)
+        {
+            // exits function (terminates thread)
+            break;
+        }
+
         // index of the request which just got completed
         const auto index = ret - WAIT_OBJECT_0;
         // grab associated request
