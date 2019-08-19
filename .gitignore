@@ -48,3 +48,8 @@
 /app/Tester/Debug
 /Debug
 /app/Tester/x64/Debug
+/app/Tester/x64/Release/Tester.tlog
+/app/Tester/x64/Release/Tester.log
+/app/Tester/x64/Release/Tester.obj
+/app/Tester/x64/Release/vc141.pdb
+/app/Tester/x64/Release/vcpkg.applocal.log

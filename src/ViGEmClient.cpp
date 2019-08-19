@@ -44,9 +44,6 @@ SOFTWARE.
 
 #include "Internal.h"
 
-#include "NotificationRequestPool.h"
-
-
 typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(
     HANDLE hProcess,
     DWORD dwPid,
@@ -58,6 +55,74 @@ typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(
     );
 
 LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExceptionInfo);
+
+
+//
+// DeviceIOControl request notification handler classes for X360 and DS4 controller types. 
+// vigem_target_XXX_register_notification functions use x360 or DS4 derived class instances in a notification thread handlers.
+//
+class NotificationRequestPayload
+{
+public:
+	LPVOID lpPayloadBuffer;
+	DWORD  payloadBufferSize;
+	DWORD  ioControlCode;
+
+public:
+	NotificationRequestPayload(DWORD _bufferSize, DWORD _ioControlCode)
+	{ 
+		lpPayloadBuffer = malloc(_bufferSize);
+		payloadBufferSize = _bufferSize;
+		ioControlCode = _ioControlCode;
+	}
+
+	virtual ~NotificationRequestPayload()
+	{
+		free(lpPayloadBuffer);
+	}
+
+	virtual void ProcessNotificationRequest(PVIGEM_CLIENT client, PVIGEM_TARGET target) = 0;
+};
+
+class NotificationRequestPayloadX360 : public NotificationRequestPayload
+{
+public:
+	NotificationRequestPayloadX360(ULONG _serialNo) : NotificationRequestPayload(sizeof(XUSB_REQUEST_NOTIFICATION), IOCTL_XUSB_REQUEST_NOTIFICATION)
+	{
+		// Let base class to allocate required buffer size, but initialize it here with a correct type of initialization function
+		XUSB_REQUEST_NOTIFICATION_INIT((PXUSB_REQUEST_NOTIFICATION)lpPayloadBuffer, _serialNo);
+	}
+
+	void ProcessNotificationRequest(PVIGEM_CLIENT client, PVIGEM_TARGET target) override
+	{
+		if(target->Notification != nullptr)
+			PFN_VIGEM_X360_NOTIFICATION(target->Notification)(client, target, 
+				((PXUSB_REQUEST_NOTIFICATION)lpPayloadBuffer)->LargeMotor, 
+				((PXUSB_REQUEST_NOTIFICATION)lpPayloadBuffer)->SmallMotor,
+				((PXUSB_REQUEST_NOTIFICATION)lpPayloadBuffer)->LedNumber
+			);
+	}
+};
+
+class NotificationRequestPayloadDS4 : public NotificationRequestPayload
+{
+public:
+	NotificationRequestPayloadDS4(ULONG _serialNo) : NotificationRequestPayload(sizeof(DS4_REQUEST_NOTIFICATION), IOCTL_DS4_REQUEST_NOTIFICATION)
+	{
+		// Let base class to allocate required buffer size, but initialize it here with a correct type of initialization function
+		DS4_REQUEST_NOTIFICATION_INIT((PDS4_REQUEST_NOTIFICATION)lpPayloadBuffer, _serialNo);
+	}
+
+	void ProcessNotificationRequest(PVIGEM_CLIENT client, PVIGEM_TARGET target) override
+	{
+		if (target->Notification != nullptr)
+			PFN_VIGEM_DS4_NOTIFICATION(target->Notification)(client, target,
+				((PDS4_REQUEST_NOTIFICATION)lpPayloadBuffer)->Report.LargeMotor,
+				((PDS4_REQUEST_NOTIFICATION)lpPayloadBuffer)->Report.SmallMotor,
+				((PDS4_REQUEST_NOTIFICATION)lpPayloadBuffer)->Report.LightbarColor
+			);
+	}
+};
 
 
 //
@@ -77,7 +142,7 @@ PVIGEM_TARGET FORCEINLINE VIGEM_TARGET_ALLOC_INIT(
     target->Size = sizeof(VIGEM_TARGET);
     target->State = VIGEM_TARGET_INITIALIZED;
     target->Type = Type;
-
+	target->notificationThreadList = nullptr;
     return target;
 }
 
@@ -288,8 +353,8 @@ PVIGEM_TARGET vigem_target_ds4_alloc(void)
 
 void vigem_target_free(PVIGEM_TARGET target)
 {
-    if (target)
-        free(target);
+	if (target)
+		free(target);
 }
 
 VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
@@ -463,6 +528,57 @@ VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
     return VIGEM_ERROR_REMOVAL_FAILED;
 }
 
+void vigem_notification_thread_worker(
+	PVIGEM_CLIENT client,
+	PVIGEM_TARGET target,
+	std::unique_ptr<NotificationRequestPayload> pNotificationRequestPayload
+)
+{
+	BOOL devIoResult;
+	DWORD error;
+	DWORD transferred = 0;
+	OVERLAPPED lOverlapped = { 0 };
+	HANDLE waitObjects[2];
+	waitObjects[0] = target->cancelNotificationThreadEvent;
+	waitObjects[1] = lOverlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);;
+
+	do
+	{
+		devIoResult = DeviceIoControl(client->hBusDevice,
+			pNotificationRequestPayload->ioControlCode,
+			pNotificationRequestPayload->lpPayloadBuffer,
+			pNotificationRequestPayload->payloadBufferSize,
+			pNotificationRequestPayload->lpPayloadBuffer,
+			pNotificationRequestPayload->payloadBufferSize,
+			&transferred,
+			&lOverlapped);
+
+		if (!devIoResult)
+		{
+			if (GetLastError() == ERROR_IO_PENDING)
+			{
+				// DeviceIoControl is not yet completed to return all data. Wait for overlapped completion and thread cancellation events
+				error = WaitForMultipleObjects(2, waitObjects, FALSE, INFINITE);
+				if (error != (WAIT_OBJECT_0 + 1))
+					break; // Cancel event signaled or error while waiting for events (maybe handles were closed?). Quit this thread worker
+			}
+			else
+				// Hmm... DeviceIoControl failed and is not just in async pending state. Quit the notification thread because the virtual controller may be in unknown state
+				break;
+		}
+
+		if (GetOverlappedResult(client->hBusDevice, &lOverlapped, &transferred, TRUE) != 0)
+			pNotificationRequestPayload->ProcessNotificationRequest(client, target);
+
+	} while (target->closingNotificationThreads != TRUE && target->Notification != nullptr);
+
+	if (lOverlapped.hEvent)
+		CloseHandle(lOverlapped.hEvent);
+
+	// Caller created the unique_ptr object, but this thread worker function should delete the object because it is no longer needed (thread specific object)
+	pNotificationRequestPayload.reset();
+}
+
 VIGEM_ERROR vigem_target_x360_register_notification(
     PVIGEM_CLIENT vigem,
     PVIGEM_TARGET target,
@@ -486,10 +602,18 @@ VIGEM_ERROR vigem_target_x360_register_notification(
 
     target->Notification = reinterpret_cast<FARPROC>(notification);
 
-    target->NotificationPool = std::make_unique<NotificationRequestPool>(
-        vigem,
-        target
-        );
+	if (target->cancelNotificationThreadEvent == 0)
+		target->cancelNotificationThreadEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+	else
+		ResetEvent(target->cancelNotificationThreadEvent);
+
+	if(target->notificationThreadList == nullptr)
+		target->notificationThreadList = std::make_unique<std::vector<std::thread>>();
+
+	target->closingNotificationThreads = FALSE;
+
+	for (int i = 0; i < 20; i++)
+		target->notificationThreadList->emplace_back(std::thread(&vigem_notification_thread_worker, vigem, target, std::make_unique<NotificationRequestPayloadX360>(target->SerialNo)));
 
     return VIGEM_ERROR_NONE;
 }
@@ -517,75 +641,49 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
 
     target->Notification = reinterpret_cast<FARPROC>(notification);
 
-    std::vector<std::thread> threadList;
+	if (target->cancelNotificationThreadEvent == 0)
+		target->cancelNotificationThreadEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+	else
+		ResetEvent(target->cancelNotificationThreadEvent);
 
-    for (int i = 0; i < 20 /* TODO: legacy, remove */; i++)
-    {
-        threadList.emplace_back(std::thread([](
-            PVIGEM_TARGET _Target,
-            PVIGEM_CLIENT _Client)
-        {
-            DWORD error = ERROR_SUCCESS;
-            DWORD transferred = 0;
-            OVERLAPPED lOverlapped = { 0 };
-            lOverlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+	if (target->notificationThreadList == nullptr)
+		target->notificationThreadList = std::make_unique<std::vector<std::thread>>();
 
-            DS4_REQUEST_NOTIFICATION notify;
-            DS4_REQUEST_NOTIFICATION_INIT(&notify, _Target->SerialNo);
+	target->closingNotificationThreads = FALSE;
 
-            do
-            {
-                DeviceIoControl(_Client->hBusDevice,
-                    IOCTL_DS4_REQUEST_NOTIFICATION,
-                    &notify,
-                    notify.Size,
-                    &notify,
-                    notify.Size,
-                    &transferred,
-                    &lOverlapped);
-
-                if (GetOverlappedResult(_Client->hBusDevice, &lOverlapped, &transferred, TRUE) != 0)
-                {
-                    if (_Target->Notification == NULL)
-                    {
-                        if (lOverlapped.hEvent)
-                            CloseHandle(lOverlapped.hEvent);
-                        return;
-                    }
-
-                    PFN_VIGEM_DS4_NOTIFICATION(_Target->Notification)(
-                        _Client,
-                        _Target,
-                        notify.Report.LargeMotor,
-                        notify.Report.SmallMotor,
-                        notify.Report.LightbarColor);
-                }
-                else
-                {
-                    error = GetLastError();
-                }
-            } while (error != ERROR_OPERATION_ABORTED && error != ERROR_ACCESS_DENIED);
-
-            if (lOverlapped.hEvent)
-                CloseHandle(lOverlapped.hEvent);
-
-        }, target, vigem));
-    }
-
-    std::for_each(threadList.begin(), threadList.end(), std::mem_fn(&std::thread::detach));
+    for (int i = 0; i < 20; i++)
+		target->notificationThreadList->emplace_back(std::thread(&vigem_notification_thread_worker, vigem, target, std::make_unique<NotificationRequestPayloadDS4>(target->SerialNo)));
 
     return VIGEM_ERROR_NONE;
 }
 
 void vigem_target_x360_unregister_notification(PVIGEM_TARGET target)
 {
-    target->NotificationPool.reset();
-    target->Notification = nullptr;
+	target->closingNotificationThreads = TRUE;
+
+	if (target->cancelNotificationThreadEvent != 0)
+		SetEvent(target->cancelNotificationThreadEvent);
+
+	if (target->notificationThreadList != nullptr)
+	{
+		// Wait for completion of all notification threads before cleaning up target object and Notification function pointer (a thread may be in the middle of handling a notification request, so close it cleanly)
+		std::for_each(target->notificationThreadList->begin(), target->notificationThreadList->end(), std::mem_fn(&std::thread::join));
+		target->notificationThreadList.reset();
+		target->notificationThreadList = nullptr;
+	}
+	
+	if (target->cancelNotificationThreadEvent != 0)
+	{
+		CloseHandle(target->cancelNotificationThreadEvent);
+		target->cancelNotificationThreadEvent = 0;
+	}
+
+	target->Notification = nullptr;
 }
 
 void vigem_target_ds4_unregister_notification(PVIGEM_TARGET target)
 {
-    target->Notification = NULL;
+	vigem_target_x360_unregister_notification(target); // The same x360_unregister handler works for DS4_unregister also
 }
 
 void vigem_target_set_vid(PVIGEM_TARGET target, USHORT vid)
