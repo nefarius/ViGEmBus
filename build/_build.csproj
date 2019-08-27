@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="GitVersion.CommandLine.DotNetCore" Version="5.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Nefarius.JsonConfig" Version="1.0.2" />
     <PackageReference Include="Nuke.Common" Version="0.21.2" />
     <PackageReference Include="Vestris.ResourceLib" Version="2.1.0" />
