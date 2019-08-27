@@ -15,7 +15,7 @@ using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
 class Build : NukeBuild
 {
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
-    private readonly string Configuration = IsLocalBuild ? "Debug" : "Release";
+    private readonly string Configuration = IsLocalBuild ? "Debug_DLL" : "Release_DLL";
 
     [GitRepository] private readonly GitRepository GitRepository;
     [GitVersion] private readonly GitVersion GitVersion;
@@ -55,9 +55,7 @@ class Build : NukeBuild
                 .SetNodeReuse(IsLocalBuild)
                 .SetTargetPlatform(MSBuildTargetPlatform.x86));
 
-            Console.WriteLine($"!! {Configuration}");
-
-            if (Configuration.Contains($"{Configuration}_dll", StringComparison.InvariantCultureIgnoreCase))
+            if (Configuration.Equals($"{Configuration}_dll", StringComparison.InvariantCultureIgnoreCase))
             {
                 var version =
                     new Version(IsLocalBuild ? GitVersion.GetNormalizedFileVersion() : AppVeyor.Instance.BuildVersion);
@@ -123,13 +121,5 @@ class Build : NukeBuild
         varFileInfoTranslation[ResourceUtil.USENGLISHLANGID] = 1300;
 
         versionResource.SaveTo(path);
-    }
-}
-
-public static class StringExtensions
-{
-    public static bool Contains(this string source, string toCheck, StringComparison comp)
-    {
-        return source?.IndexOf(toCheck, comp) >= 0;
     }
 }
