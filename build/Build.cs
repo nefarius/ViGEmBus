@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using JsonConfig;
 using Nuke.Common;
 using Nuke.Common.BuildServers;
@@ -7,6 +5,8 @@ using Nuke.Common.Git;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Tools.MSBuild;
+using System;
+using System.IO;
 using Vestris.ResourceLib;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
@@ -21,7 +21,7 @@ class Build : NukeBuild
     [GitVersion] private readonly GitVersion GitVersion;
 
     [Solution("ViGEmClient.sln")] private readonly Solution Solution;
-    private AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+    private AbsolutePath ArtifactsDirectory => RootDirectory / "bin";
 
     private Target Clean => _ => _
         .Executes(() => { EnsureCleanDirectory(ArtifactsDirectory); });
@@ -42,7 +42,7 @@ class Build : NukeBuild
             MSBuild(s => s
                 .SetTargetPath(Solution)
                 .SetTargets("Rebuild")
-                .SetConfiguration($"{Configuration}_DLL")
+                .SetConfiguration(Configuration)
                 .SetMaxCpuCount(Environment.ProcessorCount)
                 .SetNodeReuse(IsLocalBuild)
                 .SetTargetPlatform(MSBuildTargetPlatform.x64));
@@ -50,26 +50,23 @@ class Build : NukeBuild
             MSBuild(s => s
                 .SetTargetPath(Solution)
                 .SetTargets("Rebuild")
-                .SetConfiguration($"{Configuration}_DLL")
+                .SetConfiguration(Configuration)
                 .SetMaxCpuCount(Environment.ProcessorCount)
                 .SetNodeReuse(IsLocalBuild)
                 .SetTargetPlatform(MSBuildTargetPlatform.x86));
 
-            if (Configuration.Equals($"{Configuration}_dll", StringComparison.InvariantCultureIgnoreCase))
-            {
-                var version =
-                    new Version(IsLocalBuild ? GitVersion.GetNormalizedFileVersion() : AppVeyor.Instance.BuildVersion);
+            var version =
+                new Version(IsLocalBuild ? GitVersion.GetNormalizedFileVersion() : AppVeyor.Instance.BuildVersion);
 
-                Console.WriteLine($"Stamping version {version}");
+            Console.WriteLine($"Stamping version {version}");
 
-                StampVersion(
-                    Path.Combine(RootDirectory, $@"bin\{Configuration}\x64\ViGEmClient.dll"),
-                    version);
+            StampVersion(
+                Path.Combine(RootDirectory, $@"bin\{Configuration}\x64\ViGEmClient.dll"),
+                version);
 
-                StampVersion(
-                    Path.Combine(RootDirectory, $@"bin\{Configuration}\x86\ViGEmClient.dll"),
-                    version);
-            }
+            StampVersion(
+                Path.Combine(RootDirectory, $@"bin\{Configuration}\x86\ViGEmClient.dll"),
+                version);
         });
 
     private Target Pack => _ => _
