@@ -27,7 +27,7 @@ You can either build directly within Visual Studio or in PowerShell by running t
 
 Found a bug and want it fixed? Open a detailed issue on the [GitHub issue tracker](../../issues)!
 
-Have an idea for a new feature? [Check out the project board](https://projects.vigem.org/public/board/27281599595f5fbe5f915884fb9ca2de92726e74173f1ac434300b2d40af), maybe it's already on there! If not, let's have a chat about your request on [Discord](https://discord.vigem.org) or the [community forums](https://forums.vigem.org).
+Have an idea for a new feature? Let's have a chat about your request on [Discord](https://discord.vigem.org) or the [community forums](https://forums.vigem.org).
 
 ### Questions & Support
 
