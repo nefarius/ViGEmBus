@@ -60,6 +60,8 @@ class Build : NukeBuild
                 var version =
                     new Version(IsLocalBuild ? GitVersion.GetNormalizedFileVersion() : AppVeyor.Instance.BuildVersion);
 
+                Console.WriteLine($"Stamping version {version}");
+
                 StampVersion(
                     Path.Combine(RootDirectory, $@"bin\{Configuration}\x64\ViGEmClient.dll"),
                     version);
