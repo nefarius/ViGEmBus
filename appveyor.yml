@@ -3,6 +3,7 @@ image: Visual Studio 2017
 build_script:
 - ps: .\build.ps1
 artifacts:
+- path: 'bin**\*.lib'
 - path: 'bin**\*.dll'
 deploy:
 - provider: Environment
