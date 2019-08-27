@@ -55,6 +55,8 @@ class Build : NukeBuild
                 .SetNodeReuse(IsLocalBuild)
                 .SetTargetPlatform(MSBuildTargetPlatform.x86));
 
+            Console.WriteLine($"!! {Configuration}");
+
             if (Configuration.Contains($"{Configuration}_dll", StringComparison.InvariantCultureIgnoreCase))
             {
                 var version =
