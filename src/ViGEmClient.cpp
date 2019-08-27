@@ -528,52 +528,104 @@ VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
     return VIGEM_ERROR_REMOVAL_FAILED;
 }
 
+// Num of items in Notification DeviceIOControl queue (at any time there should be at least one extra call waiting for the new events or there is danger that notification events are lost).
+// The size of this queue is based on "scientific" experimentals and estimations (few games seem to sometimes flood the FFB driver interface).
+#define NOTIFICATION_OVERLAPPED_QUEUE_SIZE 6
+
 void vigem_notification_thread_worker(
 	PVIGEM_CLIENT client,
 	PVIGEM_TARGET target,
-	std::unique_ptr<NotificationRequestPayload> pNotificationRequestPayload
+	std::unique_ptr <std::vector<std::unique_ptr<NotificationRequestPayload>>> pNotificationRequestPayload
 )
 {
-	BOOL devIoResult;
+	int   idx;
 	DWORD error;
-	DWORD transferred = 0;
-	OVERLAPPED lOverlapped = { 0 };
+
 	HANDLE waitObjects[2];
+
+	BOOL  devIoResult[NOTIFICATION_OVERLAPPED_QUEUE_SIZE];
+	DWORD lastIoError[NOTIFICATION_OVERLAPPED_QUEUE_SIZE];
+	DWORD transferred[NOTIFICATION_OVERLAPPED_QUEUE_SIZE];
+	OVERLAPPED lOverlapped[NOTIFICATION_OVERLAPPED_QUEUE_SIZE];
+
+	int currentOverlappedIdx;
+	int futureOverlappedIdx;
+
+	memset(lOverlapped, 0, sizeof(lOverlapped));
+	for(idx = 0; idx < NOTIFICATION_OVERLAPPED_QUEUE_SIZE; idx++)
+		lOverlapped[idx].hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+
 	waitObjects[0] = target->cancelNotificationThreadEvent;
-	waitObjects[1] = lOverlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);;
+
+	currentOverlappedIdx = 0;
+	futureOverlappedIdx = NOTIFICATION_OVERLAPPED_QUEUE_SIZE - 1;
+
+	// Send out DeviceIOControl calls to wait for incoming feedback notifications. Use N pending requests to make sure that events are not lost even when application would flood FFB events.
+	// The order of DeviceIoControl calls and GetOverlappedResult requests is important to ensure that feedback callback function is called in correct order (ie. FIFO buffer with FFB events).
+	// Note! This loop doesn't call DevIo for the last lOverlapped item on purpose. The DO while loop does it as a first step (futureOverlappedIdx=NOTIFICATION_OVERLAPPED_QUEUE_SIZE-1 in the first loop round).
+	for (idx = 0; idx < NOTIFICATION_OVERLAPPED_QUEUE_SIZE-1; idx++)
+	{
+		devIoResult[idx] = DeviceIoControl(client->hBusDevice,
+			(*pNotificationRequestPayload)[idx]->ioControlCode,
+			(*pNotificationRequestPayload)[idx]->lpPayloadBuffer,
+			(*pNotificationRequestPayload)[idx]->payloadBufferSize,
+			(*pNotificationRequestPayload)[idx]->lpPayloadBuffer,
+			(*pNotificationRequestPayload)[idx]->payloadBufferSize,
+			&transferred[idx],
+			&lOverlapped[idx]);
+
+		lastIoError[idx] = GetLastError();
+	}
 
 	do
 	{
-		devIoResult = DeviceIoControl(client->hBusDevice,
-			pNotificationRequestPayload->ioControlCode,
-			pNotificationRequestPayload->lpPayloadBuffer,
-			pNotificationRequestPayload->payloadBufferSize,
-			pNotificationRequestPayload->lpPayloadBuffer,
-			pNotificationRequestPayload->payloadBufferSize,
-			&transferred,
-			&lOverlapped);
+		// Before reading data from "current overlapped request" then send a new DeviceIoControl request to wait for upcoming new FFB events (ring buffer of overlapped objects).
+		devIoResult[futureOverlappedIdx] = DeviceIoControl(client->hBusDevice,
+			(*pNotificationRequestPayload)[futureOverlappedIdx]->ioControlCode,
+			(*pNotificationRequestPayload)[futureOverlappedIdx]->lpPayloadBuffer,
+			(*pNotificationRequestPayload)[futureOverlappedIdx]->payloadBufferSize,
+			(*pNotificationRequestPayload)[futureOverlappedIdx]->lpPayloadBuffer,
+			(*pNotificationRequestPayload)[futureOverlappedIdx]->payloadBufferSize,
+			&transferred[futureOverlappedIdx],
+			&lOverlapped[futureOverlappedIdx]);
 
-		if (!devIoResult)
+		lastIoError[futureOverlappedIdx] = GetLastError();
+
+		// currentOverlappedIdx is an index to the "oldest" DeviceIOControl call, so it will receive the next FFB event in a FFB sequence (in case there are multiple FFB events coming in)
+		if (!devIoResult[currentOverlappedIdx])
 		{
-			if (GetLastError() == ERROR_IO_PENDING)
+			if (lastIoError[currentOverlappedIdx] == ERROR_IO_PENDING)
 			{
 				// DeviceIoControl is not yet completed to return all data. Wait for overlapped completion and thread cancellation events
+				waitObjects[1] = lOverlapped[currentOverlappedIdx].hEvent;
 				error = WaitForMultipleObjects(2, waitObjects, FALSE, INFINITE);
 				if (error != (WAIT_OBJECT_0 + 1))
 					break; // Cancel event signaled or error while waiting for events (maybe handles were closed?). Quit this thread worker
+
+				// At this point overlapped event was signaled by a device driver and data is ready and waiting for in a buffer. The next GetOverlappedResult call should return immediately.
 			}
 			else
-				// Hmm... DeviceIoControl failed and is not just in async pending state. Quit the notification thread because the virtual controller may be in unknown state
+				// Hmm... DeviceIoControl failed and is not just in async pending state. Quit the notification thread because the virtual controller may be in unknown state or device handles were closed
 				break;
 		}
 
-		if (GetOverlappedResult(client->hBusDevice, &lOverlapped, &transferred, TRUE) != 0)
-			pNotificationRequestPayload->ProcessNotificationRequest(client, target);
+		if (GetOverlappedResult(client->hBusDevice, &lOverlapped[currentOverlappedIdx], &transferred[currentOverlappedIdx], TRUE) != 0)
+			(*pNotificationRequestPayload)[currentOverlappedIdx]->ProcessNotificationRequest(client, target);
 
+		if (currentOverlappedIdx >= NOTIFICATION_OVERLAPPED_QUEUE_SIZE-1)
+			currentOverlappedIdx = 0;
+		else
+			currentOverlappedIdx++;
+
+		if (futureOverlappedIdx >= NOTIFICATION_OVERLAPPED_QUEUE_SIZE-1)
+			futureOverlappedIdx = 0;
+		else
+			futureOverlappedIdx++;
 	} while (target->closingNotificationThreads != TRUE && target->Notification != nullptr);
 
-	if (lOverlapped.hEvent)
-		CloseHandle(lOverlapped.hEvent);
+	for (idx = 0; idx < NOTIFICATION_OVERLAPPED_QUEUE_SIZE; idx++)
+		if(lOverlapped[idx].hEvent)
+			CloseHandle(lOverlapped[idx].hEvent);
 
 	// Caller created the unique_ptr object, but this thread worker function should delete the object because it is no longer needed (thread specific object)
 	pNotificationRequestPayload.reset();
@@ -612,8 +664,15 @@ VIGEM_ERROR vigem_target_x360_register_notification(
 
 	target->closingNotificationThreads = FALSE;
 
-	for (int i = 0; i < 20; i++)
-		target->notificationThreadList->emplace_back(std::thread(&vigem_notification_thread_worker, vigem, target, std::make_unique<NotificationRequestPayloadX360>(target->SerialNo)));
+	std::unique_ptr<std::vector<std::unique_ptr<NotificationRequestPayload>>> payloadVector = std::make_unique<std::vector<std::unique_ptr<NotificationRequestPayload>>>();
+	payloadVector->reserve(NOTIFICATION_OVERLAPPED_QUEUE_SIZE);
+	for (int idx = 0; idx < NOTIFICATION_OVERLAPPED_QUEUE_SIZE; idx++)
+		payloadVector->push_back(std::make_unique<NotificationRequestPayloadX360>(target->SerialNo));
+
+	// Nowadays there is only one background thread listening for incoming FFB events, but there used to be more. This code still uses notificationThreadList vector even
+	// when there is only one item in the vector. If it is someday find out that this logic needs more background threads then it is easy to do because the thread vector is already in place.
+	//for (int i = 0; i < 1; i++)
+	target->notificationThreadList->emplace_back(std::thread(&vigem_notification_thread_worker, vigem, target, std::move(payloadVector)));
 
     return VIGEM_ERROR_NONE;
 }
@@ -651,8 +710,13 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
 
 	target->closingNotificationThreads = FALSE;
 
-    for (int i = 0; i < 20; i++)
-		target->notificationThreadList->emplace_back(std::thread(&vigem_notification_thread_worker, vigem, target, std::make_unique<NotificationRequestPayloadDS4>(target->SerialNo)));
+	std::unique_ptr<std::vector<std::unique_ptr<NotificationRequestPayload>>> payloadVector = std::make_unique<std::vector<std::unique_ptr<NotificationRequestPayload>>>();
+	payloadVector->reserve(NOTIFICATION_OVERLAPPED_QUEUE_SIZE);
+	for (int idx = 0; idx < NOTIFICATION_OVERLAPPED_QUEUE_SIZE; idx++)
+		payloadVector->push_back(std::make_unique<NotificationRequestPayloadDS4>(target->SerialNo));
+
+	//for (int i = 0; i < 1; i++)
+	target->notificationThreadList->emplace_back(std::thread(&vigem_notification_thread_worker, vigem, target, std::move(payloadVector)));
 
     return VIGEM_ERROR_NONE;
 }
