@@ -1,15 +1,9 @@
 version: 1.16.{build}.0
 image: Visual Studio 2017
-before_build:
-- cmd: vcpkg integrate install
-- cmd: vcpkg install boost-asio:x86-windows-static
-- cmd: vcpkg install boost-asio:x64-windows-static
 build_script:
 - ps: .\build.ps1
 artifacts:
 - path: 'bin**\*.dll'
-cache:
-- c:\tools\vcpkg\installed\
 deploy:
 - provider: Environment
   name: BUILDBOT
