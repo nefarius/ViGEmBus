@@ -10,16 +10,10 @@ TBD
 
 ## How to build
 
-### Dependencies
-
-- [Boost.Asio](https://www.boost.org/doc/libs/1_66_0/doc/html/boost_asio.html)
-
 ### Prerequisites
 
 - Visual Studio **2017** ([Community Edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15) is just fine)
-- [.NET Core SDK 2.1](https://www.microsoft.com/net/download/dotnet-core/2.1) (or greater, required for building only)
-- [Vcpkg Quick Start](https://github.com/Microsoft/vcpkg#quick-start)
-  - `.\vcpkg.exe install boost-asio:x86-windows-static boost-asio:x64-windows-static`
+- [.NET Core SDK 2.1](https://github.com/dotnet/cli/tree/release/2.1#installers-and-binaries) (or greater, required for building only)
 
 You can either build directly within Visual Studio or in PowerShell by running the build script:
 
