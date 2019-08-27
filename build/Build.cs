@@ -55,7 +55,7 @@ class Build : NukeBuild
                 .SetNodeReuse(IsLocalBuild)
                 .SetTargetPlatform(MSBuildTargetPlatform.x86));
 
-            if (Configuration.Equals($"{Configuration}_dll", StringComparison.InvariantCultureIgnoreCase))
+            if (Configuration.Contains($"{Configuration}_dll", StringComparison.InvariantCultureIgnoreCase))
             {
                 var version =
                     new Version(IsLocalBuild ? GitVersion.GetNormalizedFileVersion() : AppVeyor.Instance.BuildVersion);
@@ -121,5 +121,13 @@ class Build : NukeBuild
         varFileInfoTranslation[ResourceUtil.USENGLISHLANGID] = 1300;
 
         versionResource.SaveTo(path);
+    }
+}
+
+public static class StringExtensions
+{
+    public static bool Contains(this string source, string toCheck, StringComparison comp)
+    {
+        return source?.IndexOf(toCheck, comp) >= 0;
     }
 }
