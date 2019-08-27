@@ -33,24 +33,12 @@
     <ClInclude Include="$(SolutionDir)\include\ViGEm\km\BusShared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="XusbNotificationRequest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NotificationRequestPool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Internal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ViGEmClient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XusbNotificationRequest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NotificationRequestPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

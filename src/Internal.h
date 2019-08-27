@@ -51,7 +51,7 @@ typedef enum _VIGEM_TARGET_STATE
     VIGEM_TARGET_DISCONNECTED
 } VIGEM_TARGET_STATE, *PVIGEM_TARGET_STATE;
 
-class NotificationRequestPool;
+
 
 //
 // Represents a virtual gamepad object.
@@ -66,6 +66,7 @@ typedef struct _VIGEM_TARGET_T
     VIGEM_TARGET_TYPE Type;
     FARPROC Notification;
 
-    std::unique_ptr<NotificationRequestPool> NotificationPool;
-
+	bool closingNotificationThreads;
+	HANDLE cancelNotificationThreadEvent;
+	std::unique_ptr<std::vector<std::thread>> notificationThreadList;
 } VIGEM_TARGET;
