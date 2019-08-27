@@ -61,11 +61,15 @@ class Build : NukeBuild
             Console.WriteLine($"Stamping version {version}");
 
             StampVersion(
-                Path.Combine(RootDirectory, $@"bin\{Configuration}\x64\ViGEmClient.dll"),
+                Path.Combine(
+                    RootDirectory,
+                    $@"bin\{Configuration.Substring(0, Configuration.Length - 4)}\x64\ViGEmClient.dll"),
                 version);
 
             StampVersion(
-                Path.Combine(RootDirectory, $@"bin\{Configuration}\x86\ViGEmClient.dll"),
+                Path.Combine(
+                    RootDirectory,
+                    $@"bin\{Configuration.Substring(0, Configuration.Length - 4)}\x86\ViGEmClient.dll"),
                 version);
         });
 
