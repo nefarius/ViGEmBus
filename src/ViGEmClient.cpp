@@ -907,6 +907,9 @@ VIGEM_ERROR vigem_target_x360_get_user_index(
     if (target->SerialNo == 0 || target->Type != Xbox360Wired)
         return VIGEM_ERROR_INVALID_TARGET;
 
+	if (!index)
+		return VIGEM_ERROR_INVALID_PARAMETER;
+
     DWORD transferred = 0;
     OVERLAPPED lOverlapped = { 0 };
     lOverlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
