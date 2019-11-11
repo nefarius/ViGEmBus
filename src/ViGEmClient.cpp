@@ -162,6 +162,12 @@ LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExcep
         nullptr
     );
 
+	const DWORD flags = MiniDumpWithFullMemory | MiniDumpWithHandleData | MiniDumpWithUnloadedModules |
+		MiniDumpWithUnloadedModules | MiniDumpWithProcessThreadData |
+		MiniDumpWithFullMemoryInfo | MiniDumpWithThreadInfo |
+		MiniDumpWithFullAuxiliaryState | MiniDumpIgnoreInaccessibleMemory |
+		MiniDumpWithTokenInformation;
+
     if (hFile != INVALID_HANDLE_VALUE)
     {
         _MINIDUMP_EXCEPTION_INFORMATION ExInfo;
@@ -169,7 +175,15 @@ LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExcep
         ExInfo.ExceptionPointers = apExceptionInfo;
         ExInfo.ClientPointers = FALSE;
 
-        pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &ExInfo, nullptr, nullptr);
+        pDump(
+			GetCurrentProcess(), 
+			GetCurrentProcessId(), 
+			hFile, 
+			(MINIDUMP_TYPE)flags,
+			&ExInfo, 
+			nullptr, 
+			nullptr
+		);
         CloseHandle(hFile);
     }
 
