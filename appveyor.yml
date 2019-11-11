@@ -5,6 +5,7 @@ build_script:
 artifacts:
 - path: 'bin**\*.lib'
 - path: 'bin**\*.dll'
+- path: 'bin**\*.pdb'
 deploy:
 - provider: Environment
   name: BUILDBOT
