@@ -120,7 +120,7 @@ extern "C" {
 
     typedef
         _Function_class_(EVT_VIGEM_DS4_NOTIFICATION)
-        VOID
+        VOID CALLBACK
         EVT_VIGEM_DS4_NOTIFICATION(
             PVIGEM_CLIENT Client,
             PVIGEM_TARGET Target,
