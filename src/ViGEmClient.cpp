@@ -23,11 +23,17 @@ SOFTWARE.
 */
 
 
+//
+// WinAPI
+// 
 #include <Windows.h>
 #include <SetupAPI.h>
 #include <initguid.h>
 #include <Dbghelp.h>
 
+//
+// Driver shared
+// 
 #include "ViGEm/km/BusShared.h"
 #include "ViGEm/Client.h"
 #include <winioctl.h>
@@ -39,10 +45,14 @@ SOFTWARE.
 #include <climits>
 #include <vector>
 #include <algorithm>
-
 #include <thread>
+#include <functional>
 
+//
+// Internal
+// 
 #include "Internal.h"
+
 
 typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(
     HANDLE hProcess,
