@@ -18,7 +18,7 @@
 
 
 #include "busenum.h"
-#include <wdmguid.h> //Check if optimal to include EVERYTHING or just redefine
+#include <wdmguid.h>
 #include "xgip.tmh"
 
 NTSTATUS Xgip_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription)

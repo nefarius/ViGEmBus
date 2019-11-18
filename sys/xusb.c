@@ -18,7 +18,7 @@
 
 
 #include "busenum.h"
-#include <wdmguid.h> //Check if optimal to include EVERYTHING or just redefine
+#include <wdmguid.h>
 #include "xusb.tmh"
 
 NTSTATUS Xusb_PreparePdo(
