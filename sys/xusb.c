@@ -18,6 +18,7 @@
 
 
 #include "busenum.h"
+#include <wdmguid.h> //Check if optimal to include EVERYTHING or just redefine
 #include "xusb.tmh"
 
 NTSTATUS Xusb_PreparePdo(
@@ -129,7 +130,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
 
     // Dummy PNP_LOCATION
 
-    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_PNP_LOCATION_DUMMY, NULL);
+    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_PNP_LOCATION_INTERFACE, NULL);
 
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
@@ -137,7 +138,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
         TraceEvents(TRACE_LEVEL_ERROR,
             TRACE_XUSB,
             "Couldn't register PNP_LOCATION dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-            &GUID_DEVINTERFACE_XUSB_PNP_LOCATION_DUMMY,
+            &GUID_PNP_LOCATION_INTERFACE,
             status);
 
         return status;
@@ -145,7 +146,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
 
     // Dummy D3COLD_SUPPORT
 
-    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_D3COLD_SUPPORT_DUMMY, NULL);
+    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_D3COLD_SUPPORT_INTERFACE, NULL);
 
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
@@ -153,7 +154,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
         TraceEvents(TRACE_LEVEL_ERROR,
             TRACE_XUSB,
             "Couldn't register D3COLD_SUPPORT dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-            &GUID_DEVINTERFACE_XUSB_D3COLD_SUPPORT_DUMMY,
+            &GUID_D3COLD_SUPPORT_INTERFACE,
             status);
 
         return status;
@@ -161,7 +162,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
 
     // Dummy REENUMERATE_SELF_INTERFACE_STANDARD
 
-    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_REENUMERATE_SELF_INTERFACE_STD_DUMMY, NULL);
+    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_REENUMERATE_SELF_INTERFACE_STANDARD, NULL);
 
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
@@ -169,7 +170,7 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
         TraceEvents(TRACE_LEVEL_ERROR,
             TRACE_XUSB,
             "Couldn't register REENUM_SELF_STD dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-            &GUID_DEVINTERFACE_XUSB_REENUMERATE_SELF_INTERFACE_STD_DUMMY,
+            &GUID_REENUMERATE_SELF_INTERFACE_STANDARD,
             status);
 
         return status;
