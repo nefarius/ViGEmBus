@@ -1,6 +1,6 @@
 /*
 * Virtual Gamepad Emulation Framework - Windows kernel-mode bus driver
-* Copyright (C) 2016-2018  Benjamin Höglinger-Stelzer
+* Copyright (C) 2016-2019 Nefarius Software Solutions e.U. and Contributors
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -22,21 +22,22 @@
 // have to be exposed by the PDO or else the child devices won't start
 // 
 
-// {70211B0E-0AFB-47DB-AFC1-410BF842497A}
+// {70211B0E-0AFB-47DB-AFC1-410BF842497A} PNP_LOCATION_INTERFACE from wdmguid.h being used as a dummy
 // ReSharper disable once CppMissingIncludeGuard
-DEFINE_GUID(GUID_DEVINTERFACE_XGIP_UNKNOWN_0,
+DEFINE_GUID(GUID_DEVINTERFACE_XGIP_PNP_LOCATION_DUMMY,
     0x70211B0E, 0x0AFB, 0x47DB, 0xAF, 0xC1, 0x41, 0x0B, 0xF8, 0x42, 0x49, 0x7A);
 
-// {B38290E5-3CD0-4F9D-9937-F5FE2B44D47A}
-DEFINE_GUID(GUID_DEVINTERFACE_XGIP_UNKNOWN_1,
+// {B38290E5-3CD0-4F9D-9937-F5FE2B44D47A} D3COLD_SUPPORT_INTERFACE from wdmguid.h being used as a dummy
+DEFINE_GUID(GUID_DEVINTERFACE_XGIP_D3COLD_SUPPORT_DUMMY,
     0xB38290E5, 0x3CD0, 0x4F9D, 0x99, 0x37, 0xF5, 0xFE, 0x2B, 0x44, 0xD4, 0x7A);
 
-// {2AEB0243-6A6E-486B-82FC-D815F6B97006}
-DEFINE_GUID(GUID_DEVINTERFACE_XGIP_UNKNOWN_2,
+// {2AEB0243-6A6E-486B-82FC-D815F6B97006} REENUMERATE_SELF_INTERFACE_STANDARD from wdmguid.h being used as a dummy
+DEFINE_GUID(GUID_DEVINTERFACE_XGIP_REENUMERATE_SELF_INTERFACE_STD_DUMMY,
     0x2AEB0243, 0x6A6E, 0x486B, 0x82, 0xFC, 0xD8, 0x15, 0xF6, 0xB9, 0x70, 0x06);
 
-// {DC7A8E51-49B3-4A3A-9E81-625205E7D729}
-DEFINE_GUID(GUID_DEVINTERFACE_XGIP_UNKNOWN_3,
+// {DC7A8E51-49B3-4A3A-9E81-625205E7D729} Seems to be GUID_POWER_THREAD_INTERFACE
+// Source: https://github.com/microsoft/Windows-Driver-Frameworks/blob/master/src/framework/shared/irphandlers/pnp/fxpkgpnp.cpp#L63
+DEFINE_GUID(GUID_DEVINTERFACE_XGIP_UNSURE_POWER_THREAD_INTERFACE_DUMMY,
     0xDC7A8E51, 0x49B3, 0x4A3A, 0x9E, 0x81, 0x62, 0x52, 0x05, 0xE7, 0xD7, 0x29);
 
 // {DEEE98EA-C0A1-42C3-9738-A04606C84E93}

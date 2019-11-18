@@ -1,6 +1,6 @@
 /*
 * Virtual Gamepad Emulation Framework - Windows kernel-mode bus driver
-* Copyright (C) 2016-2018  Benjamin Höglinger-Stelzer
+* Copyright (C) 2016-2019 Nefarius Software Solutions e.U. and Contributors
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -123,85 +123,53 @@ NTSTATUS Xusb_PrepareHardware(WDFDEVICE Device)
     dummyIface.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
     dummyIface.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
 
-    /* XUSB.sys will query for the following three (unknown) interfaces
-    * BUT WONT USE IT so we just expose them to satisfy initialization. */
+    /* XUSB.sys will query for the following three "dummy" interfaces
+    * BUT WONT USE IT so we just expose them to satisfy initialization. (TODO: Check if still valid!)
+    */
 
-    // Dummy 0
+    // Dummy PNP_LOCATION
 
-    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_UNKNOWN_0, NULL);
+    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_PNP_LOCATION_DUMMY, NULL);
 
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
             TRACE_XUSB,
-            "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
-            "(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data1,
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data2,
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data3,
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[0],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[1],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[2],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[3],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[4],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[5],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[6],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_0.Data4[7],
+            "Couldn't register PNP_LOCATION dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
+            &GUID_DEVINTERFACE_XUSB_PNP_LOCATION_DUMMY,
             status);
 
         return status;
     }
 
-    // Dummy 1
+    // Dummy D3COLD_SUPPORT
 
-    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_UNKNOWN_1, NULL);
+    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_D3COLD_SUPPORT_DUMMY, NULL);
 
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
             TRACE_XUSB,
-            "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
-            "(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data1,
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data2,
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data3,
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[0],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[1],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[2],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[3],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[4],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[5],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[6],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_1.Data4[7],
+            "Couldn't register D3COLD_SUPPORT dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
+            &GUID_DEVINTERFACE_XUSB_D3COLD_SUPPORT_DUMMY,
             status);
 
         return status;
     }
 
-    // Dummy 2
+    // Dummy REENUMERATE_SELF_INTERFACE_STANDARD
 
-    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_UNKNOWN_2, NULL);
+    WDF_QUERY_INTERFACE_CONFIG_INIT(&ifaceCfg, (PINTERFACE)&dummyIface, &GUID_DEVINTERFACE_XUSB_REENUMERATE_SELF_INTERFACE_STD_DUMMY, NULL);
 
     status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
             TRACE_XUSB,
-            "Couldn't register unknown interface GUID: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X " \
-            "(WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data1,
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data2,
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data3,
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[0],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[1],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[2],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[3],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[4],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[5],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[6],
-            GUID_DEVINTERFACE_XUSB_UNKNOWN_2.Data4[7],
+            "Couldn't register REENUM_SELF_STD dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
+            &GUID_DEVINTERFACE_XUSB_REENUMERATE_SELF_INTERFACE_STD_DUMMY,
             status);
 
         return status;
