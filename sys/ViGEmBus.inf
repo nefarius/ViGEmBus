@@ -1,5 +1,5 @@
 ; Virtual Gamepad Emulation Framework - Windows kernel-mode bus driver
-; Copyright (C) 2016-2019  Nefarius Software Solutions e.U.
+; Copyright (C) 2016-2019 Nefarius Software Solutions e.U. and Contributors
 ;
 ; This program is free software: you can redistribute it and/or modify
 ; it under the terms of the GNU General Public License as published by

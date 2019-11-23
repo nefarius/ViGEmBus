@@ -1,6 +1,6 @@
 /*
 * Virtual Gamepad Emulation Framework - Windows kernel-mode bus driver
-* Copyright (C) 2016-2018  Benjamin Höglinger-Stelzer
+* Copyright (C) 2016-2019 Nefarius Software Solutions e.U. and Contributors
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 
 #include "busenum.h"
+#include <wdmguid.h>
 #include "xgip.tmh"
 
 NTSTATUS Xgip_PreparePdo(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription)
