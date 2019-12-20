@@ -9,18 +9,18 @@ install:
 - cmd: git submodule -q update --init
 build:
   project: $(APPVEYOR_BUILD_FOLDER)\$(APPVEYOR_PROJECT_NAME).sln
-#after_build:
-#- ps: |
-#    Invoke-WebRequest "https://downloads.vigem.org/other/pavel-a/ddverpatch/verpatch-1.0.15.1-x86-codeplex.zip" -OutFile verpatch-1.0.15.1-x86-codeplex.zip
-#    Expand-Archive verpatch-1.0.15.1-x86-codeplex.zip -DestinationPath .
-#    .\verpatch.exe .\artifacts\x64\ViGEmBus.sys "$env:APPVEYOR_BUILD_VERSION"
-#    .\verpatch.exe .\artifacts\x64\ViGEmBus.sys /pv "$env:APPVEYOR_BUILD_VERSION"
-#    .\verpatch.exe .\artifacts\x86\ViGEmBus.sys "$env:APPVEYOR_BUILD_VERSION"
-#    .\verpatch.exe .\artifacts\x86\ViGEmBus.sys /pv "$env:APPVEYOR_BUILD_VERSION"
+after_build:
+- ps: |
+    Invoke-WebRequest "https://downloads.vigem.org/other/pavel-a/ddverpatch/verpatch-1.0.15.1-x86-codeplex.zip" -OutFile verpatch-1.0.15.1-x86-codeplex.zip
+    Expand-Archive verpatch-1.0.15.1-x86-codeplex.zip -DestinationPath .
+    .\verpatch.exe ".\bin\$env:PLATFORM\ViGEmBus.sys" "$env:APPVEYOR_BUILD_VERSION"
+    .\verpatch.exe ".\bin\$env:PLATFORM\ViGEmBus.sys" /pv "$env:APPVEYOR_BUILD_VERSION"
 #    makecab.exe /f ViGEmBus.ddf
-#artifacts:
-#- path: disk1\ViGEmBus.cab
-#  name: ViGEmBus_unsigned_x86_amd64
+artifacts:
+- path: 'bin**\$(APPVEYOR_PROJECT_NAME)\*.inf'
+- path: 'bin**\$(APPVEYOR_PROJECT_NAME)\*.sys'
+- path: 'bin**\$(APPVEYOR_PROJECT_NAME)\*.dll'
+- path: 'bin**\*.pdb'
 deploy:
 - provider: Environment
   name: BUILDBOT
