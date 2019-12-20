@@ -36,15 +36,10 @@ The driver is built for Windows 7/8.1/10 (x86 and amd64).
 
 ### Prerequisites
 
-- Visual Studio **2017** ([Community Edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15) is just fine)
-- [WDK for Windows 10, version 1803](https://developer.microsoft.com/en-us/windows/hardware/windows-driver-kit)
-- [.NET Core SDK 2.1](https://www.microsoft.com/net/download/dotnet-core/2.1) (or greater, required for building only)
+- Visual Studio **2019** ([Community Edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=16) is just fine)
+- [WDK for Windows 10, version 1903](https://docs.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk#wdk-for-windows-10-version-1903)
 
-You can either build directly within Visual Studio or in PowerShell by running the build script:
-
-```PowerShell
-.\build.ps1 -configuration release
-```
+You can build directly within Visual Studio.
 
 Do bear in mind that you'll need to **sign** the driver to use it without [test mode](<https://technet.microsoft.com/en-us/ff553484(v=vs.96)>).
 
