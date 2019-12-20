@@ -1,100 +1,49 @@
-// Microsoft Visual C++ generated resource script.
 //
-#include "resource.h"
-
-#define APSTUDIO_READONLY_SYMBOLS
-/////////////////////////////////////////////////////////////////////////////
+// Include the necessary resources
 //
-// Generated from the TEXTINCLUDE 2 resource.
+#include <winver.h>
+#include <ntdef.h>
+
+#ifdef RC_INVOKED
+
 //
-#include "winres.h"
-
-/////////////////////////////////////////////////////////////////////////////
-#undef APSTUDIO_READONLY_SYMBOLS
-
-/////////////////////////////////////////////////////////////////////////////
-// German (Austria) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEA)
-LANGUAGE LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN
-#pragma code_page(1252)
-
-#ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
+// Set up debug information
 //
-// TEXTINCLUDE
-//
+#if DBG
+#define VER_DBG VS_FF_DEBUG
+#else
+#define VER_DBG 0
+#endif
 
-1 TEXTINCLUDE 
-BEGIN
-    "resource.h\0"
-END
-
-2 TEXTINCLUDE 
-BEGIN
-    "#include ""winres.h""\r\n"
-    "\0"
-END
-
-3 TEXTINCLUDE 
-BEGIN
-    "\r\n"
-    "\0"
-END
-
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Version
-//
+// ------- version info -------------------------------------------------------
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,14,3,0
- PRODUCTVERSION 1,14,3,0
- FILEFLAGSMASK 0x3fL
-#ifdef _DEBUG
- FILEFLAGS 0x1L
-#else
- FILEFLAGS 0x0L
-#endif
- FILEOS 0x40004L
- FILETYPE 0xe9L
- FILESUBTYPE 0x0L
+FILEVERSION             1,16,200,0
+PRODUCTVERSION          1,16,200,0
+FILEFLAGSMASK           VS_FFI_FILEFLAGSMASK
+FILEFLAGS               VER_DBG
+FILEOS                  VOS_NT
+FILETYPE                VFT_DRV
+FILESUBTYPE             VFT2_DRV_SYSTEM
 BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "000904b0"
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "Benjamin Höglinger-Stelzer"
-            VALUE "FileDescription", "Virtual Gamepad Emulation Bus Driver"
-VALUE "FileVersion", "1.14.3.0"
-            VALUE "InternalName", "Virtual Gamepad Emulation Bus Driver"
-            VALUE "LegalCopyright", "Copyright (C) Benjamin Höglinger-Stelzer 2016"
-            VALUE "OriginalFilename", "vigembus.sys"
-            VALUE "ProductName", "Virtual Gamepad Emulation Bus Driver"
-VALUE "ProductVersion", "1.14.3.0"
+		VALUE "Comments",         "Virtual Gamepad Emulation Framework Bus Driver"
+		VALUE "CompanyName",      "Nefarius Software Solutions e.U."
+		VALUE "FileDescription",  "Virtual Gamepad Emulation Framework Bus Driver"
+		VALUE "FileVersion",      "1.16.200.0"
+		VALUE "InternalName",     "Virtual Gamepad Emulation Framework Bus Driver"
+		VALUE "LegalCopyright",   "(C) 2016-2019 Nefarius Software Solutions e.U."
+		VALUE "OriginalFilename", "ViGEmBus.sys"
+		VALUE "ProductName",      "Virtual Gamepad Emulation Framework Bus Driver"
+		VALUE "ProductVersion",	  "1.16.200.0"
         END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x9, 1200
-    END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x0409,1200
+	END
 END
-
-#endif    // German (Austria) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-
-#ifndef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// Generated from the TEXTINCLUDE 3 resource.
-//
-
-
-/////////////////////////////////////////////////////////////////////////////
-#endif    // not APSTUDIO_INVOKED
-
+#endif
