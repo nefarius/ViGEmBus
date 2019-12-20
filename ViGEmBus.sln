@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ViGEmBus", "sys\ViGEmBus.vcxproj", "{040101B0-EE5C-4EF1-99EE-9F81C795C001}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{E1E264A8-6100-429F-BA23-F00FFF7D126B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,10 +25,6 @@ Global
 		{040101B0-EE5C-4EF1-99EE-9F81C795C001}.Release|x86.ActiveCfg = Release|Win32
 		{040101B0-EE5C-4EF1-99EE-9F81C795C001}.Release|x86.Build.0 = Release|Win32
 		{040101B0-EE5C-4EF1-99EE-9F81C795C001}.Release|x86.Deploy.0 = Release|Win32
-		{E1E264A8-6100-429F-BA23-F00FFF7D126B}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{E1E264A8-6100-429F-BA23-F00FFF7D126B}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{E1E264A8-6100-429F-BA23-F00FFF7D126B}.Release|x64.ActiveCfg = Release|Any CPU
-		{E1E264A8-6100-429F-BA23-F00FFF7D126B}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
