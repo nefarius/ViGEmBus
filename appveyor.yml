@@ -14,7 +14,7 @@ before_build:
 build:
   project: $(APPVEYOR_BUILD_FOLDER)\$(APPVEYOR_PROJECT_NAME).sln
 after_build:
-- cmd: makecab.exe /f ViGEmBus.ddf
+#- cmd: makecab.exe /f ViGEmBus.ddf
 artifacts:
 - path: 'bin**\$(APPVEYOR_PROJECT_NAME)\*.inf'
 - path: 'bin**\$(APPVEYOR_PROJECT_NAME)\*.sys'
