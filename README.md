@@ -12,14 +12,7 @@ TBD
 
 ### Prerequisites
 
-- Visual Studio **2017** ([Community Edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15) is just fine)
-- [.NET Core SDK 2.1](https://github.com/dotnet/cli/tree/release/2.1#installers-and-binaries) (or greater, required for building only)
-
-You can either build directly within Visual Studio or in PowerShell by running the build script:
-
-```PowerShell
-.\build.ps1
-```
+- Visual Studio **2019** ([Community Edition](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=16) is just fine)
 
 ## Contribute
 
