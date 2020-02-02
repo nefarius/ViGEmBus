@@ -8,6 +8,9 @@
 #include <mutex>
 #include <iostream>
 
+// Comment out for DS4 sample
+#define X360
+
 static std::mutex m;
 
 VOID CALLBACK notification(
@@ -38,7 +41,7 @@ int main()
 
     auto ret = vigem_connect(client);
 
-#if X360
+#ifdef X360
     const auto x360 = vigem_target_x360_alloc();
 
 	ret = vigem_target_add(client, x360);
@@ -50,7 +53,7 @@ int main()
 	
 	ret = vigem_target_add(client, ds4);
 
-#if X360
+#ifdef X360
     XUSB_REPORT report;
     XUSB_REPORT_INIT(&report);
 
@@ -61,7 +64,7 @@ int main()
         Sleep(10);
     }
 
-#endif
+#else
 
 	DS4_REPORT report;
 	DS4_REPORT_INIT(&report);
@@ -74,7 +77,9 @@ int main()
 		Sleep(10);
 	}
 
-#if X360
+	#endif
+	
+#ifdef X360
     vigem_target_x360_unregister_notification(x360);
     vigem_target_remove(client, x360);
     vigem_target_free(x360);
