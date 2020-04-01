@@ -106,7 +106,7 @@ public:
 	void ProcessNotificationRequest(PVIGEM_CLIENT client, PVIGEM_TARGET target) override
 	{
 		if(target->Notification != nullptr)
-			PFN_VIGEM_X360_NOTIFICATION(target->Notification)(client, target, 
+			PFN_VIGEM_X360_NOTIFICATION(target->Notification)(client, target, target->NotificationUserData,
 				((PXUSB_REQUEST_NOTIFICATION)lpPayloadBuffer)->LargeMotor, 
 				((PXUSB_REQUEST_NOTIFICATION)lpPayloadBuffer)->SmallMotor,
 				((PXUSB_REQUEST_NOTIFICATION)lpPayloadBuffer)->LedNumber
@@ -126,7 +126,7 @@ public:
 	void ProcessNotificationRequest(PVIGEM_CLIENT client, PVIGEM_TARGET target) override
 	{
 		if (target->Notification != nullptr)
-			PFN_VIGEM_DS4_NOTIFICATION(target->Notification)(client, target,
+			PFN_VIGEM_DS4_NOTIFICATION(target->Notification)(client, target, target->NotificationUserData,
 				((PDS4_REQUEST_NOTIFICATION)lpPayloadBuffer)->Report.LargeMotor,
 				((PDS4_REQUEST_NOTIFICATION)lpPayloadBuffer)->Report.SmallMotor,
 				((PDS4_REQUEST_NOTIFICATION)lpPayloadBuffer)->Report.LightbarColor
@@ -658,7 +658,8 @@ void vigem_notification_thread_worker(
 VIGEM_ERROR vigem_target_x360_register_notification(
     PVIGEM_CLIENT vigem,
     PVIGEM_TARGET target,
-    PFN_VIGEM_X360_NOTIFICATION notification
+    PFN_VIGEM_X360_NOTIFICATION notification,
+    LPVOID userData
 )
 {
     if (!vigem)
@@ -677,6 +678,7 @@ VIGEM_ERROR vigem_target_x360_register_notification(
         return VIGEM_ERROR_CALLBACK_ALREADY_REGISTERED;
 
     target->Notification = reinterpret_cast<FARPROC>(notification);
+    target->NotificationUserData = userData;
 
 	if (target->cancelNotificationThreadEvent == 0)
 		target->cancelNotificationThreadEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
@@ -704,7 +706,8 @@ VIGEM_ERROR vigem_target_x360_register_notification(
 VIGEM_ERROR vigem_target_ds4_register_notification(
     PVIGEM_CLIENT vigem,
     PVIGEM_TARGET target,
-    PFN_VIGEM_DS4_NOTIFICATION notification
+    PFN_VIGEM_DS4_NOTIFICATION notification,
+    LPVOID userData
 )
 {
     if (!vigem)
@@ -723,6 +726,7 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
         return VIGEM_ERROR_CALLBACK_ALREADY_REGISTERED;
 
     target->Notification = reinterpret_cast<FARPROC>(notification);
+    target->NotificationUserData = userData;
 
 	if (target->cancelNotificationThreadEvent == 0)
 		target->cancelNotificationThreadEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
@@ -767,6 +771,7 @@ void vigem_target_x360_unregister_notification(PVIGEM_TARGET target)
 	}
 
 	target->Notification = nullptr;
+	target->NotificationUserData = nullptr;
 }
 
 void vigem_target_ds4_unregister_notification(PVIGEM_TARGET target)
