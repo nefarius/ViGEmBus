@@ -111,10 +111,10 @@ extern "C" {
         EVT_VIGEM_X360_NOTIFICATION(
             PVIGEM_CLIENT Client,
             PVIGEM_TARGET Target,
-            LPVOID UserData,
             UCHAR LargeMotor,
             UCHAR SmallMotor,
-            UCHAR LedNumber
+            UCHAR LedNumber,
+            LPVOID UserData
         );
 
     typedef EVT_VIGEM_X360_NOTIFICATION *PFN_VIGEM_X360_NOTIFICATION;
@@ -125,10 +125,10 @@ extern "C" {
         EVT_VIGEM_DS4_NOTIFICATION(
             PVIGEM_CLIENT Client,
             PVIGEM_TARGET Target,
-            LPVOID UserData,
             UCHAR LargeMotor,
             UCHAR SmallMotor,
-            DS4_LIGHTBAR_COLOR LightbarColor
+            DS4_LIGHTBAR_COLOR LightbarColor,
+            LPVOID UserData
         );
 
     typedef EVT_VIGEM_DS4_NOTIFICATION *PFN_VIGEM_DS4_NOTIFICATION;

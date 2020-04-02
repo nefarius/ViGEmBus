@@ -106,10 +106,11 @@ public:
 	void ProcessNotificationRequest(PVIGEM_CLIENT client, PVIGEM_TARGET target) override
 	{
 		if(target->Notification != nullptr)
-			PFN_VIGEM_X360_NOTIFICATION(target->Notification)(client, target, target->NotificationUserData,
+			PFN_VIGEM_X360_NOTIFICATION(target->Notification)(client, target,
 				((PXUSB_REQUEST_NOTIFICATION)lpPayloadBuffer)->LargeMotor, 
 				((PXUSB_REQUEST_NOTIFICATION)lpPayloadBuffer)->SmallMotor,
-				((PXUSB_REQUEST_NOTIFICATION)lpPayloadBuffer)->LedNumber
+				((PXUSB_REQUEST_NOTIFICATION)lpPayloadBuffer)->LedNumber,
+				target->NotificationUserData
 			);
 	}
 };
@@ -126,10 +127,11 @@ public:
 	void ProcessNotificationRequest(PVIGEM_CLIENT client, PVIGEM_TARGET target) override
 	{
 		if (target->Notification != nullptr)
-			PFN_VIGEM_DS4_NOTIFICATION(target->Notification)(client, target, target->NotificationUserData,
+			PFN_VIGEM_DS4_NOTIFICATION(target->Notification)(client, target,
 				((PDS4_REQUEST_NOTIFICATION)lpPayloadBuffer)->Report.LargeMotor,
 				((PDS4_REQUEST_NOTIFICATION)lpPayloadBuffer)->Report.SmallMotor,
-				((PDS4_REQUEST_NOTIFICATION)lpPayloadBuffer)->Report.LightbarColor
+				((PDS4_REQUEST_NOTIFICATION)lpPayloadBuffer)->Report.LightbarColor,
+				target->NotificationUserData
 			);
 	}
 };

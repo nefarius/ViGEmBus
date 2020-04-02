@@ -16,10 +16,10 @@ static std::mutex m;
 VOID CALLBACK notification(
     PVIGEM_CLIENT Client,
     PVIGEM_TARGET Target,
-    LPVOID UserData,
     UCHAR LargeMotor,
     UCHAR SmallMotor,
-    UCHAR LedNumber
+    UCHAR LedNumber,
+    LPVOID UserData
 )
 {
     m.lock();
