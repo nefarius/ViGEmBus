@@ -113,7 +113,8 @@ extern "C" {
             PVIGEM_TARGET Target,
             UCHAR LargeMotor,
             UCHAR SmallMotor,
-            UCHAR LedNumber
+            UCHAR LedNumber,
+            LPVOID UserData
         );
 
     typedef EVT_VIGEM_X360_NOTIFICATION *PFN_VIGEM_X360_NOTIFICATION;
@@ -126,7 +127,8 @@ extern "C" {
             PVIGEM_TARGET Target,
             UCHAR LargeMotor,
             UCHAR SmallMotor,
-            DS4_LIGHTBAR_COLOR LightbarColor
+            DS4_LIGHTBAR_COLOR LightbarColor,
+            LPVOID UserData
         );
 
     typedef EVT_VIGEM_DS4_NOTIFICATION *PFN_VIGEM_DS4_NOTIFICATION;
@@ -291,10 +293,11 @@ extern "C" {
      * \param   vigem           The driver connection object.
      * \param   target          The target device object.
      * \param   notification    The notification callback.
+     * \param   userData        The user data passed to the notification callback.
      *
      * \return  A VIGEM_ERROR.
      */
-    VIGEM_API VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PFN_VIGEM_X360_NOTIFICATION notification);
+    VIGEM_API VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PFN_VIGEM_X360_NOTIFICATION notification, LPVOID userData);
 
     /**
      * \fn  VIGEM_ERROR vigem_target_ds4_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_DS4_NOTIFICATION notification);
@@ -309,10 +312,11 @@ extern "C" {
      * \param   vigem           The driver connection object.
      * \param   target          The target device object.
      * \param   notification    The notification callback.
+     * \param   userData        The user data passed to the notification callback.
      *
      * \return  A VIGEM_ERROR.
      */
-    VIGEM_API VIGEM_ERROR vigem_target_ds4_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PFN_VIGEM_DS4_NOTIFICATION notification);
+    VIGEM_API VIGEM_ERROR vigem_target_ds4_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PFN_VIGEM_DS4_NOTIFICATION notification, LPVOID userData);
 
     /**
      * \fn  void vigem_target_x360_unregister_notification(PVIGEM_TARGET target);

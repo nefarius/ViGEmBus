@@ -18,7 +18,8 @@ VOID CALLBACK notification(
     PVIGEM_TARGET Target,
     UCHAR LargeMotor,
     UCHAR SmallMotor,
-    UCHAR LedNumber
+    UCHAR LedNumber,
+    LPVOID UserData
 )
 {
     m.lock();
@@ -46,7 +47,7 @@ int main()
 
 	ret = vigem_target_add(client, x360);
 
-	ret = vigem_target_x360_register_notification(client, x360, &notification);
+	ret = vigem_target_x360_register_notification(client, x360, &notification, nullptr);
 #endif
 	
 	const auto ds4 = vigem_target_ds4_alloc();
