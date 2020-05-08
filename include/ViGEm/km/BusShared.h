@@ -67,8 +67,8 @@ DEFINE_GUID(GUID_DEVINTERFACE_BUSENUM_VIGEM,
 #define IOCTL_XUSB_SUBMIT_REPORT        BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x201)
 #define IOCTL_DS4_SUBMIT_REPORT         BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x202)
 #define IOCTL_DS4_REQUEST_NOTIFICATION  BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x203)
-#define IOCTL_XGIP_SUBMIT_REPORT        BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x204)
-#define IOCTL_XGIP_SUBMIT_INTERRUPT     BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x205)
+//#define IOCTL_XGIP_SUBMIT_REPORT        BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x204)
+//#define IOCTL_XGIP_SUBMIT_INTERRUPT     BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x205)
 #define IOCTL_XUSB_GET_USER_INDEX       BUSENUM_RW_IOCTL(IOCTL_VIGEM_BASE + 0x206)
 
 
@@ -398,100 +398,6 @@ VOID FORCEINLINE DS4_SUBMIT_REPORT_INIT(
     Report->SerialNo = SerialNo;
 
     DS4_REPORT_INIT(&Report->Report);
-}
-
-#pragma endregion
-
-#pragma region XGIP (aka Xbox One device) section - EXPERIMENTAL
-
-typedef struct _XGIP_REPORT
-{
-    UCHAR Buttons1;
-    UCHAR Buttons2;
-    SHORT LeftTrigger;
-    SHORT RightTrigger;
-    SHORT ThumbLX;
-    SHORT ThumbLY;
-    SHORT ThumbRX;
-    SHORT ThumbRY;
-
-} XGIP_REPORT, *PXGIP_REPORT;
-
-//
-// Xbox One request data
-// 
-typedef struct _XGIP_SUBMIT_REPORT
-{
-    //
-    // sizeof(struct _XGIP_SUBMIT_REPORT)
-    // 
-    ULONG Size;
-
-    //
-    // Serial number of target device.
-    // 
-    ULONG SerialNo;
-
-    //
-    // HID Input report
-    // 
-    XGIP_REPORT Report;
-
-} XGIP_SUBMIT_REPORT, *PXGIP_SUBMIT_REPORT;
-
-//
-// Initializes an Xbox One report.
-// 
-VOID FORCEINLINE XGIP_SUBMIT_REPORT_INIT(
-    _Out_ PXGIP_SUBMIT_REPORT Report,
-    _In_ ULONG SerialNo
-)
-{
-    RtlZeroMemory(Report, sizeof(XGIP_SUBMIT_REPORT));
-
-    Report->Size = sizeof(XGIP_SUBMIT_REPORT);
-    Report->SerialNo = SerialNo;
-}
-
-//
-// Xbox One interrupt data
-// 
-typedef struct _XGIP_SUBMIT_INTERRUPT
-{
-    //
-    // sizeof(struct _XGIP_SUBMIT_INTERRUPT)
-    // 
-    ULONG Size;
-
-    //
-    // Serial number of target device.
-    // 
-    ULONG SerialNo;
-
-    //
-    // Interrupt buffer.
-    // 
-    UCHAR Interrupt[64];
-
-    //
-    // Length of interrupt buffer.
-    // 
-    ULONG InterruptLength;
-
-} XGIP_SUBMIT_INTERRUPT, *PXGIP_SUBMIT_INTERRUPT;
-
-//
-// Initializes an Xbox One interrupt.
-// 
-VOID FORCEINLINE XGIP_SUBMIT_INTERRUPT_INIT(
-    _Out_ PXGIP_SUBMIT_INTERRUPT Report,
-    _In_ ULONG SerialNo
-)
-{
-    RtlZeroMemory(Report, sizeof(XGIP_SUBMIT_INTERRUPT));
-
-    Report->Size = sizeof(XGIP_SUBMIT_INTERRUPT);
-    Report->SerialNo = SerialNo;
 }
 
 #pragma endregion
