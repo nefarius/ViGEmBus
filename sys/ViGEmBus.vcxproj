@@ -189,6 +189,7 @@
     <ClInclude Include="Context.h" />
     <ClInclude Include="CRTCPP.hpp" />
     <ClInclude Include="Ds4.h" />
+    <ClInclude Include="Ds4Pdo.hpp" />
     <ClInclude Include="EmulationTargetPDO.hpp" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="resource.h" />
@@ -207,6 +208,7 @@
     <ClCompile Include="ByteArray.c" />
     <ClCompile Include="Driver.c" />
     <ClCompile Include="Ds4.c" />
+    <ClCompile Include="Ds4Pdo.cpp" />
     <ClCompile Include="EmulationTargetPDO.cpp" />
     <ClCompile Include="Queue.c" />
     <ClCompile Include="UsbPdo.c" />
