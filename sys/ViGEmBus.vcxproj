@@ -175,6 +175,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Inf Include="ViGEmBus.inf" />
+    <Inf Include="ViGEmBus_SingleArch.inf" />
   </ItemGroup>
   <ItemGroup>
     <FilesToPackage Include="$(TargetPath)" />
