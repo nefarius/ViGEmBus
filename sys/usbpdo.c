@@ -145,12 +145,6 @@ NTSTATUS UsbPdo_GetDeviceDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommon)
 
         break;
 
-    case XboxOneWired:
-
-        Xgip_GetDeviceDescriptorType(pDescriptor, pCommon);
-
-        break;
-
     default:
         return STATUS_UNSUCCESSFUL;
     }
@@ -182,11 +176,6 @@ NTSTATUS UsbPdo_GetConfigurationDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommo
             Ds4_GetConfigurationDescriptorType(Buffer, length);
 
             break;
-        case XboxOneWired:
-
-            Xgip_GetConfigurationDescriptorType(Buffer, length);
-
-            break;
         default:
             return STATUS_UNSUCCESSFUL;
         }
@@ -210,14 +199,6 @@ NTSTATUS UsbPdo_GetConfigurationDescriptorType(PURB urb, PPDO_DEVICE_DATA pCommo
         if (length >= DS4_DESCRIPTOR_SIZE)
         {
             Ds4_GetConfigurationDescriptorType(Buffer, DS4_DESCRIPTOR_SIZE);
-        }
-
-        break;
-    case XboxOneWired:
-
-        if (length >= XGIP_DESCRIPTOR_SIZE)
-        {
-            Xgip_GetConfigurationDescriptorType(Buffer, XGIP_DESCRIPTOR_SIZE);
         }
 
         break;
@@ -379,20 +360,6 @@ NTSTATUS UsbPdo_SelectConfiguration(PURB urb, PPDO_DEVICE_DATA pCommon)
         }
 
         Ds4_SelectConfiguration(pInfo);
-
-        break;
-
-    case XboxOneWired:
-
-        if (urb->UrbHeader.Length < XGIP_CONFIGURATION_SIZE)
-        {
-            TraceEvents(TRACE_LEVEL_WARNING,
-                TRACE_USBPDO,
-                ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor");
-            return STATUS_INVALID_PARAMETER;
-        }
-
-        Xgip_SelectConfiguration(pInfo);
 
         break;
 
@@ -797,31 +764,6 @@ NTSTATUS UsbPdo_BulkOrInterruptTransfer(PURB urb, WDFDEVICE Device, WDFREQUEST R
                     status);
             }
         }
-
-        break;
-    }
-    case XboxOneWired:
-    {
-        PXGIP_DEVICE_DATA xgipData = XgipGetData(Device);
-
-        // Data coming FROM us TO higher driver
-        if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN)
-        {
-            KdPrint((DRIVERNAME ">> >> >> Incoming request, queuing..."));
-
-            /* This request is sent periodically and relies on data the "feeder"
-            has to supply, so we queue this request and return with STATUS_PENDING.
-            The request gets completed as soon as the "feeder" sent an update. */
-            status = WdfRequestForwardToIoQueue(Request, xgipData->PendingUsbInRequests);
-
-            return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
-        }
-
-        // Data coming FROM the higher driver TO us
-        KdPrint((DRIVERNAME ">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d",
-            pTransfer->PipeHandle,
-            pTransfer->TransferFlags,
-            pTransfer->TransferBufferLength));
 
         break;
     }

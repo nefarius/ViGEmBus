@@ -44,7 +44,6 @@
 #include "UsbPdo.h"
 #include "Xusb.h"
 #include "Ds4.h"
-#include "Xgip.h"
 
 
 #pragma region Macros
@@ -106,8 +105,6 @@ EVT_WDF_DEVICE_PREPARE_HARDWARE Pdo_EvtDevicePrepareHardware;
 
 EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL Pdo_EvtIoInternalDeviceControl;
 
-EVT_WDF_TIMER Xgip_SysInitTimerFunc;
-
 EVT_WDF_OBJECT_CONTEXT_CLEANUP Bus_EvtDriverContextCleanup;
 
 EVT_WDF_TIMER Bus_PlugInRequestCleanUpEvtTimerFunc;
@@ -144,14 +141,6 @@ Bus_QueueNotification(
     WDFDEVICE Device,
     ULONG SerialNo,
     WDFREQUEST Request
-);
-
-NTSTATUS
-Bus_XgipSubmitReport(
-    WDFDEVICE Device,
-    ULONG SerialNo,
-    PXGIP_SUBMIT_REPORT Report,
-    _In_ BOOLEAN FromInterface
 );
 
 NTSTATUS

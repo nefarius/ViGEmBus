@@ -50,8 +50,6 @@ VOID Bus_EvtIoDeviceControl(
     PXUSB_REQUEST_NOTIFICATION  xusbNotify = NULL;
     PDS4_SUBMIT_REPORT          ds4Submit = NULL;
     PDS4_REQUEST_NOTIFICATION   ds4Notify = NULL;
-    PXGIP_SUBMIT_REPORT         xgipSubmit = NULL;
-    PXGIP_SUBMIT_INTERRUPT      xgipInterrupt = NULL;
     PVIGEM_CHECK_VERSION        pCheckVersion = NULL;
     PXUSB_GET_USER_INDEX        pXusbGetUserIndex = NULL;
 
@@ -273,64 +271,6 @@ VOID Bus_EvtIoDeviceControl(
             }
 
             status = Bus_QueueNotification(Device, ds4Notify->SerialNo, Request);
-        }
-
-        break;
-#pragma endregion 
-
-#pragma region IOCTL_XGIP_SUBMIT_REPORT
-    case IOCTL_XGIP_SUBMIT_REPORT:
-
-        TraceEvents(TRACE_LEVEL_VERBOSE,
-            TRACE_QUEUE,
-            "IOCTL_XGIP_SUBMIT_REPORT");
-
-        status = WdfRequestRetrieveInputBuffer(Request, sizeof(XGIP_SUBMIT_REPORT), (PVOID)&xgipSubmit, &length);
-
-        if (!NT_SUCCESS(status))
-        {
-            KdPrint((DRIVERNAME "WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
-            break;
-        }
-
-        if ((sizeof(XGIP_SUBMIT_REPORT) == xgipSubmit->Size) && (length == InputBufferLength))
-        {
-            // This request only supports a single PDO at a time
-            if (xgipSubmit->SerialNo == 0)
-            {
-                status = STATUS_INVALID_PARAMETER;
-                break;
-            }
-
-            status = Bus_XgipSubmitReport(Device, xgipSubmit->SerialNo, xgipSubmit, FALSE);
-        }
-
-        break;
-#pragma endregion 
-
-#pragma region IOCTL_XGIP_SUBMIT_INTERRUPT
-    case IOCTL_XGIP_SUBMIT_INTERRUPT:
-
-        KdPrint((DRIVERNAME "IOCTL_XGIP_SUBMIT_INTERRUPT\n"));
-
-        status = WdfRequestRetrieveInputBuffer(Request, sizeof(XGIP_SUBMIT_INTERRUPT), (PVOID)&xgipInterrupt, &length);
-
-        if (!NT_SUCCESS(status))
-        {
-            KdPrint((DRIVERNAME "WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
-            break;
-        }
-
-        if ((sizeof(XGIP_SUBMIT_INTERRUPT) == xgipInterrupt->Size) && (length == InputBufferLength))
-        {
-            // This request only supports a single PDO at a time
-            if (xgipInterrupt->SerialNo == 0)
-            {
-                status = STATUS_INVALID_PARAMETER;
-                break;
-            }
-
-            status = Bus_XgipSubmitInterrupt(Device, xgipSubmit->SerialNo, xgipInterrupt, FALSE);
         }
 
         break;

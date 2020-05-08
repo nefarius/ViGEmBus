@@ -140,17 +140,8 @@ NTSTATUS Bus_PlugInDevice(
             description.ProductId = 0x05C4;
 
             break;
-        case XboxOneWired:
-
-            description.VendorId = 0x0E6F;
-            description.ProductId = 0x0139;
-
-#if !DBG
-            // TODO: implement and remove!
+        default:
             return STATUS_NOT_SUPPORTED;
-#endif
-
-            break;
         }
     }
     else
@@ -548,20 +539,6 @@ NTSTATUS Bus_Ds4SubmitReport(WDFDEVICE Device, ULONG SerialNo, PDS4_SUBMIT_REPOR
     return Bus_SubmitReport(Device, SerialNo, Report, FromInterface);
 }
 
-NTSTATUS Bus_XgipSubmitReport(WDFDEVICE Device, ULONG SerialNo, PXGIP_SUBMIT_REPORT Report, BOOLEAN FromInterface)
-{
-    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Entry");
-
-    return Bus_SubmitReport(Device, SerialNo, Report, FromInterface);
-}
-
-NTSTATUS Bus_XgipSubmitInterrupt(WDFDEVICE Device, ULONG SerialNo, PXGIP_SUBMIT_INTERRUPT Report, BOOLEAN FromInterface)
-{
-    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSENUM, "%!FUNC! Entry");
-
-    return Bus_SubmitReport(Device, SerialNo, Report, FromInterface);
-}
-
 WDFDEVICE Bus_GetPdo(IN WDFDEVICE Device, IN ULONG SerialNo)
 {
     WDFCHILDLIST                list;
@@ -640,12 +617,6 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
         changed = TRUE;
 
         break;
-    case XboxOneWired:
-
-        // TODO: necessary?
-        changed = TRUE;
-
-        break;
     default:
 
         changed = FALSE;
@@ -678,60 +649,6 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
     case DualShock4Wired:
 
         status = WdfIoQueueRetrieveNextRequest(pdoData->PendingUsbInRequests, &usbRequest);
-
-        break;
-    case XboxOneWired:
-
-        // Request is control data
-        if (((PXGIP_SUBMIT_INTERRUPT)Report)->Size == sizeof(XGIP_SUBMIT_INTERRUPT))
-        {
-            PXGIP_DEVICE_DATA xgip = XgipGetData(hChild);
-            PXGIP_SUBMIT_INTERRUPT interrupt = (PXGIP_SUBMIT_INTERRUPT)Report;
-            WDFMEMORY memory;
-            WDF_OBJECT_ATTRIBUTES memAttribs;
-            WDF_OBJECT_ATTRIBUTES_INIT(&memAttribs);
-
-            memAttribs.ParentObject = hChild;
-
-            // Allocate kernel memory
-            status = WdfMemoryCreate(&memAttribs, NonPagedPool, VIGEM_POOL_TAG,
-                interrupt->InterruptLength, &memory, NULL);
-            if (!NT_SUCCESS(status))
-            {
-                KdPrint((DRIVERNAME "WdfMemoryCreate failed with status 0x%X\n", status));
-                goto endSubmitReport;
-            }
-
-            // Copy interrupt buffer to memory object
-            status = WdfMemoryCopyFromBuffer(memory, 0, interrupt->Interrupt, interrupt->InterruptLength);
-            if (!NT_SUCCESS(status))
-            {
-                KdPrint((DRIVERNAME "WdfMemoryCopyFromBuffer failed with status 0x%X\n", status));
-                goto endSubmitReport;
-            }
-
-            // Add memory object to collection
-            status = WdfCollectionAdd(xgip->XboxgipSysInitCollection, memory);
-            if (!NT_SUCCESS(status))
-            {
-                KdPrint((DRIVERNAME "WdfCollectionAdd failed with status 0x%X\n", status));
-                goto endSubmitReport;
-            }
-
-            // Check if all packets have been received
-            xgip->XboxgipSysInitReady =
-                WdfCollectionGetCount(xgip->XboxgipSysInitCollection) == XGIP_SYS_INIT_PACKETS;
-
-            // If all packets are cached, start initialization timer
-            if (xgip->XboxgipSysInitReady)
-            {
-                WdfTimerStart(xgip->XboxgipSysInitTimer, XGIP_SYS_INIT_PERIOD);
-            }
-
-            goto endSubmitReport;
-        }
-
-        status = WdfIoQueueRetrieveNextRequest(XgipGetData(hChild)->PendingUsbInRequests, &usbRequest);
 
         break;
     default:
@@ -787,25 +704,6 @@ NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEA
 
         if (Buffer)
             RtlCopyBytes(Buffer, Ds4GetData(hChild)->Report, DS4_REPORT_SIZE);
-
-        break;
-    case XboxOneWired:
-
-        // Request is input report
-        if (((PXGIP_SUBMIT_REPORT)Report)->Size == sizeof(XGIP_SUBMIT_REPORT))
-        {
-            urb->UrbBulkOrInterruptTransfer.TransferBufferLength = XGIP_REPORT_SIZE;
-
-            // Increase event counter on every call (can roll-over)
-            XgipGetData(hChild)->Report[2]++;
-
-            /* Copy report to cache and transfer buffer
-             * Skip first four bytes as they are not part of the report */
-            RtlCopyBytes(XgipGetData(hChild)->Report + 4, &((PXGIP_SUBMIT_REPORT)Report)->Report, sizeof(XGIP_REPORT));
-            RtlCopyBytes(Buffer, XgipGetData(hChild)->Report, XGIP_REPORT_SIZE);
-
-            break;
-        }
 
         break;
     default:

@@ -189,18 +189,6 @@ NTSTATUS Bus_CreatePdo(
 
         break;
 
-        //
-        // A Xbox One device was requested
-        // 
-    case XboxOneWired:
-
-        status = Xgip_PreparePdo(DeviceInit, &deviceId, &deviceDescription);
-
-        if (!NT_SUCCESS(status))
-            goto endCreatePdo;
-
-        break;
-
     default:
 
         status = STATUS_INVALID_PARAMETER;
@@ -334,23 +322,6 @@ NTSTATUS Bus_CreatePdo(
 
         break;
     }
-    case XboxOneWired:
-    {
-        PXGIP_DEVICE_DATA xgipData = NULL;
-        WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&pdoAttributes, XGIP_DEVICE_DATA);
-
-        status = WdfObjectAllocateContext(hChild, &pdoAttributes, (PVOID)&xgipData);
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_BUSPDO,
-                "WdfObjectAllocateContext failed with status %!STATUS!",
-                status);
-            goto endCreatePdo;
-        }
-
-        break;
-    }
     default:
         break;
     }
@@ -406,13 +377,6 @@ NTSTATUS Bus_CreatePdo(
         status = Ds4_AssignPdoContext(hChild, Description);
 
         break;
-
-    case XboxOneWired:
-
-        status = Xgip_AssignPdoContext(hChild);
-
-        break;
-
     default:
         break;
     }
@@ -560,12 +524,6 @@ NTSTATUS Pdo_EvtDevicePrepareHardware(
     case DualShock4Wired:
 
         status = Ds4_PrepareHardware(Device);
-
-        break;
-
-    case XboxOneWired:
-
-        status = Xgip_PrepareHardware(Device);
 
         break;
 
