@@ -29,6 +29,8 @@
 #include <wdmguid.h>
 #include "xusb.tmh"
 
+EXTERN_C_START
+
 NTSTATUS Xusb_PreparePdo(
     PWDFDEVICE_INIT DeviceInit,
     USHORT VendorId,
@@ -637,3 +639,5 @@ NTSTATUS Xusb_GetUserIndex(WDFDEVICE Device, PXUSB_GET_USER_INDEX Request)
 
     return status;
 }
+
+EXTERN_C_END

@@ -171,6 +171,7 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppEnabled>true</WppEnabled>
       <WppScanConfigurationData>trace.h</WppScanConfigurationData>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -186,13 +187,16 @@
     <ClInclude Include="busenum.h" />
     <ClInclude Include="ByteArray.h" />
     <ClInclude Include="Context.h" />
+    <ClInclude Include="CRTCPP.hpp" />
     <ClInclude Include="Ds4.h" />
+    <ClInclude Include="EmulationTargetPDO.hpp" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="trace.h" />
     <ClInclude Include="UsbPdo.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="Xusb.h" />
+    <ClInclude Include="XusbPdo.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ViGEmBus.rc" />
@@ -203,10 +207,12 @@
     <ClCompile Include="ByteArray.c" />
     <ClCompile Include="Driver.c" />
     <ClCompile Include="Ds4.c" />
+    <ClCompile Include="EmulationTargetPDO.cpp" />
     <ClCompile Include="Queue.c" />
     <ClCompile Include="UsbPdo.c" />
     <ClCompile Include="Util.c" />
     <ClCompile Include="xusb.c" />
+    <ClCompile Include="XusbPdo.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -117,6 +117,7 @@ typedef struct _XUSB_DEVICE_DATA
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(XUSB_DEVICE_DATA, XusbGetData)
 
+EXTERN_C_START
 
 NTSTATUS
 Bus_XusbSubmitReport(
@@ -136,3 +137,5 @@ VOID Xusb_GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length);
 VOID Xusb_GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, PPDO_DEVICE_DATA pCommon);
 VOID Xusb_SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo);
 NTSTATUS Xusb_GetUserIndex(WDFDEVICE Device, PXUSB_GET_USER_INDEX Request);
+
+EXTERN_C_END

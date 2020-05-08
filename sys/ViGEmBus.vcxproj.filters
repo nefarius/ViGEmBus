@@ -20,6 +20,12 @@
     <Filter Include="Header Files\Common">
       <UniqueIdentifier>{bbf85b1d-5a75-4302-af4e-46627fcf0d78}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Targets">
+      <UniqueIdentifier>{b00da32a-ce46-490d-9e77-95bb90925995}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Targets">
+      <UniqueIdentifier>{3a87fd70-9882-47c4-a23b-50dd0b42b0f8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Inf Include="ViGEmBus.inf">
@@ -66,6 +72,15 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="XusbPdo.hpp">
+      <Filter>Header Files\Targets</Filter>
+    </ClInclude>
+    <ClInclude Include="EmulationTargetPDO.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CRTCPP.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="busenum.c">
@@ -93,6 +108,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ByteArray.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XusbPdo.cpp">
+      <Filter>Source Files\Targets</Filter>
+    </ClCompile>
+    <ClCompile Include="EmulationTargetPDO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
