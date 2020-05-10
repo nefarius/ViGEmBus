@@ -2,11 +2,11 @@
 
 
 #include "EmulationTargetPDO.hpp"
+#include <ViGEm/km/BusShared.h>
+#include "Util.h"
 
 namespace ViGEm::Bus::Targets
-{
-	
-	
+{	
 	class EmulationTargetDS4 : public Core::EmulationTargetPDO
 	{
 	public:
@@ -28,7 +28,7 @@ namespace ViGEm::Bus::Targets
 
 	private:
 		static PCWSTR _deviceDescription;
-
+		
 #if defined(_X86_)
 		static const int XUSB_CONFIGURATION_SIZE = 0x00E4;
 #else
@@ -70,5 +70,43 @@ namespace ViGEm::Bus::Targets
 
 		static const int DS4_REPORT_SIZE = 0x40;
 		static const int DS4_QUEUE_FLUSH_PERIOD = 0x05;
+		
+		//
+		// HID Input Report buffer
+		//
+		UCHAR Report[DS4_REPORT_SIZE];
+
+		//
+		// Output report cache
+		//
+		DS4_OUTPUT_REPORT OutputReport;
+		
+		//
+		// Timer for dispatching interrupt transfer
+		//
+		WDFTIMER PendingUsbInRequestsTimer;
+
+		//
+		// Auto-generated MAC address of the target device
+		//
+		MAC_ADDRESS TargetMacAddress;
+
+		//
+		// Default MAC address of the host (not used)
+		//
+		MAC_ADDRESS HostMacAddress;
+
+		static EVT_WDF_TIMER PendingUsbRequestsTimerFunc;
 	};
+
+	//
+	// DS4-specific device context data.
+	// 
+	typedef struct _DS4_PDO_CONTEXT
+	{
+		EmulationTargetDS4* Context;
+
+	} DS4_PDO_CONTEXT, * PDS4_PDO_CONTEXT;
+
+	WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DS4_PDO_CONTEXT, Ds4PdoGetContext)
 }

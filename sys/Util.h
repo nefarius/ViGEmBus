@@ -48,5 +48,9 @@ typedef struct _MAC_ADDRESS
 } MAC_ADDRESS, *PMAC_ADDRESS;
 
 
+EXTERN_C_START
+
 VOID ReverseByteArray(PUCHAR Array, INT Length);
 VOID GenerateRandomMacAddress(PMAC_ADDRESS Address);
+
+EXTERN_C_END

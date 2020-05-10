@@ -2,9 +2,12 @@
 
 #include <ntddk.h>
 #include <wdf.h>
+#include <ntintsafe.h>
 
 #include <usb.h>
 #include <usbbusif.h>
+
+#include <ViGEm/Common.h>
 
 //
 // Some insane macro-magic =3
@@ -56,5 +59,40 @@ namespace ViGEm::Bus::Core
 			IN OUT PUSBD_VERSION_INFORMATION VersionInformation,
 			IN OUT PULONG HcdCapabilities
 		);
+
+        //
+	    // Unique serial number of the device on the bus
+	    // 
+        ULONG SerialNo;
+
+        // 
+        // PID of the process creating this PDO
+        // 
+        DWORD OwnerProcessId;
+
+        //
+        // Device type this PDO is emulating
+        // 
+        VIGEM_TARGET_TYPE TargetType;
+
+        //
+        // If set, the vendor ID the emulated device is reporting
+        // 
+        USHORT VendorId;
+
+        //
+        // If set, the product ID the emulated device is reporting
+        // 
+        USHORT ProductId;
+
+        //
+        // Queue for incoming data interrupt transfer
+        //
+        WDFQUEUE PendingUsbInRequests;
+
+        //
+        // Queue for inverted calls
+        //
+        WDFQUEUE PendingNotificationRequests;
 	};
 }

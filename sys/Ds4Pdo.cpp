@@ -3,6 +3,7 @@
 #include "Ds4Pdo.tmh"
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
+#include <hidclass.h>
 
 
 using namespace ViGEm::Bus::Targets;
@@ -101,16 +102,230 @@ NTSTATUS EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT Ve
 
 NTSTATUS EmulationTargetDS4::PrepareHardware(WDFDEVICE Device)
 {
-    UNREFERENCED_PARAMETER(Device);
-	
-	return NTSTATUS();
+	WDF_QUERY_INTERFACE_CONFIG ifaceCfg;
+    INTERFACE devinterfaceHid;
+
+    devinterfaceHid.Size = sizeof(INTERFACE);
+    devinterfaceHid.Version = 1;
+    devinterfaceHid.Context = (PVOID)Device;
+
+    devinterfaceHid.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
+    devinterfaceHid.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
+
+    // Expose GUID_DEVINTERFACE_HID so HIDUSB can initialize
+    WDF_QUERY_INTERFACE_CONFIG_INIT(
+        &ifaceCfg, 
+        (PINTERFACE)&devinterfaceHid,
+        &GUID_DEVINTERFACE_HID,
+        NULL
+    );
+
+    NTSTATUS status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfDeviceAddQueryInterface failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    // Set default HID input report (everything zero`d)
+    UCHAR DefaultHidReport[DS4_REPORT_SIZE] =
+    {
+        0x01, 0x82, 0x7F, 0x7E, 0x80, 0x08, 0x00, 0x58,
+        0x00, 0x00, 0xFD, 0x63, 0x06, 0x03, 0x00, 0xFE,
+        0xFF, 0xFC, 0xFF, 0x79, 0xFD, 0x1B, 0x14, 0xD1,
+        0xE9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1B, 0x00,
+        0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x80,
+        0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00,
+        0x80, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00,
+        0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00
+    };
+
+    // Initialize HID reports to defaults
+    RtlCopyBytes(this->Report, DefaultHidReport, DS4_REPORT_SIZE);
+    RtlZeroMemory(&this->OutputReport, sizeof(DS4_OUTPUT_REPORT));
+
+    // Start pending IRP queue flush timer
+    WdfTimerStart(this->PendingUsbInRequestsTimer, DS4_QUEUE_FLUSH_PERIOD);
+
+    return STATUS_SUCCESS;
 }
 
 NTSTATUS EmulationTargetDS4::InitContext(WDFDEVICE Device)
 {
-    UNREFERENCED_PARAMETER(Device);
-	
-	return NTSTATUS();
+    NTSTATUS            status;
+
+    // Initialize periodic timer
+    WDF_TIMER_CONFIG timerConfig;
+    WDF_TIMER_CONFIG_INIT_PERIODIC(
+        &timerConfig, 
+        PendingUsbRequestsTimerFunc, 
+        DS4_QUEUE_FLUSH_PERIOD
+    );
+
+    // Timer object attributes
+    WDF_OBJECT_ATTRIBUTES timerAttribs;
+    WDF_OBJECT_ATTRIBUTES_INIT(&timerAttribs);
+
+    // PDO is parent
+    timerAttribs.ParentObject = Device;
+
+    // Create timer
+    status = WdfTimerCreate(
+        &timerConfig, 
+        &timerAttribs, 
+        &this->PendingUsbInRequestsTimer
+    );
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfTimerCreate failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    // Load/generate MAC address
+
+    // TODO: tidy up this region
+
+    WDFKEY keyParams, keyTargets, keyDS, keySerial;
+    UNICODE_STRING keyName, valueName;
+
+    status = WdfDriverOpenParametersRegistryKey(
+        WdfGetDriver(), 
+        STANDARD_RIGHTS_ALL, 
+        WDF_NO_OBJECT_ATTRIBUTES, 
+        &keyParams
+    );
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfDriverOpenParametersRegistryKey failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    RtlUnicodeStringInit(&keyName, L"Targets");
+
+    status = WdfRegistryCreateKey(
+        keyParams,
+        &keyName,
+        KEY_ALL_ACCESS,
+        REG_OPTION_NON_VOLATILE,
+        NULL,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &keyTargets
+    );
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfRegistryCreateKey failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    RtlUnicodeStringInit(&keyName, L"DualShock");
+
+    status = WdfRegistryCreateKey(
+        keyTargets,
+        &keyName,
+        KEY_ALL_ACCESS,
+        REG_OPTION_NON_VOLATILE,
+        NULL,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &keyDS
+    );
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfRegistryCreateKey failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    DECLARE_UNICODE_STRING_SIZE(serialPath, 4);
+    RtlUnicodeStringPrintf(&serialPath, L"%04d", this->SerialNo);
+
+    status = WdfRegistryCreateKey(
+        keyDS,
+        &serialPath,
+        KEY_ALL_ACCESS,
+        REG_OPTION_NON_VOLATILE,
+        NULL,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &keySerial
+    );
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfRegistryCreateKey failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    RtlUnicodeStringInit(&valueName, L"TargetMacAddress");
+
+    status = WdfRegistryQueryValue(
+        keySerial, 
+        &valueName,
+        sizeof(MAC_ADDRESS), 
+        &this->TargetMacAddress, 
+        NULL, 
+        NULL
+    );
+
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_DS4,
+        "MAC-Address: %02X:%02X:%02X:%02X:%02X:%02X\n",
+        this->TargetMacAddress.Vendor0,
+        this->TargetMacAddress.Vendor1,
+        this->TargetMacAddress.Vendor2,
+        this->TargetMacAddress.Nic0,
+        this->TargetMacAddress.Nic1,
+        this->TargetMacAddress.Nic2);
+
+    if (status == STATUS_OBJECT_NAME_NOT_FOUND)
+    {
+        GenerateRandomMacAddress(&this->TargetMacAddress);
+
+        status = WdfRegistryAssignValue(
+            keySerial, 
+            &valueName, 
+            REG_BINARY, 
+            sizeof(MAC_ADDRESS), 
+            static_cast<PVOID>(&this->TargetMacAddress)
+        );
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_DS4,
+                "WdfRegistryAssignValue failed with status %!STATUS!",
+                status);
+            return status;
+        }
+    }
+    else if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DS4,
+            "WdfRegistryQueryValue failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    WdfRegistryClose(keySerial);
+    WdfRegistryClose(keyDS);
+    WdfRegistryClose(keyTargets);
+    WdfRegistryClose(keyParams);
+
+    return STATUS_SUCCESS;
 }
 
 VOID EmulationTargetDS4::GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length)
@@ -215,4 +430,11 @@ VOID EmulationTargetDS4::SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
     pInfo->Pipes[1].PipeType = (USBD_PIPE_TYPE)0x03;
     pInfo->Pipes[1].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0003;
     pInfo->Pipes[1].PipeFlags = 0x00;
+}
+
+VOID EmulationTargetDS4::PendingUsbRequestsTimerFunc(
+    _In_ WDFTIMER Timer
+)
+{
+    UNREFERENCED_PARAMETER(Timer);
 }

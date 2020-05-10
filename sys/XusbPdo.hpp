@@ -2,23 +2,12 @@
 
 
 #include "EmulationTargetPDO.hpp"
+#include <ViGEm/km/BusShared.h>
 
 namespace ViGEm::Bus::Targets
 {
 	constexpr auto XUSB_POOL_TAG = 'EGiV';
-	
-	typedef struct _XUSB_REPORT
-	{
-		USHORT wButtons;
-		BYTE bLeftTrigger;
-		BYTE bRightTrigger;
-		SHORT sThumbLX;
-		SHORT sThumbLY;
-		SHORT sThumbRX;
-		SHORT sThumbRY;
-
-	} XUSB_REPORT, * PXUSB_REPORT;
-	
+		
 	typedef struct _XUSB_INTERRUPT_IN_PACKET
 	{
 		UCHAR Id;
@@ -29,49 +18,7 @@ namespace ViGEm::Bus::Targets
 
 	} XUSB_INTERRUPT_IN_PACKET, * PXUSB_INTERRUPT_IN_PACKET;
 
-	//
-	// XUSB-specific device context data.
-	// 
-	typedef struct _XUSB_DEVICE_DATA
-	{
-		//
-		// Rumble buffer
-		//
-		UCHAR Rumble[0x08];
 
-		//
-		// LED number (represents XInput slot index)
-		//
-		CHAR LedNumber;
-
-		//
-		// Report packet
-		//
-		XUSB_INTERRUPT_IN_PACKET Packet;
-
-		//
-		// Queue for incoming control interrupt transfer
-		//
-		WDFQUEUE HoldingUsbInRequests;
-
-		//
-		// Required for XInputGetCapabilities to work
-		// 
-		BOOLEAN ReportedCapabilities;
-
-		//
-		// Required for XInputGetCapabilities to work
-		// 
-		ULONG InterruptInitStage;
-
-		//
-		// Storage of binary blobs (packets) for PDO initialization
-		// 
-		WDFMEMORY InterruptBlobStorage;
-
-	} XUSB_DEVICE_DATA, * PXUSB_DEVICE_DATA;
-
-	WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(XUSB_DEVICE_DATA, XusbPdoGetContext)
 	
 	class EmulationTargetXUSB : public Core::EmulationTargetPDO
 	{
@@ -115,5 +62,51 @@ namespace ViGEm::Bus::Targets
 		static const int XUSB_BLOB_05_OFFSET = 0x20;
 		static const int XUSB_BLOB_06_OFFSET = 0x23;
 		static const int XUSB_BLOB_07_OFFSET = 0x26;
+		
+		//
+		// Rumble buffer
+		//
+		UCHAR Rumble[XUSB_RUMBLE_SIZE];
+
+		//
+		// LED number (represents XInput slot index)
+		//
+		CHAR LedNumber;
+
+		//
+		// Report packet
+		//
+		XUSB_INTERRUPT_IN_PACKET Packet;
+
+		//
+		// Queue for incoming control interrupt transfer
+		//
+		WDFQUEUE HoldingUsbInRequests;
+
+		//
+		// Required for XInputGetCapabilities to work
+		// 
+		BOOLEAN ReportedCapabilities;
+
+		//
+		// Required for XInputGetCapabilities to work
+		// 
+		ULONG InterruptInitStage;
+
+		//
+		// Storage of binary blobs (packets) for PDO initialization
+		// 
+		WDFMEMORY InterruptBlobStorage;
 	};
+
+	//
+	// XUSB-specific device context data.
+	// 
+	typedef struct _XUSB_PDO_CONTEXT
+	{
+		EmulationTargetXUSB* Context;
+
+	} XUSB_PDO_CONTEXT, * PXUSB_PDO_CONTEXT;
+
+	WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(XUSB_PDO_CONTEXT, XusbPdoGetContext)
 }

@@ -224,22 +224,26 @@ NTSTATUS EmulationTargetXUSB::InitContext(WDFDEVICE Device)
 
 	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XUSB, "Initializing XUSB context...");
 
-	PXUSB_DEVICE_DATA xusb = XusbPdoGetContext(Device);
-
-	RtlZeroMemory(xusb, sizeof(XUSB_DEVICE_DATA));
-
+	RtlZeroMemory(this->Rumble, ARRAYSIZE(this->Rumble));
+	
 	// Is later overwritten by actual XInput slot
-	xusb->LedNumber = -1;
+	this->LedNumber = -1;
+	
+	RtlZeroMemory(&this->Packet, sizeof(XUSB_INTERRUPT_IN_PACKET));
 	// Packet size (20 bytes = 0x14)
-	xusb->Packet.Size = 0x14;
+	this->Packet.Size = 0x14;
 
+	this->ReportedCapabilities = FALSE;
+
+	this->InterruptInitStage = 0;
+	
 	// Allocate blob storage
 	NTSTATUS status = WdfMemoryCreate(
 		&attributes,
 		NonPagedPoolNx,
 		XUSB_POOL_TAG,
 		XUSB_BLOB_STORAGE_SIZE,
-		&xusb->InterruptBlobStorage,
+		&this->InterruptBlobStorage,
 		reinterpret_cast<PVOID*>(&blobBuffer)
 	);
 	if (!NT_SUCCESS(status))
@@ -279,7 +283,12 @@ NTSTATUS EmulationTargetXUSB::InitContext(WDFDEVICE Device)
 	// Create and assign queue for unhandled interrupt requests
 	WDF_IO_QUEUE_CONFIG_INIT(&holdingInQueueConfig, WdfIoQueueDispatchManual);
 
-	status = WdfIoQueueCreate(Device, &holdingInQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &xusb->HoldingUsbInRequests);
+	status = WdfIoQueueCreate(
+		Device, 
+		&holdingInQueueConfig, 
+		WDF_NO_OBJECT_ATTRIBUTES, 
+		&this->HoldingUsbInRequests
+	);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
