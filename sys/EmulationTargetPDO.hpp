@@ -32,16 +32,15 @@ namespace ViGEm::Bus::Core
 		virtual ~EmulationTargetPDO() = default;
 
 		virtual NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit,
-		                               PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription) = 0;
+		                               PUNICODE_STRING DeviceId,
+		                               PUNICODE_STRING DeviceDescription) = 0;
 
 		virtual NTSTATUS PrepareHardware() = 0;
 
 		virtual NTSTATUS InitContext() = 0;
 
-		
-
 		virtual VOID GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) = 0;
-				
+
 		NTSTATUS CreateDevice(_In_ WDFDEVICE Device,
 		                      _In_ PWDFDEVICE_INIT DeviceInit,
 		                      _In_ PPDO_IDENTIFICATION_DESCRIPTION Description);
@@ -56,11 +55,11 @@ namespace ViGEm::Bus::Core
 		}
 
 		NTSTATUS UsbSelectConfiguration(PURB Urb);
-		
+
 		void UsbAbortPipe();
 
 		NTSTATUS UsbGetConfigurationDescriptorType(PURB Urb);
-		
+
 	protected:
 		static const ULONG _maxHardwareIdLength = 0xFF;
 
@@ -93,11 +92,11 @@ namespace ViGEm::Bus::Core
 		static const int MAX_INSTANCE_ID_LEN = 80;
 
 		virtual VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) = 0;
-		
+
 		virtual NTSTATUS SelectConfiguration(PURB Urb) = 0;
-		
+
 		virtual void AbortPipe() = 0;
-		
+
 		//
 		// Unique serial number of the device on the bus
 		// 
@@ -152,7 +151,7 @@ namespace ViGEm::Bus::Core
 	typedef struct _PDO_IDENTIFICATION_DESCRIPTION
 	{
 		WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER Header;
-		
+
 		EmulationTargetPDO* Target;
 	} PDO_IDENTIFICATION_DESCRIPTION, *PPDO_IDENTIFICATION_DESCRIPTION;
 

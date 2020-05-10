@@ -23,7 +23,8 @@ namespace ViGEm::Bus::Targets
 		~EmulationTargetXUSB() = default;
 
 		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit,
-		                       PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription) override;
+		                       PUNICODE_STRING DeviceId,
+		                       PUNICODE_STRING DeviceDescription) override;
 
 		NTSTATUS PrepareHardware() override;
 
