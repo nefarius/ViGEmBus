@@ -169,7 +169,11 @@ NTSTATUS Bus_PlugInDevice(
         "Current pending requests count: %d",
         WdfCollectionGetCount(pFdoData->PendingPluginRequests));
 
-    status = WdfChildListAddOrUpdateChildDescriptionAsPresent(WdfFdoGetDefaultChildList(Device), &description.Header, NULL);
+    status = WdfChildListAddOrUpdateChildDescriptionAsPresent(
+        WdfFdoGetDefaultChildList(Device),
+        &description.Header, 
+        NULL
+    );
 
     if (!NT_SUCCESS(status))
     {
