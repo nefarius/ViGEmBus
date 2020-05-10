@@ -95,4 +95,9 @@ namespace ViGEm::Bus::Core
         //
         WDFQUEUE PendingNotificationRequests{};
 	};
+
+	typedef struct _PDO_IDENTIFICATION_DESCRIPTION
+	{
+		EmulationTargetPDO* Context;
+	} PDO_IDENTIFICATION_DESCRIPTION, *PPDO_IDENTIFICATION_DESCRIPTION;
 }

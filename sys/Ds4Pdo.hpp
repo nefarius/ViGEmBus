@@ -2,18 +2,21 @@
 
 #include "EmulationTargetPDO.hpp"
 #include <ViGEm/km/BusShared.h>
+
 #include "Util.h"
 
+
 namespace ViGEm::Bus::Targets
-{	
+{
 	class EmulationTargetDS4 : public Core::EmulationTargetPDO
 	{
 	public:
 		EmulationTargetDS4();
 		~EmulationTargetDS4() = default;
-
-		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit, 
-		                       PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription) override;
+		
+		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit,
+		                       PUNICODE_STRING DeviceId,
+		                       PUNICODE_STRING DeviceDescription) override;
 
 		NTSTATUS PrepareHardware(WDFDEVICE Device) override;
 
@@ -27,7 +30,7 @@ namespace ViGEm::Bus::Targets
 
 	private:
 		static PCWSTR _deviceDescription;
-		
+
 #if defined(_X86_)
 		static const int XUSB_CONFIGURATION_SIZE = 0x00E4;
 #else
@@ -69,7 +72,7 @@ namespace ViGEm::Bus::Targets
 
 		static const int DS4_REPORT_SIZE = 0x40;
 		static const int DS4_QUEUE_FLUSH_PERIOD = 0x05;
-		
+
 		//
 		// HID Input Report buffer
 		//
@@ -79,7 +82,7 @@ namespace ViGEm::Bus::Targets
 		// Output report cache
 		//
 		DS4_OUTPUT_REPORT OutputReport;
-		
+
 		//
 		// Timer for dispatching interrupt transfer
 		//
@@ -104,8 +107,7 @@ namespace ViGEm::Bus::Targets
 	typedef struct _DS4_PDO_CONTEXT
 	{
 		EmulationTargetDS4* Context;
-
-	} DS4_PDO_CONTEXT, * PDS4_PDO_CONTEXT;
+	} DS4_PDO_CONTEXT, *PDS4_PDO_CONTEXT;
 
 	WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DS4_PDO_CONTEXT, Ds4PdoGetContext)
 }
