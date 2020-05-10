@@ -21,10 +21,10 @@ namespace ViGEm::Bus::Targets
 	class EmulationTargetXUSB : public Core::EmulationTargetPDO
 	{
 	public:
-		EmulationTargetXUSB() = default;
+		EmulationTargetXUSB();
 		~EmulationTargetXUSB() = default;
 
-		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT VID, USHORT PID,
+		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit, 
 		                       PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription) override;
 
 		NTSTATUS PrepareHardware(WDFDEVICE Device) override;

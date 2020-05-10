@@ -6,13 +6,15 @@
 #include <wdmguid.h>
 
 
-using namespace ViGEm::Bus::Targets;
 
-PCWSTR EmulationTargetXUSB::_deviceDescription = L"Virtual Xbox 360 Controller";
+PCWSTR ViGEm::Bus::Targets::EmulationTargetXUSB::_deviceDescription = L"Virtual Xbox 360 Controller";
 
-NTSTATUS EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT VID,
-                                            USHORT PID, PUNICODE_STRING DeviceId,
-                                            PUNICODE_STRING DeviceDescription)
+ViGEm::Bus::Targets::EmulationTargetXUSB::EmulationTargetXUSB() : EmulationTargetPDO(0x045E, 0x028E)
+{
+}
+
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId,
+                                                                 PUNICODE_STRING DeviceDescription)
 {
 	NTSTATUS status;
 	DECLARE_UNICODE_STRING_SIZE(buffer, _maxHardwareIdLength);
@@ -29,7 +31,7 @@ NTSTATUS EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT V
 	}
 
 	// Set hardware ID
-	RtlUnicodeStringPrintf(&buffer, L"USB\\VID_%04X&PID_%04X", VID, PID);
+	RtlUnicodeStringPrintf(&buffer, L"USB\\VID_%04X&PID_%04X", this->VendorId, this->ProductId);
 
 	RtlUnicodeStringCopy(DeviceId, &buffer);
 
@@ -96,7 +98,7 @@ NTSTATUS EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT V
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS EmulationTargetXUSB::PrepareHardware(WDFDEVICE Device)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware(WDFDEVICE Device)
 {
 	WDF_QUERY_INTERFACE_CONFIG ifaceCfg;
 
@@ -214,7 +216,7 @@ NTSTATUS EmulationTargetXUSB::PrepareHardware(WDFDEVICE Device)
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS EmulationTargetXUSB::InitContext(WDFDEVICE Device)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::InitContext(WDFDEVICE Device)
 {
 	WDF_OBJECT_ATTRIBUTES attributes;
 	PUCHAR blobBuffer;
@@ -301,7 +303,7 @@ NTSTATUS EmulationTargetXUSB::InitContext(WDFDEVICE Device)
 	return STATUS_SUCCESS;
 }
 
-VOID EmulationTargetXUSB::GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length)
+VOID ViGEm::Bus::Targets::EmulationTargetXUSB::GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length)
 {
 	UCHAR XusbDescriptorData[XUSB_DESCRIPTOR_SIZE] =
 	{
@@ -443,7 +445,7 @@ VOID EmulationTargetXUSB::GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Le
 	RtlCopyBytes(Buffer, XusbDescriptorData, Length);
 }
 
-VOID EmulationTargetXUSB::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
+VOID ViGEm::Bus::Targets::EmulationTargetXUSB::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
 {
 	pDescriptor->bLength = 0x12;
 	pDescriptor->bDescriptorType = USB_DEVICE_DESCRIPTOR_TYPE;
@@ -461,7 +463,7 @@ VOID EmulationTargetXUSB::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescri
 	pDescriptor->bNumConfigurations = 0x01;
 }
 
-VOID EmulationTargetXUSB::SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
+VOID ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 {
 	TraceEvents(TRACE_LEVEL_VERBOSE,
 		TRACE_XUSB,

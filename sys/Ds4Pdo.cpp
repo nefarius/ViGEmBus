@@ -10,18 +10,12 @@ using namespace ViGEm::Bus::Targets;
 
 PCWSTR EmulationTargetDS4::_deviceDescription = L"Virtual DualShock 4 Controller";
 
-NTSTATUS EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT VID, USHORT PID,
+NTSTATUS EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT DeviceInit, 
                                            PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription)
 {
     NTSTATUS status;
     UNICODE_STRING buffer;
-
-	//
-	// TODO: implement usage!
-	// 
-    UNREFERENCED_PARAMETER(VID);
-    UNREFERENCED_PARAMETER(PID);
-	
+    	
     // prepare device description
     status = RtlUnicodeStringInit(DeviceDescription, _deviceDescription);
     if (!NT_SUCCESS(status))

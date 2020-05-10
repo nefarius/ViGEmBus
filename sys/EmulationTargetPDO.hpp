@@ -25,7 +25,7 @@ namespace ViGEm::Bus::Core
 
 		virtual ~EmulationTargetPDO() = default;
 
-		virtual NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT VendorId, USHORT ProductId,
+		virtual NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit, 
 		                               PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription) = 0;
 
 		virtual NTSTATUS PrepareHardware(WDFDEVICE Device) = 0;

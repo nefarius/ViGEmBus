@@ -13,7 +13,7 @@ namespace ViGEm::Bus::Targets
 		EmulationTargetDS4() = default;
 		~EmulationTargetDS4() = default;
 
-		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT VID, USHORT PID,
+		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit, 
 		                       PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription) override;
 
 		NTSTATUS PrepareHardware(WDFDEVICE Device) override;
