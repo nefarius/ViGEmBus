@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "EmulationTargetPDO.hpp"
 #include <ViGEm/km/BusShared.h>
 
@@ -24,7 +23,7 @@ namespace ViGEm::Bus::Targets
 		EmulationTargetXUSB();
 		~EmulationTargetXUSB() = default;
 
-		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit, 
+		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit,
 		                       PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription) override;
 
 		NTSTATUS PrepareHardware(WDFDEVICE Device) override;

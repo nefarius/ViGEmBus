@@ -6,12 +6,15 @@
 #include <hidclass.h>
 
 
-using namespace ViGEm::Bus::Targets;
 
-PCWSTR EmulationTargetDS4::_deviceDescription = L"Virtual DualShock 4 Controller";
+PCWSTR ViGEm::Bus::Targets::EmulationTargetDS4::_deviceDescription = L"Virtual DualShock 4 Controller";
 
-NTSTATUS EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT DeviceInit, 
-                                           PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription)
+ViGEm::Bus::Targets::EmulationTargetDS4::EmulationTargetDS4() : EmulationTargetPDO(0x054C, 0x05C4)
+{
+}
+
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT DeviceInit,
+                                                                PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription)
 {
     NTSTATUS status;
     UNICODE_STRING buffer;
@@ -94,7 +97,7 @@ NTSTATUS EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT DeviceInit,
     return STATUS_SUCCESS;
 }
 
-NTSTATUS EmulationTargetDS4::PrepareHardware(WDFDEVICE Device)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PrepareHardware(WDFDEVICE Device)
 {
 	WDF_QUERY_INTERFACE_CONFIG ifaceCfg;
     INTERFACE devinterfaceHid;
@@ -147,7 +150,7 @@ NTSTATUS EmulationTargetDS4::PrepareHardware(WDFDEVICE Device)
     return STATUS_SUCCESS;
 }
 
-NTSTATUS EmulationTargetDS4::InitContext(WDFDEVICE Device)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::InitContext(WDFDEVICE Device)
 {
     NTSTATUS            status;
 
@@ -322,7 +325,7 @@ NTSTATUS EmulationTargetDS4::InitContext(WDFDEVICE Device)
     return STATUS_SUCCESS;
 }
 
-VOID EmulationTargetDS4::GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length)
+VOID ViGEm::Bus::Targets::EmulationTargetDS4::GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length)
 {
     UCHAR Ds4DescriptorData[DS4_DESCRIPTOR_SIZE] =
     {
@@ -375,7 +378,7 @@ VOID EmulationTargetDS4::GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Len
     RtlCopyBytes(Buffer, Ds4DescriptorData, Length);
 }
 
-VOID EmulationTargetDS4::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
+VOID ViGEm::Bus::Targets::EmulationTargetDS4::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
 {
     pDescriptor->bLength = 0x12;
     pDescriptor->bDescriptorType = USB_DEVICE_DESCRIPTOR_TYPE;
@@ -393,7 +396,7 @@ VOID EmulationTargetDS4::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescrip
     pDescriptor->bNumConfigurations = 0x01;
 }
 
-VOID EmulationTargetDS4::SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
+VOID ViGEm::Bus::Targets::EmulationTargetDS4::SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
 {
     TraceEvents(TRACE_LEVEL_VERBOSE,
         TRACE_DS4,
@@ -426,7 +429,7 @@ VOID EmulationTargetDS4::SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
     pInfo->Pipes[1].PipeFlags = 0x00;
 }
 
-VOID EmulationTargetDS4::PendingUsbRequestsTimerFunc(
+VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
     _In_ WDFTIMER Timer
 )
 {

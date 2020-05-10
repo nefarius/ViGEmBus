@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "EmulationTargetPDO.hpp"
 #include <ViGEm/km/BusShared.h>
 #include "Util.h"
@@ -10,7 +9,7 @@ namespace ViGEm::Bus::Targets
 	class EmulationTargetDS4 : public Core::EmulationTargetPDO
 	{
 	public:
-		EmulationTargetDS4() = default;
+		EmulationTargetDS4();
 		~EmulationTargetDS4() = default;
 
 		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit, 
