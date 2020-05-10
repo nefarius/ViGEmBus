@@ -298,6 +298,16 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::CreateDevice(WDFDEVICE Device, PW
 	return status;
 }
 
+VOID ViGEm::Bus::Core::EmulationTargetPDO::SetSerial(ULONG Serial)
+{
+	this->SerialNo = Serial;
+}
+
+ULONG ViGEm::Bus::Core::EmulationTargetPDO::GetSerial() const
+{
+	return this->SerialNo;
+}
+
 #pragma region USB Interface Functions
 
 BOOLEAN USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbIsDeviceHighSpeed(IN PVOID BusContext)

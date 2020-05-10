@@ -47,6 +47,16 @@ namespace ViGEm::Bus::Core
 		NTSTATUS CreateDevice(_In_ WDFDEVICE Device,
 		                      _In_ PWDFDEVICE_INIT DeviceInit,
 		                      _In_ PPDO_IDENTIFICATION_DESCRIPTION Description);
+
+		VOID SetSerial(ULONG Serial);
+
+		ULONG GetSerial() const;
+
+		bool operator==(EmulationTargetPDO& other) const
+		{
+			return (other.SerialNo == this->SerialNo);
+		}
+		
 	protected:
 		static const ULONG _maxHardwareIdLength = 0xFF;
 
