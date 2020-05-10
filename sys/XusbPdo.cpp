@@ -11,6 +11,7 @@ PCWSTR ViGEm::Bus::Targets::EmulationTargetXUSB::_deviceDescription = L"Virtual 
 
 ViGEm::Bus::Targets::EmulationTargetXUSB::EmulationTargetXUSB() : EmulationTargetPDO(0x045E, 0x028E)
 {
+	TargetType = Xbox360Wired;
 }
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId,
@@ -98,7 +99,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware(WDFDEVICE Device)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware()
 {
 	WDF_QUERY_INTERFACE_CONFIG ifaceCfg;
 
@@ -106,7 +107,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware(WDFDEVICE Dev
 
 	dummyIface.Size = sizeof(INTERFACE);
 	dummyIface.Version = 1;
-	dummyIface.Context = static_cast<PVOID>(Device);
+	dummyIface.Context = static_cast<PVOID>(this->PdoDevice);
 
 	dummyIface.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
 	dummyIface.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
@@ -124,7 +125,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware(WDFDEVICE Dev
 		nullptr
 	);
 
-	NTSTATUS status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
+	NTSTATUS status = WdfDeviceAddQueryInterface(this->PdoDevice, &ifaceCfg);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
@@ -145,7 +146,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware(WDFDEVICE Dev
 		nullptr
 	);
 
-	status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
+	status = WdfDeviceAddQueryInterface(this->PdoDevice, &ifaceCfg);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
@@ -166,7 +167,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware(WDFDEVICE Dev
 		nullptr
 	);
 
-	status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
+	status = WdfDeviceAddQueryInterface(this->PdoDevice, &ifaceCfg);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
@@ -185,7 +186,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware(WDFDEVICE Dev
 
 	xusbInterface.Size = sizeof(USB_BUS_INTERFACE_USBDI_V1);
 	xusbInterface.Version = USB_BUSIF_USBDI_VERSION_1;
-	xusbInterface.BusContext = static_cast<PVOID>(Device);
+	xusbInterface.BusContext = static_cast<PVOID>(this->PdoDevice);
 
 	xusbInterface.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
 	xusbInterface.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
@@ -203,7 +204,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware(WDFDEVICE Dev
 		nullptr
 	);
 
-	status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
+	status = WdfDeviceAddQueryInterface(this->PdoDevice, &ifaceCfg);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
@@ -216,13 +217,13 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware(WDFDEVICE Dev
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::InitContext(WDFDEVICE Device)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::InitContext()
 {
 	WDF_OBJECT_ATTRIBUTES attributes;
 	PUCHAR blobBuffer;
 
 	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-	attributes.ParentObject = Device;
+	attributes.ParentObject = this->PdoDevice;
 
 	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XUSB, "Initializing XUSB context...");
 
@@ -286,7 +287,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::InitContext(WDFDEVICE Device)
 	WDF_IO_QUEUE_CONFIG_INIT(&holdingInQueueConfig, WdfIoQueueDispatchManual);
 
 	status = WdfIoQueueCreate(
-		Device, 
+		this->PdoDevice,
 		&holdingInQueueConfig, 
 		WDF_NO_OBJECT_ATTRIBUTES, 
 		&this->HoldingUsbInRequests

@@ -26,9 +26,9 @@ namespace ViGEm::Bus::Targets
 		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit,
 		                       PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription) override;
 
-		NTSTATUS PrepareHardware(WDFDEVICE Device) override;
+		NTSTATUS PrepareHardware() override;
 
-		NTSTATUS InitContext(WDFDEVICE Device) override;
+		NTSTATUS InitContext() override;
 
 		VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) override;
 
@@ -95,14 +95,4 @@ namespace ViGEm::Bus::Targets
 		// 
 		WDFMEMORY InterruptBlobStorage;
 	};
-
-	//
-	// XUSB-specific device context data.
-	// 
-	typedef struct _XUSB_PDO_CONTEXT
-	{
-		EmulationTargetXUSB* Context;
-	} XUSB_PDO_CONTEXT, *PXUSB_PDO_CONTEXT;
-
-	WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(XUSB_PDO_CONTEXT, XusbPdoGetContext)
 }

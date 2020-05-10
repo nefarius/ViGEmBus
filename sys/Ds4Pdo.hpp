@@ -18,9 +18,9 @@ namespace ViGEm::Bus::Targets
 		                       PUNICODE_STRING DeviceId,
 		                       PUNICODE_STRING DeviceDescription) override;
 
-		NTSTATUS PrepareHardware(WDFDEVICE Device) override;
+		NTSTATUS PrepareHardware() override;
 
-		NTSTATUS InitContext(WDFDEVICE Device) override;
+		NTSTATUS InitContext() override;
 
 		VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) override;
 
@@ -87,14 +87,4 @@ namespace ViGEm::Bus::Targets
 
 		static EVT_WDF_TIMER PendingUsbRequestsTimerFunc;
 	};
-
-	//
-	// DS4-specific device context data.
-	// 
-	typedef struct _DS4_PDO_CONTEXT
-	{
-		EmulationTargetDS4* Context;
-	} DS4_PDO_CONTEXT, *PDS4_PDO_CONTEXT;
-
-	WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DS4_PDO_CONTEXT, Ds4PdoGetContext)
 }

@@ -5,12 +5,14 @@
 #include <ntstrsafe.h>
 #include <hidclass.h>
 
+#include "Ds4.h"
 
 
 PCWSTR ViGEm::Bus::Targets::EmulationTargetDS4::_deviceDescription = L"Virtual DualShock 4 Controller";
 
 ViGEm::Bus::Targets::EmulationTargetDS4::EmulationTargetDS4() : EmulationTargetPDO(0x054C, 0x05C4)
 {
+    TargetType = DualShock4Wired;
 }
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT DeviceInit,
@@ -97,14 +99,14 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT 
     return STATUS_SUCCESS;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PrepareHardware(WDFDEVICE Device)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PrepareHardware()
 {
 	WDF_QUERY_INTERFACE_CONFIG ifaceCfg;
     INTERFACE devinterfaceHid;
 
     devinterfaceHid.Size = sizeof(INTERFACE);
     devinterfaceHid.Version = 1;
-    devinterfaceHid.Context = (PVOID)Device;
+    devinterfaceHid.Context = static_cast<PVOID>(this->PdoDevice);
 
     devinterfaceHid.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
     devinterfaceHid.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
@@ -117,7 +119,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PrepareHardware(WDFDEVICE Devi
         NULL
     );
 
-    NTSTATUS status = WdfDeviceAddQueryInterface(Device, &ifaceCfg);
+    NTSTATUS status = WdfDeviceAddQueryInterface(this->PdoDevice, &ifaceCfg);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
@@ -150,7 +152,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PrepareHardware(WDFDEVICE Devi
     return STATUS_SUCCESS;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::InitContext(WDFDEVICE Device)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::InitContext()
 {
     NTSTATUS            status;
 
@@ -167,7 +169,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::InitContext(WDFDEVICE Device)
     WDF_OBJECT_ATTRIBUTES_INIT(&timerAttribs);
 
     // PDO is parent
-    timerAttribs.ParentObject = Device;
+    timerAttribs.ParentObject = this->PdoDevice;
 
     // Create timer
     status = WdfTimerCreate(
@@ -433,5 +435,38 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
     _In_ WDFTIMER Timer
 )
 {
-    UNREFERENCED_PARAMETER(Timer);
+	auto ctx = reinterpret_cast<EmulationTargetDS4*>(Core::EmulationTargetPdoGetContext(WdfTimerGetParentObject(Timer)));
+
+	WDFREQUEST              usbRequest;
+    PIRP                    pendingIrp;
+    PIO_STACK_LOCATION      irpStack;
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_DS4, "%!FUNC! Entry");
+
+    // Get pending USB request
+    NTSTATUS status = WdfIoQueueRetrieveNextRequest(ctx->PendingUsbInRequests, &usbRequest);
+
+    if (NT_SUCCESS(status))
+    {
+        // Get pending IRP
+        pendingIrp = WdfRequestWdmGetIrp(usbRequest);
+        irpStack = IoGetCurrentIrpStackLocation(pendingIrp);
+
+        // Get USB request block
+        PURB urb = (PURB)irpStack->Parameters.Others.Argument1;
+
+        // Get transfer buffer
+        PUCHAR Buffer = (PUCHAR)urb->UrbBulkOrInterruptTransfer.TransferBuffer;
+        // Set buffer length to report size
+        urb->UrbBulkOrInterruptTransfer.TransferBufferLength = DS4_REPORT_SIZE;
+
+        // Copy cached report to transfer buffer 
+        if (Buffer)
+            RtlCopyBytes(Buffer,  ctx->Report, DS4_REPORT_SIZE);
+
+        // Complete pending request
+        WdfRequestComplete(usbRequest, status);
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "%!FUNC! Exit with status %!STATUS!", status);
 }
