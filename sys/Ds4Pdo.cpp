@@ -12,6 +12,7 @@ PCWSTR ViGEm::Bus::Targets::EmulationTargetDS4::_deviceDescription = L"Virtual D
 ViGEm::Bus::Targets::EmulationTargetDS4::EmulationTargetDS4() : EmulationTargetPDO(0x054C, 0x05C4)
 {
     TargetType = DualShock4Wired;
+    UsbConfigurationDescriptionSize = DS4_DESCRIPTOR_SIZE;
 }
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT DeviceInit,

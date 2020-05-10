@@ -162,8 +162,8 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::CreateDevice(WDFDEVICE Device, PW
 #pragma region Expose USB Interface
 
 		status = WdfDeviceCreateDeviceInterface(
-			Device, 
-			const_cast<LPGUID>(&GUID_DEVINTERFACE_USB_DEVICE), 
+			Device,
+			const_cast<LPGUID>(&GUID_DEVINTERFACE_USB_DEVICE),
 			NULL
 		);
 		if (!NT_SUCCESS(status))
@@ -219,9 +219,9 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::CreateDevice(WDFDEVICE Device, PW
 		WDF_IO_QUEUE_CONFIG_INIT(&notificationsQueueConfig, WdfIoQueueDispatchManual);
 
 		status = WdfIoQueueCreate(
-			Device, 
-			&notificationsQueueConfig, 
-			WDF_NO_OBJECT_ATTRIBUTES, 
+			Device,
+			&notificationsQueueConfig,
+			WDF_NO_OBJECT_ATTRIBUTES,
 			&this->PendingNotificationRequests
 		);
 		if (!NT_SUCCESS(status))
@@ -242,9 +242,9 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::CreateDevice(WDFDEVICE Device, PW
 		defaultPdoQueueConfig.EvtIoInternalDeviceControl = EvtIoInternalDeviceControl;
 
 		status = WdfIoQueueCreate(
-			this->PdoDevice, 
-			&defaultPdoQueueConfig, 
-			WDF_NO_OBJECT_ATTRIBUTES, 
+			this->PdoDevice,
+			&defaultPdoQueueConfig,
+			WDF_NO_OBJECT_ATTRIBUTES,
 			&defaultPdoQueue
 		);
 		if (!NT_SUCCESS(status))
@@ -295,7 +295,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::CreateDevice(WDFDEVICE Device, PW
 	} while (FALSE);
 
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
-	
+
 	return status;
 }
 
@@ -377,8 +377,33 @@ void ViGEm::Bus::Core::EmulationTargetPDO::UsbAbortPipe()
 	WdfIoQueuePurge(this->PendingNotificationRequests, NULL, NULL);
 }
 
+NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::UsbGetConfigurationDescriptorType(PURB Urb)
+{
+	const PUCHAR Buffer = (PUCHAR)Urb->UrbControlDescriptorRequest.TransferBuffer;
+
+	// First request just gets required buffer size back
+	if (Urb->UrbControlDescriptorRequest.TransferBufferLength == sizeof(USB_CONFIGURATION_DESCRIPTOR))
+	{
+		const ULONG length = sizeof(USB_CONFIGURATION_DESCRIPTOR);
+
+		this->GetConfigurationDescriptorType(Buffer, length);
+		return STATUS_SUCCESS;
+	}
+
+	const ULONG length = Urb->UrbControlDescriptorRequest.TransferBufferLength;
+
+	// Second request can store the whole descriptor
+	if (length >= UsbConfigurationDescriptionSize)
+	{
+		this->GetConfigurationDescriptorType(Buffer, UsbConfigurationDescriptionSize);
+		return STATUS_SUCCESS;
+	}
+
+	return STATUS_UNSUCCESSFUL;
+}
+
 NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::UsbSelectConfiguration(PURB Urb)
-{	
+{
 	TraceEvents(TRACE_LEVEL_VERBOSE,
 		TRACE_USBPDO,
 		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: TotalLength %d",
@@ -408,7 +433,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EvtDevicePrepareHardware(
 {
 	UNREFERENCED_PARAMETER(ResourcesRaw);
 	UNREFERENCED_PARAMETER(ResourcesTranslated);
-	
+
 	const auto ctx = EmulationTargetPdoGetContext(Device);
 
 	return ctx->Target->PrepareHardware();

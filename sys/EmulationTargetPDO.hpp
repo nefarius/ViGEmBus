@@ -38,7 +38,7 @@ namespace ViGEm::Bus::Core
 
 		virtual NTSTATUS InitContext() = 0;
 
-		virtual VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) = 0;
+		
 
 		virtual VOID GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) = 0;
 				
@@ -58,6 +58,8 @@ namespace ViGEm::Bus::Core
 		NTSTATUS UsbSelectConfiguration(PURB Urb);
 		
 		void UsbAbortPipe();
+
+		NTSTATUS UsbGetConfigurationDescriptorType(PURB Urb);
 		
 	protected:
 		static const ULONG _maxHardwareIdLength = 0xFF;
@@ -90,6 +92,8 @@ namespace ViGEm::Bus::Core
 
 		static const int MAX_INSTANCE_ID_LEN = 80;
 
+		virtual VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) = 0;
+		
 		virtual NTSTATUS SelectConfiguration(PURB Urb) = 0;
 		
 		virtual void AbortPipe() = 0;
@@ -138,6 +142,11 @@ namespace ViGEm::Bus::Core
 		// Signals the bus that PDO is ready to receive data
 		// 
 		KEVENT PdoBootNotificationEvent;
+
+		//
+		// Configuration descriptor size
+		// 
+		ULONG UsbConfigurationDescriptionSize;
 	};
 
 	typedef struct _PDO_IDENTIFICATION_DESCRIPTION

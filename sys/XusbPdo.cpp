@@ -12,6 +12,7 @@ PCWSTR ViGEm::Bus::Targets::EmulationTargetXUSB::_deviceDescription = L"Virtual 
 ViGEm::Bus::Targets::EmulationTargetXUSB::EmulationTargetXUSB() : EmulationTargetPDO(0x045E, 0x028E)
 {
 	TargetType = Xbox360Wired;
+	UsbConfigurationDescriptionSize = XUSB_DESCRIPTOR_SIZE;
 }
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId,
