@@ -5,7 +5,6 @@
 #include <ntstrsafe.h>
 #include <hidclass.h>
 
-#include "Ds4.h"
 
 
 PCWSTR ViGEm::Bus::Targets::EmulationTargetDS4::_deviceDescription = L"Virtual DualShock 4 Controller";

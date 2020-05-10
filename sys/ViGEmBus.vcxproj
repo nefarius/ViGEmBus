@@ -188,7 +188,6 @@
     <ClInclude Include="$(SolutionDir)\Include\ViGEmBusDriver.h" />
     <ClInclude Include="..\client\include\ViGEm\km\BusShared.h" />
     <ClInclude Include="busenum.h" />
-    <ClInclude Include="BusFdoPdoCommon.hpp" />
     <ClInclude Include="ByteArray.h" />
     <ClInclude Include="Context.h" />
     <ClInclude Include="CRTCPP.hpp" />

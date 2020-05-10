@@ -84,9 +84,6 @@
     <ClInclude Include="Ds4Pdo.hpp">
       <Filter>Header Files\Targets</Filter>
     </ClInclude>
-    <ClInclude Include="BusFdoPdoCommon.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="busenum.c">

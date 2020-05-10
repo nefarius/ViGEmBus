@@ -1,7 +1,6 @@
 #pragma once
 
 #include "EmulationTargetPDO.hpp"
-#include <ViGEm/km/BusShared.h>
 
 namespace ViGEm::Bus::Targets
 {
