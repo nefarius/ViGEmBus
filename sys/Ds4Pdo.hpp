@@ -31,19 +31,6 @@ namespace ViGEm::Bus::Targets
 	private:
 		static PCWSTR _deviceDescription;
 
-#if defined(_X86_)
-		static const int XUSB_CONFIGURATION_SIZE = 0x00E4;
-#else
-		static const int XUSB_CONFIGURATION_SIZE = 0x0130;
-#endif
-		static const int XUSB_DESCRIPTOR_SIZE = 0x0099;
-		static const int XUSB_RUMBLE_SIZE = 0x08;
-		static const int XUSB_LEDSET_SIZE = 0x03;
-		static const int XUSB_LEDNUM_SIZE = 0x01;
-		static const int XUSB_INIT_STAGE_SIZE = 0x03;
-		static const int XUSB_BLOB_STORAGE_SIZE = 0x2A;
-
-
 		static const int HID_GET_FEATURE_REPORT_SIZE_0 = 0x31;
 		static const int HID_GET_FEATURE_REPORT_SIZE_1 = 0x25;
 		static const int HID_GET_FEATURE_REPORT_MAC_ADDRESSES_SIZE = 0x10;
