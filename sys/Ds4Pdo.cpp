@@ -397,8 +397,18 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::GetDeviceDescriptorType(PUSB_DEVIC
     pDescriptor->bNumConfigurations = 0x01;
 }
 
-VOID ViGEm::Bus::Targets::EmulationTargetDS4::SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::SelectConfiguration(PURB Urb)
 {
+    if (Urb->UrbHeader.Length < DS4_CONFIGURATION_SIZE)
+    {
+        TraceEvents(TRACE_LEVEL_WARNING,
+            TRACE_USBPDO,
+            ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor");
+        return STATUS_INVALID_PARAMETER;
+    }
+	
+    PUSBD_INTERFACE_INFORMATION pInfo = &Urb->UrbSelectConfiguration.Interface;
+	
     TraceEvents(TRACE_LEVEL_VERBOSE,
         TRACE_DS4,
         ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
@@ -428,6 +438,8 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::SelectConfiguration(PUSBD_INTERFAC
     pInfo->Pipes[1].PipeType = (USBD_PIPE_TYPE)0x03;
     pInfo->Pipes[1].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0003;
     pInfo->Pipes[1].PipeFlags = 0x00;
+
+    return STATUS_SUCCESS;
 }
 
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(

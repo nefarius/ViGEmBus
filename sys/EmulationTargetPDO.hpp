@@ -41,9 +41,7 @@ namespace ViGEm::Bus::Core
 		virtual VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) = 0;
 
 		virtual VOID GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) = 0;
-
-		virtual VOID SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo) = 0;
-
+				
 		NTSTATUS CreateDevice(_In_ WDFDEVICE Device,
 		                      _In_ PWDFDEVICE_INIT DeviceInit,
 		                      _In_ PPDO_IDENTIFICATION_DESCRIPTION Description);
@@ -56,6 +54,10 @@ namespace ViGEm::Bus::Core
 		{
 			return (other.SerialNo == this->SerialNo);
 		}
+
+		NTSTATUS UsbSelectConfiguration(PURB Urb);
+		
+		void UsbAbortPipe();
 		
 	protected:
 		static const ULONG _maxHardwareIdLength = 0xFF;
@@ -88,6 +90,10 @@ namespace ViGEm::Bus::Core
 
 		static const int MAX_INSTANCE_ID_LEN = 80;
 
+		virtual NTSTATUS SelectConfiguration(PURB Urb) = 0;
+		
+		virtual void AbortPipe() = 0;
+		
 		//
 		// Unique serial number of the device on the bus
 		// 

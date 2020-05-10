@@ -4,6 +4,7 @@
 #include "EmulationTargetPDO.tmh"
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
+#include <usbioctl.h>
 #include <usbiodef.h>
 
 
@@ -367,8 +368,36 @@ VOID USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbGetUSBDIVersion(IN PVO
 
 #pragma endregion
 
+void ViGEm::Bus::Core::EmulationTargetPDO::UsbAbortPipe()
+{
+	this->AbortPipe();
+
+	// Higher driver shutting down, emptying PDOs queues
+	WdfIoQueuePurge(this->PendingUsbInRequests, NULL, NULL);
+	WdfIoQueuePurge(this->PendingNotificationRequests, NULL, NULL);
+}
+
+NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::UsbSelectConfiguration(PURB Urb)
+{	
+	TraceEvents(TRACE_LEVEL_VERBOSE,
+		TRACE_USBPDO,
+		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: TotalLength %d",
+		Urb->UrbHeader.Length);
+
+	if (Urb->UrbHeader.Length == sizeof(struct _URB_SELECT_CONFIGURATION))
+	{
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_USBPDO,
+			">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: NULL ConfigurationDescriptor");
+		return STATUS_SUCCESS;
+	}
+
+	return this->SelectConfiguration(Urb);
+}
+
 ViGEm::Bus::Core::EmulationTargetPDO::EmulationTargetPDO(USHORT VID, USHORT PID) : VendorId(VID), ProductId(PID)
 {
+	KeInitializeEvent(&this->PdoBootNotificationEvent, NotificationEvent, FALSE);
 }
 
 NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EvtDevicePrepareHardware(

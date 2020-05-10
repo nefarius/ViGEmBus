@@ -33,7 +33,7 @@ namespace ViGEm::Bus::Targets
 
 		VOID GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) override;
 
-		VOID SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo) override;
+		NTSTATUS SelectConfiguration(PURB Urb) override;
 
 	private:
 		static PCWSTR _deviceDescription;

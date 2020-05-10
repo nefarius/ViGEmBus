@@ -464,8 +464,18 @@ VOID ViGEm::Bus::Targets::EmulationTargetXUSB::GetDeviceDescriptorType(PUSB_DEVI
 	pDescriptor->bNumConfigurations = 0x01;
 }
 
-VOID ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PURB Urb)
 {
+	if (Urb->UrbHeader.Length < XUSB_CONFIGURATION_SIZE)
+	{
+		TraceEvents(TRACE_LEVEL_WARNING,
+			TRACE_USBPDO,
+			">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor");
+		return STATUS_INVALID_PARAMETER;
+	}
+	
+	PUSBD_INTERFACE_INFORMATION pInfo = &Urb->UrbSelectConfiguration.Interface;
+	
 	TraceEvents(TRACE_LEVEL_VERBOSE,
 		TRACE_XUSB,
 		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
@@ -583,4 +593,6 @@ VOID ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PUSBD_INTERFA
 	pInfo->Protocol = 0x13;
 
 	pInfo->InterfaceHandle = (USBD_INTERFACE_HANDLE)0xFFFF0000;
+
+	return STATUS_SUCCESS;
 }
