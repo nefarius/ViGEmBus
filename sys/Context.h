@@ -27,6 +27,8 @@
 
 #pragma once
 
+EXTERN_C_START
+
 //
 // Used to identify children in the device list of the bus.
 // 
@@ -194,3 +196,4 @@ typedef struct _FDO_PLUGIN_REQUEST_DATA
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(FDO_PLUGIN_REQUEST_DATA, PluginRequestGetData)
 
+EXTERN_C_END

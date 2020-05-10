@@ -1,18 +1,18 @@
 #include "EmulationTargetPDO.hpp"
+#include "CRTCPP.hpp"
 
-using namespace ViGEm::Bus::Core;
 
-BOOLEAN USB_BUSIFFN EmulationTargetPDO::UsbIsDeviceHighSpeed(IN PVOID BusContext)
+BOOLEAN USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbIsDeviceHighSpeed(IN PVOID BusContext)
 {
 	UNREFERENCED_PARAMETER(BusContext);
 
 	return TRUE;
 }
 
-NTSTATUS USB_BUSIFFN EmulationTargetPDO::UsbQueryBusInformation(IN PVOID BusContext, IN ULONG Level,
-                                                                IN OUT PVOID BusInformationBuffer,
-                                                                IN OUT PULONG BusInformationBufferLength,
-                                                                OUT PULONG BusInformationActualLength)
+NTSTATUS USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbQueryBusInformation(IN PVOID BusContext, IN ULONG Level,
+                                                                                  IN OUT PVOID BusInformationBuffer,
+                                                                                  IN OUT PULONG BusInformationBufferLength,
+                                                                                  OUT PULONG BusInformationActualLength)
 {
 	UNREFERENCED_PARAMETER(BusContext);
 	UNREFERENCED_PARAMETER(Level);
@@ -23,7 +23,7 @@ NTSTATUS USB_BUSIFFN EmulationTargetPDO::UsbQueryBusInformation(IN PVOID BusCont
 	return STATUS_UNSUCCESSFUL;
 }
 
-NTSTATUS USB_BUSIFFN EmulationTargetPDO::UsbSubmitIsoOutUrb(IN PVOID BusContext, IN PURB Urb)
+NTSTATUS USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbSubmitIsoOutUrb(IN PVOID BusContext, IN PURB Urb)
 {
 	UNREFERENCED_PARAMETER(BusContext);
 	UNREFERENCED_PARAMETER(Urb);
@@ -31,7 +31,7 @@ NTSTATUS USB_BUSIFFN EmulationTargetPDO::UsbSubmitIsoOutUrb(IN PVOID BusContext,
 	return STATUS_UNSUCCESSFUL;
 }
 
-NTSTATUS USB_BUSIFFN EmulationTargetPDO::UsbQueryBusTime(IN PVOID BusContext, IN OUT PULONG CurrentUsbFrame)
+NTSTATUS USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbQueryBusTime(IN PVOID BusContext, IN OUT PULONG CurrentUsbFrame)
 {
 	UNREFERENCED_PARAMETER(BusContext);
 	UNREFERENCED_PARAMETER(CurrentUsbFrame);
@@ -39,9 +39,9 @@ NTSTATUS USB_BUSIFFN EmulationTargetPDO::UsbQueryBusTime(IN PVOID BusContext, IN
 	return STATUS_UNSUCCESSFUL;
 }
 
-VOID USB_BUSIFFN EmulationTargetPDO::UsbGetUSBDIVersion(IN PVOID BusContext,
-                                                        IN OUT PUSBD_VERSION_INFORMATION VersionInformation,
-                                                        IN OUT PULONG HcdCapabilities)
+VOID USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbGetUSBDIVersion(IN PVOID BusContext,
+                                                                          IN OUT PUSBD_VERSION_INFORMATION VersionInformation,
+                                                                          IN OUT PULONG HcdCapabilities)
 {
 	UNREFERENCED_PARAMETER(BusContext);
 
@@ -55,4 +55,8 @@ VOID USB_BUSIFFN EmulationTargetPDO::UsbGetUSBDIVersion(IN PVOID BusContext,
 	{
 		*HcdCapabilities = 0;
 	}
+}
+
+ViGEm::Bus::Core::EmulationTargetPDO::EmulationTargetPDO(USHORT VID, USHORT PID): VendorId(VID), ProductId(PID)
+{
 }

@@ -1,38 +1,64 @@
 #pragma once
-#include <ntifs.h>
 
 constexpr auto cpp_pool_tag = 'EGiV';
 
-#ifdef _AMD64_
-
-static void* operator new(size_t lBlockSize)
+void* operator new
+(
+    size_t size
+    )
 {
-	return ExAllocatePoolWithTag(NonPagedPoolNx, lBlockSize, cpp_pool_tag);
+    return ExAllocatePoolWithTag(NonPagedPoolNx, size, cpp_pool_tag);
 }
 
-static void operator delete(void* p)
+void* operator new[]
+(
+    size_t size
+    )
 {
-	if (p == nullptr)
-	{
-		return;
-	}
-	ExFreePoolWithTag(p, cpp_pool_tag);
+    return ExAllocatePoolWithTag(NonPagedPoolNx, size, cpp_pool_tag);
 }
 
-#else
-
-static void* __CRTDECL operator new(size_t lBlockSize)
+void operator delete
+(
+    void* what
+    )
 {
-	return ExAllocatePoolWithTag(NonPagedPoolNx, lBlockSize, CPP_POOL_TAG);
+    if (what == nullptr)
+    {
+        return;
+    }
+	
+    ExFreePoolWithTag(what, cpp_pool_tag);
 }
 
-static void __CRTDECL operator delete(void* p)
+void operator delete
+(
+    void* what,
+    size_t size
+    )
 {
-	if (!p)
-	{
-		return;
-	}
-	ExFreePoolWithTag(p, CPP_POOL_TAG);
+    UNREFERENCED_PARAMETER(size);
+	
+    if (what == nullptr)
+    {
+        return;
+    }
+
+    ExFreePoolWithTag(what, cpp_pool_tag);
 }
 
-#endif
+void operator delete[]
+(
+    void* what,
+    size_t size
+    )
+{
+    UNREFERENCED_PARAMETER(size);
+	
+    if (what == nullptr)
+    {
+        return;
+    }
+	
+    ExFreePoolWithTag(what, cpp_pool_tag);
+}

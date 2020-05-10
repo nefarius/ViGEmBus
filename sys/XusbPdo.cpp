@@ -10,8 +10,8 @@ using namespace ViGEm::Bus::Targets;
 
 PCWSTR EmulationTargetXUSB::_deviceDescription = L"Virtual Xbox 360 Controller";
 
-NTSTATUS EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT VendorId,
-                                            USHORT ProductId, PUNICODE_STRING DeviceId,
+NTSTATUS EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT VID,
+                                            USHORT PID, PUNICODE_STRING DeviceId,
                                             PUNICODE_STRING DeviceDescription)
 {
 	NTSTATUS status;
@@ -29,7 +29,7 @@ NTSTATUS EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT V
 	}
 
 	// Set hardware ID
-	RtlUnicodeStringPrintf(&buffer, L"USB\\VID_%04X&PID_%04X", VendorId, ProductId);
+	RtlUnicodeStringPrintf(&buffer, L"USB\\VID_%04X&PID_%04X", VID, PID);
 
 	RtlUnicodeStringCopy(DeviceId, &buffer);
 
@@ -443,7 +443,7 @@ VOID EmulationTargetXUSB::GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Le
 	RtlCopyBytes(Buffer, XusbDescriptorData, Length);
 }
 
-VOID EmulationTargetXUSB::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, USHORT VendorId, USHORT ProductId)
+VOID EmulationTargetXUSB::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
 {
 	pDescriptor->bLength = 0x12;
 	pDescriptor->bDescriptorType = USB_DEVICE_DESCRIPTOR_TYPE;
@@ -452,8 +452,8 @@ VOID EmulationTargetXUSB::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescri
 	pDescriptor->bDeviceSubClass = 0xFF;
 	pDescriptor->bDeviceProtocol = 0xFF;
 	pDescriptor->bMaxPacketSize0 = 0x08;
-	pDescriptor->idVendor = VendorId;
-	pDescriptor->idProduct = ProductId;
+	pDescriptor->idVendor = this->VendorId;
+	pDescriptor->idProduct = this->ProductId;
 	pDescriptor->bcdDevice = 0x0114;
 	pDescriptor->iManufacturer = 0x01;
 	pDescriptor->iProduct = 0x02;

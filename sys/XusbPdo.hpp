@@ -7,7 +7,7 @@
 namespace ViGEm::Bus::Targets
 {
 	constexpr auto XUSB_POOL_TAG = 'EGiV';
-		
+
 	typedef struct _XUSB_INTERRUPT_IN_PACKET
 	{
 		UCHAR Id;
@@ -15,30 +15,28 @@ namespace ViGEm::Bus::Targets
 		UCHAR Size;
 
 		XUSB_REPORT Report;
+	} XUSB_INTERRUPT_IN_PACKET, *PXUSB_INTERRUPT_IN_PACKET;
 
-	} XUSB_INTERRUPT_IN_PACKET, * PXUSB_INTERRUPT_IN_PACKET;
 
-
-	
 	class EmulationTargetXUSB : public Core::EmulationTargetPDO
 	{
 	public:
 		EmulationTargetXUSB() = default;
 		~EmulationTargetXUSB() = default;
 
-		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT VendorId, USHORT ProductId,
-			PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription);
+		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT VID, USHORT PID,
+		                       PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription) override;
 
-		NTSTATUS PrepareHardware(WDFDEVICE Device);
+		NTSTATUS PrepareHardware(WDFDEVICE Device) override;
 
-		NTSTATUS InitContext(WDFDEVICE Device);
+		NTSTATUS InitContext(WDFDEVICE Device) override;
 
-		VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length);
+		VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) override;
 
-		VOID GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, USHORT VendorId, USHORT ProductId);
+		VOID GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) override;
 
-		VOID SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo);
-		
+		VOID SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo) override;
+
 	private:
 		static PCWSTR _deviceDescription;
 
@@ -53,7 +51,7 @@ namespace ViGEm::Bus::Targets
 		static const int XUSB_LEDNUM_SIZE = 0x01;
 		static const int XUSB_INIT_STAGE_SIZE = 0x03;
 		static const int XUSB_BLOB_STORAGE_SIZE = 0x2A;
-		
+
 		static const int XUSB_BLOB_00_OFFSET = 0x00;
 		static const int XUSB_BLOB_01_OFFSET = 0x03;
 		static const int XUSB_BLOB_02_OFFSET = 0x06;
@@ -62,7 +60,7 @@ namespace ViGEm::Bus::Targets
 		static const int XUSB_BLOB_05_OFFSET = 0x20;
 		static const int XUSB_BLOB_06_OFFSET = 0x23;
 		static const int XUSB_BLOB_07_OFFSET = 0x26;
-		
+
 		//
 		// Rumble buffer
 		//
@@ -105,8 +103,7 @@ namespace ViGEm::Bus::Targets
 	typedef struct _XUSB_PDO_CONTEXT
 	{
 		EmulationTargetXUSB* Context;
-
-	} XUSB_PDO_CONTEXT, * PXUSB_PDO_CONTEXT;
+	} XUSB_PDO_CONTEXT, *PXUSB_PDO_CONTEXT;
 
 	WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(XUSB_PDO_CONTEXT, XusbPdoGetContext)
 }

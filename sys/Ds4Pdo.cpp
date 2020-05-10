@@ -10,7 +10,7 @@ using namespace ViGEm::Bus::Targets;
 
 PCWSTR EmulationTargetDS4::_deviceDescription = L"Virtual DualShock 4 Controller";
 
-NTSTATUS EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT VendorId, USHORT ProductId,
+NTSTATUS EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT VID, USHORT PID,
                                            PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription)
 {
     NTSTATUS status;
@@ -19,8 +19,8 @@ NTSTATUS EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT Ve
 	//
 	// TODO: implement usage!
 	// 
-    UNREFERENCED_PARAMETER(VendorId);
-    UNREFERENCED_PARAMETER(ProductId);
+    UNREFERENCED_PARAMETER(VID);
+    UNREFERENCED_PARAMETER(PID);
 	
     // prepare device description
     status = RtlUnicodeStringInit(DeviceDescription, _deviceDescription);
@@ -381,7 +381,7 @@ VOID EmulationTargetDS4::GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Len
     RtlCopyBytes(Buffer, Ds4DescriptorData, Length);
 }
 
-VOID EmulationTargetDS4::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, USHORT VendorId, USHORT ProductId)
+VOID EmulationTargetDS4::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
 {
     pDescriptor->bLength = 0x12;
     pDescriptor->bDescriptorType = USB_DEVICE_DESCRIPTOR_TYPE;
@@ -390,8 +390,8 @@ VOID EmulationTargetDS4::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescrip
     pDescriptor->bDeviceSubClass = 0x00;
     pDescriptor->bDeviceProtocol = 0x00;
     pDescriptor->bMaxPacketSize0 = 0x40;
-    pDescriptor->idVendor = VendorId;
-    pDescriptor->idProduct = ProductId;
+    pDescriptor->idVendor = this->VendorId;
+    pDescriptor->idProduct = this->ProductId;
     pDescriptor->bcdDevice = 0x0100;
     pDescriptor->iManufacturer = 0x01;
     pDescriptor->iProduct = 0x02;

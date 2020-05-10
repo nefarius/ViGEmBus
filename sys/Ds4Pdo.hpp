@@ -13,7 +13,7 @@ namespace ViGEm::Bus::Targets
 		EmulationTargetDS4() = default;
 		~EmulationTargetDS4() = default;
 
-		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT VendorId, USHORT ProductId,
+		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit, USHORT VID, USHORT PID,
 		                       PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription) override;
 
 		NTSTATUS PrepareHardware(WDFDEVICE Device) override;
@@ -22,7 +22,7 @@ namespace ViGEm::Bus::Targets
 
 		VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) override;
 
-		VOID GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, USHORT VendorId, USHORT ProductId) override;
+		VOID GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) override;
 
 		VOID SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo) override;
 

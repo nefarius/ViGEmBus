@@ -21,7 +21,7 @@ namespace ViGEm::Bus::Core
 	class EmulationTargetPDO
 	{
 	public:
-		EmulationTargetPDO() = default;
+		EmulationTargetPDO(USHORT VID, USHORT PID);
 
 		virtual ~EmulationTargetPDO() = default;
 
@@ -34,7 +34,7 @@ namespace ViGEm::Bus::Core
 
 		virtual VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) = 0;
 
-		virtual VOID GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor, USHORT VendorId, USHORT ProductId) = 0;
+		virtual VOID GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) = 0;
 
 		virtual VOID SelectConfiguration(PUSBD_INTERFACE_INFORMATION pInfo) = 0;
 	protected:
@@ -63,12 +63,12 @@ namespace ViGEm::Bus::Core
         //
 	    // Unique serial number of the device on the bus
 	    // 
-        ULONG SerialNo;
+        ULONG SerialNo{};
 
         // 
         // PID of the process creating this PDO
         // 
-        DWORD OwnerProcessId;
+        DWORD OwnerProcessId{};
 
         //
         // Device type this PDO is emulating
@@ -78,21 +78,21 @@ namespace ViGEm::Bus::Core
         //
         // If set, the vendor ID the emulated device is reporting
         // 
-        USHORT VendorId;
+        USHORT VendorId{};
 
         //
         // If set, the product ID the emulated device is reporting
         // 
-        USHORT ProductId;
+        USHORT ProductId{};
 
         //
         // Queue for incoming data interrupt transfer
         //
-        WDFQUEUE PendingUsbInRequests;
+        WDFQUEUE PendingUsbInRequests{};
 
         //
         // Queue for inverted calls
         //
-        WDFQUEUE PendingNotificationRequests;
+        WDFQUEUE PendingNotificationRequests{};
 	};
 }

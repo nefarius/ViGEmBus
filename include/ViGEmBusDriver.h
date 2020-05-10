@@ -36,6 +36,7 @@ DEFINE_GUID(GUID_DEVCLASS_VIGEM_RAWPDO,
 
 #pragma once
 
+EXTERN_C_START
 
 //
 // Describes the current stage a PDO completed
@@ -85,3 +86,4 @@ VOID FORCEINLINE BUS_PDO_REPORT_STAGE_RESULT(
     (*Interface.BusPdoStageResult)(&Interface.InterfaceHeader, Stage, Serial, Status);
 }
 
+EXTERN_C_END
