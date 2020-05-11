@@ -21,7 +21,7 @@ namespace ViGEm::Bus::Targets
 	class EmulationTargetDS4 : public Core::EmulationTargetPDO
 	{
 	public:
-		EmulationTargetDS4();
+		EmulationTargetDS4(ULONG Serial, LONG SessionId, USHORT VendorId = 0x054C, USHORT ProductId = 0x05C4);
 		~EmulationTargetDS4() = default;
 		
 		NTSTATUS PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit,
@@ -45,6 +45,7 @@ namespace ViGEm::Bus::Targets
 		NTSTATUS UsbGetStringDescriptorType(PURB Urb) override;
 		NTSTATUS UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request) override;
 		NTSTATUS UsbControlTransfer(PURB Urb) override;
+		NTSTATUS SubmitReport(PVOID NewReport) override;
 	private:
 		static PCWSTR _deviceDescription;
 

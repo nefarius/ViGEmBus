@@ -26,8 +26,8 @@
 
 
 #include "busenum.h"
-#include <wdmguid.h>
 #include "driver.tmh"
+#include <wdmguid.h>
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (INIT, DriverEntry)
@@ -35,9 +35,20 @@
 #pragma alloc_text (PAGE, Bus_DeviceFileCreate)
 #pragma alloc_text (PAGE, Bus_FileClose)
 #pragma alloc_text (PAGE, Bus_EvtDriverContextCleanup)
-#pragma alloc_text (PAGE, Bus_PdoStageResult)
 #endif
 
+
+#include "EmulationTargetPDO.hpp"
+#include "XusbPdo.hpp"
+#include "Ds4Pdo.hpp"
+
+using ViGEm::Bus::Core::PDO_IDENTIFICATION_DESCRIPTION;
+using ViGEm::Bus::Core::EmulationTargetPDO;
+using ViGEm::Bus::Targets::EmulationTargetXUSB;
+using ViGEm::Bus::Targets::EmulationTargetDS4;
+
+
+EXTERN_C_START
 
 //
 // Driver entry routine.
@@ -94,12 +105,7 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
     WDF_FILEOBJECT_CONFIG       foConfig;
     WDF_OBJECT_ATTRIBUTES       fdoAttributes;
     WDF_OBJECT_ATTRIBUTES       fileHandleAttributes;
-    WDF_OBJECT_ATTRIBUTES       collectionAttributes;
-    WDF_OBJECT_ATTRIBUTES       timerAttributes;
     PFDO_DEVICE_DATA            pFDOData;
-    VIGEM_BUS_INTERFACE         busInterface;
-    PINTERFACE                  interfaceHeader;
-    WDF_TIMER_CONFIG            reqTimerCfg;
 
     UNREFERENCED_PARAMETER(Driver);
 
@@ -162,104 +168,11 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
 #pragma endregion
 
-#pragma region Create pending requests collection & lock
-
-    WDF_OBJECT_ATTRIBUTES_INIT(&collectionAttributes);
-    collectionAttributes.ParentObject = device;
-
-    status = WdfCollectionCreate(&collectionAttributes, &pFDOData->PendingPluginRequests);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "WdfCollectionCreate failed with status %!STATUS!",
-            status);
-        return STATUS_UNSUCCESSFUL;
-    }
-
-    WDF_OBJECT_ATTRIBUTES_INIT(&collectionAttributes);
-    collectionAttributes.ParentObject = device;
-
-    status = WdfSpinLockCreate(&collectionAttributes, &pFDOData->PendingPluginRequestsLock);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "WdfSpinLockCreate failed with status %!STATUS!",
-            status);
-        return STATUS_UNSUCCESSFUL;
-    }
-
-#pragma endregion
-
-#pragma region Create timer for sweeping up orphaned requests
-
-    WDF_TIMER_CONFIG_INIT_PERIODIC(
-        &reqTimerCfg,
-        Bus_PlugInRequestCleanUpEvtTimerFunc,
-        ORC_TIMER_START_DELAY
-    );
-    WDF_OBJECT_ATTRIBUTES_INIT(&timerAttributes);
-    timerAttributes.ParentObject = device;
-
-    status = WdfTimerCreate(&reqTimerCfg, &timerAttributes, &pFDOData->PendingPluginRequestsCleanupTimer);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "WdfTimerCreate failed with status %!STATUS!",
-            status);
-        return status;
-    }
-
-#pragma endregion
-
-#pragma region Add query interface
-
-    // 
-    // Set up the common interface header
-    // 
-    interfaceHeader = &busInterface.InterfaceHeader;
-
-    interfaceHeader->Size = sizeof(VIGEM_BUS_INTERFACE);
-    interfaceHeader->Version = VIGEM_BUS_INTERFACE_VERSION;
-    interfaceHeader->Context = (PVOID)device;
-
-    // 
-    // We don't pay any particular attention to the reference
-    // counting of this interface, but we MUST specify routines for
-    // it. Luckily the framework provides dummy routines
-    // 
-    interfaceHeader->InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
-    interfaceHeader->InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
-
-    busInterface.BusPdoStageResult = Bus_PdoStageResult;
-
-    WDF_QUERY_INTERFACE_CONFIG queryInterfaceConfig;
-
-    WDF_QUERY_INTERFACE_CONFIG_INIT(&queryInterfaceConfig,
-        interfaceHeader,
-        &GUID_VIGEM_INTERFACE_PDO,
-        WDF_NO_EVENT_CALLBACK);
-
-    status = WdfDeviceAddQueryInterface(device,
-        &queryInterfaceConfig);
-
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "WdfDeviceAddQueryInterface failed with status %!STATUS!",
-            status);
-        return(status);
-    }
-
-#pragma endregion
-
 #pragma region Create default I/O queue for FDO
 
     WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
 
     queueConfig.EvtIoDeviceControl = Bus_EvtIoDeviceControl;
-    queueConfig.EvtIoInternalDeviceControl = Bus_EvtIoInternalDeviceControl;
     queueConfig.EvtIoDefault = Bus_EvtIoDefault;
 
     __analysis_assume(queueConfig.EvtIoStop != 0);
@@ -442,21 +355,20 @@ Bus_FileClose(
             break;
         }
 
-        TraceEvents(TRACE_LEVEL_VERBOSE,
-            TRACE_DRIVER,
-            "PDO properties: status = %!STATUS!, pdoPID = %d, curPID = %d, pdoSID = %d, curSID = %d, internal = %d",
-            (int)childInfo.Status,
-            (int)description.OwnerProcessId,
-            (int)CURRENT_PROCESS_ID(),
-            (int)description.SessionId,
-            (int)pFileData->SessionId,
-            (int)description.OwnerIsDriver
-        );
+        //TraceEvents(TRACE_LEVEL_VERBOSE,
+        //    TRACE_DRIVER,
+        //    "PDO properties: status = %!STATUS!, pdoPID = %d, curPID = %d, pdoSID = %d, curSID = %d, internal = %d",
+        //    (int)childInfo.Status,
+        //    (int)description.OwnerProcessId,
+        //    (int)CURRENT_PROCESS_ID(),
+        //    (int)description.SessionId,
+        //    (int)pFileData->SessionId,
+        //    (int)description.OwnerIsDriver
+        //);
 
         // Only unplug devices with matching session id
         if (childInfo.Status == WdfChildListRetrieveDeviceSuccess
-            && description.SessionId == pFileData->SessionId
-            && !description.OwnerIsDriver)
+            && description.SessionId == pFileData->SessionId)
         {
             TraceEvents(TRACE_LEVEL_INFORMATION,
                 TRACE_DRIVER,
@@ -512,151 +424,4 @@ Return Value:
 
 }
 
-//
-// Called by PDO when a boot-up stage has been completed
-// 
-_Use_decl_annotations_
-VOID
-Bus_PdoStageResult(
-    _In_ PINTERFACE InterfaceHeader,
-    _In_ VIGEM_PDO_STAGE Stage,
-    _In_ ULONG Serial,
-    _In_ NTSTATUS Status
-)
-{
-    ULONG               i;
-    PFDO_DEVICE_DATA    pFdoData;
-    WDFREQUEST          curRequest;
-    ULONG               curSerial;
-    ULONG               items;
-
-    UNREFERENCED_PARAMETER(InterfaceHeader);
-
-    PAGED_CODE();
-
-    TraceEvents(TRACE_LEVEL_INFORMATION,
-        TRACE_DRIVER,
-        "%!FUNC! Entry (stage = %d, serial = %d, status = %!STATUS!)",
-        Stage, Serial, Status);
-
-    pFdoData = FdoGetData(InterfaceHeader->Context);
-
-    //
-    // If any stage fails or is last stage, get associated request and complete it
-    // 
-    if (!NT_SUCCESS(Status) || Stage == ViGEmPdoInitFinished)
-    {
-        WdfSpinLockAcquire(pFdoData->PendingPluginRequestsLock);
-
-        items = WdfCollectionGetCount(pFdoData->PendingPluginRequests);
-
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_DRIVER,
-            "Items count: %d",
-            items);
-
-        for (i = 0; i < items; i++)
-        {
-            curRequest = WdfCollectionGetItem(pFdoData->PendingPluginRequests, i);
-            curSerial = PluginRequestGetData(curRequest)->Serial;
-
-            TraceEvents(TRACE_LEVEL_INFORMATION,
-                TRACE_DRIVER,
-                "Serial: %d, curSerial: %d",
-                Serial, curSerial);
-
-            if (Serial == curSerial)
-            {
-                WdfRequestComplete(curRequest, Status);
-
-                WdfCollectionRemove(pFdoData->PendingPluginRequests, curRequest);
-
-                TraceEvents(TRACE_LEVEL_INFORMATION,
-                    TRACE_DRIVER,
-                    "Removed item with serial: %d",
-                    curSerial);
-
-                break;
-            }
-        }
-        WdfSpinLockRelease(pFdoData->PendingPluginRequestsLock);
-    }
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
-}
-
-_Use_decl_annotations_
-VOID
-Bus_PlugInRequestCleanUpEvtTimerFunc(
-    WDFTIMER  Timer
-)
-{
-    ULONG                       i;
-    PFDO_DEVICE_DATA            pFdoData;
-    WDFREQUEST                  curRequest;
-    ULONG                       items;
-    WDFDEVICE                   device;
-    PFDO_PLUGIN_REQUEST_DATA    pPluginData;
-    LONGLONG                    freq;
-    LARGE_INTEGER               pcNow;
-    LONGLONG                    ellapsed;
-
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
-
-    device = WdfTimerGetParentObject(Timer);
-    pFdoData = FdoGetData(device);
-
-    WdfSpinLockAcquire(pFdoData->PendingPluginRequestsLock);
-
-    items = WdfCollectionGetCount(pFdoData->PendingPluginRequests);
-
-    TraceEvents(TRACE_LEVEL_INFORMATION,
-        TRACE_DRIVER,
-        "Items count: %d",
-        items);
-
-    //
-    // Collection is empty; no need to keep timer running
-    // 
-    if (items == 0)
-    {
-        TraceEvents(TRACE_LEVEL_VERBOSE,
-            TRACE_DRIVER,
-            "Collection is empty, stopping periodic timer");
-        WdfTimerStop(Timer, FALSE);
-    }
-
-    for (i = 0; i < items; i++)
-    {
-        curRequest = WdfCollectionGetItem(pFdoData->PendingPluginRequests, i);
-        pPluginData = PluginRequestGetData(curRequest);
-
-        freq = pPluginData->Frequency.QuadPart / ORC_PC_FREQUENCY_DIVIDER;
-        pcNow = KeQueryPerformanceCounter(NULL);
-        ellapsed = (pcNow.QuadPart - pPluginData->Timestamp.QuadPart) / freq;
-
-        TraceEvents(TRACE_LEVEL_VERBOSE,
-            TRACE_DRIVER,
-            "PDO (serial = %d) plugin request age: %llu ms",
-            pPluginData->Serial, ellapsed);
-
-        if (ellapsed >= ORC_REQUEST_MAX_AGE)
-        {
-            WdfRequestComplete(curRequest, STATUS_SUCCESS);
-
-            WdfCollectionRemove(pFdoData->PendingPluginRequests, curRequest);
-
-            TraceEvents(TRACE_LEVEL_INFORMATION,
-                TRACE_DRIVER,
-                "Removed item with serial: %d",
-                pPluginData->Serial);
-
-            break;
-        }
-    }
-    WdfSpinLockRelease(pFdoData->PendingPluginRequestsLock);
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
-}
-
+EXTERN_C_END

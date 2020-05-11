@@ -24,16 +24,16 @@ namespace ViGEm::Bus::Targets
 	{
 		return (pTransfer->PipeHandle == reinterpret_cast<USBD_PIPE_HANDLE>(0xFFFF0083));
 	}
-	
+
 	class EmulationTargetXUSB : public Core::EmulationTargetPDO
 	{
 	public:
-		EmulationTargetXUSB();
+		EmulationTargetXUSB(ULONG Serial, LONG SessionId, USHORT VendorId = 0x045E, USHORT ProductId = 0x028E);
 		~EmulationTargetXUSB() = default;
 
 		NTSTATUS PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit,
-		                       PUNICODE_STRING DeviceId,
-		                       PUNICODE_STRING DeviceDescription) override;
+		                          PUNICODE_STRING DeviceId,
+		                          PUNICODE_STRING DeviceDescription) override;
 
 		NTSTATUS PdoPrepareHardware() override;
 
@@ -46,13 +46,14 @@ namespace ViGEm::Bus::Targets
 		NTSTATUS SelectConfiguration(PURB Urb) override;
 
 		void AbortPipe() override;
-		
+
 		NTSTATUS UsbClassInterface(PURB Urb) override;
 		NTSTATUS UsbGetDescriptorFromInterface(PURB Urb) override;
 		NTSTATUS UsbSelectInterface(PURB Urb) override;
 		NTSTATUS UsbGetStringDescriptorType(PURB Urb) override;
 		NTSTATUS UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request) override;
 		NTSTATUS UsbControlTransfer(PURB Urb) override;
+		NTSTATUS SubmitReport(PVOID NewReport) override;
 	private:
 		static PCWSTR _deviceDescription;
 

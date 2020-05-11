@@ -28,9 +28,23 @@
 #include "busenum.h"
 #include "queue.tmh"
 
+#include "EmulationTargetPDO.hpp"
+#include "XusbPdo.hpp"
+#include "Ds4Pdo.hpp"
+
+
+
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (PAGE, Bus_EvtIoDefault)
 #endif
+
+using ViGEm::Bus::Core::PDO_IDENTIFICATION_DESCRIPTION;
+using ViGEm::Bus::Core::EmulationTargetPDO;
+using ViGEm::Bus::Targets::EmulationTargetXUSB;
+using ViGEm::Bus::Targets::EmulationTargetDS4;
+
+
+EXTERN_C_START
 
 //
 // Responds to I/O control requests sent to the FDO.
@@ -52,6 +66,7 @@ VOID Bus_EvtIoDeviceControl(
     PDS4_REQUEST_NOTIFICATION   ds4Notify = NULL;
     PVIGEM_CHECK_VERSION        pCheckVersion = NULL;
     PXUSB_GET_USER_INDEX        pXusbGetUserIndex = NULL;
+    EmulationTargetPDO          *pdo;
 
     Device = WdfIoQueueGetDevice(Queue);
 
@@ -66,7 +81,12 @@ VOID Bus_EvtIoDeviceControl(
             TRACE_QUEUE,
             "IOCTL_VIGEM_CHECK_VERSION");
 
-        status = WdfRequestRetrieveInputBuffer(Request, sizeof(VIGEM_CHECK_VERSION), (PVOID)&pCheckVersion, &length);
+        status = WdfRequestRetrieveInputBuffer(
+            Request, 
+            sizeof(VIGEM_CHECK_VERSION),
+            (PVOID*)&pCheckVersion, 
+            &length
+        );
 
         if (!NT_SUCCESS(status) || length != sizeof(VIGEM_CHECK_VERSION))
         {
@@ -115,7 +135,12 @@ VOID Bus_EvtIoDeviceControl(
             TRACE_QUEUE,
             "IOCTL_XUSB_SUBMIT_REPORT");
 
-        status = WdfRequestRetrieveInputBuffer(Request, sizeof(XUSB_SUBMIT_REPORT), (PVOID)&xusbSubmit, &length);
+        status = WdfRequestRetrieveInputBuffer(
+            Request, 
+            sizeof(XUSB_SUBMIT_REPORT), 
+            (PVOID*)&xusbSubmit,
+            &length
+        );
 
         if (!NT_SUCCESS(status))
         {
@@ -139,7 +164,12 @@ VOID Bus_EvtIoDeviceControl(
                 break;
             }
 
-            status = Bus_XusbSubmitReport(Device, xusbSubmit->SerialNo, xusbSubmit, FALSE);
+            pdo = EmulationTargetPDO::GetPdoBySerial(Device, xusbSubmit->SerialNo);
+
+            if (pdo == nullptr)
+                status = STATUS_DEVICE_DOES_NOT_EXIST;
+            else
+                status = pdo->SubmitReport(xusbSubmit);
         }
 
         break;
@@ -162,7 +192,12 @@ VOID Bus_EvtIoDeviceControl(
             break;
         }
 
-        status = WdfRequestRetrieveInputBuffer(Request, sizeof(XUSB_REQUEST_NOTIFICATION), (PVOID)&xusbNotify, &length);
+        status = WdfRequestRetrieveInputBuffer(
+            Request, 
+            sizeof(XUSB_REQUEST_NOTIFICATION), 
+            (PVOID*)&xusbNotify, 
+            &length
+        );
 
         if (!NT_SUCCESS(status))
         {
@@ -199,7 +234,12 @@ VOID Bus_EvtIoDeviceControl(
             TRACE_QUEUE,
             "IOCTL_DS4_SUBMIT_REPORT");
 
-        status = WdfRequestRetrieveInputBuffer(Request, sizeof(DS4_SUBMIT_REPORT), (PVOID)&ds4Submit, &length);
+        status = WdfRequestRetrieveInputBuffer(
+            Request, 
+            sizeof(DS4_SUBMIT_REPORT), 
+            (PVOID*)&ds4Submit, 
+            &length
+        );
 
         if (!NT_SUCCESS(status))
         {
@@ -223,7 +263,12 @@ VOID Bus_EvtIoDeviceControl(
                 break;
             }
 
-            status = Bus_Ds4SubmitReport(Device, ds4Submit->SerialNo, ds4Submit, FALSE);
+            pdo = EmulationTargetPDO::GetPdoBySerial(Device, ds4Submit->SerialNo);
+
+            if (pdo == nullptr)
+                status = STATUS_DEVICE_DOES_NOT_EXIST;
+            else
+                status = pdo->SubmitReport(ds4Submit);
         }
 
         break;
@@ -246,7 +291,12 @@ VOID Bus_EvtIoDeviceControl(
             break;
         }
 
-        status = WdfRequestRetrieveInputBuffer(Request, sizeof(DS4_REQUEST_NOTIFICATION), (PVOID)&ds4Notify, &length);
+        status = WdfRequestRetrieveInputBuffer(
+            Request, 
+            sizeof(DS4_REQUEST_NOTIFICATION), 
+            (PVOID*)&ds4Notify,
+            &length
+        );
 
         if (!NT_SUCCESS(status))
         {
@@ -291,7 +341,7 @@ VOID Bus_EvtIoDeviceControl(
         status = WdfRequestRetrieveInputBuffer(
             Request, 
             sizeof(XUSB_GET_USER_INDEX), 
-            (PVOID)&pXusbGetUserIndex, 
+            (PVOID*)&pXusbGetUserIndex, 
             &length);
 
         if (!NT_SUCCESS(status))
@@ -309,7 +359,7 @@ VOID Bus_EvtIoDeviceControl(
                 break;
             }
 
-            status = Xusb_GetUserIndex(Device, pXusbGetUserIndex);
+            //status = Xusb_GetUserIndex(Device, pXusbGetUserIndex);
         }
 
         break;
@@ -333,55 +383,6 @@ VOID Bus_EvtIoDeviceControl(
 }
 
 //
-// Gets called upon driver-to-driver communication.
-// 
-// TODO: incomplete and unused currently
-// 
-VOID Bus_EvtIoInternalDeviceControl(
-    _In_ WDFQUEUE   Queue,
-    _In_ WDFREQUEST Request,
-    _In_ size_t     OutputBufferLength,
-    _In_ size_t     InputBufferLength,
-    _In_ ULONG      IoControlCode
-)
-{
-    NTSTATUS    status = STATUS_INVALID_PARAMETER;
-    WDFDEVICE   Device;
-    size_t      length = 0;
-
-    UNREFERENCED_PARAMETER(OutputBufferLength);
-    UNREFERENCED_PARAMETER(InputBufferLength);
-
-    Device = WdfIoQueueGetDevice(Queue);
-
-    KdPrint((DRIVERNAME "Bus_EvtIoInternalDeviceControl: 0x%p\n", Device));
-
-    switch (IoControlCode)
-    {
-    case IOCTL_VIGEM_PLUGIN_TARGET:
-
-        KdPrint((DRIVERNAME "IOCTL_VIGEM_PLUGIN_TARGET\n"));
-
-        status = Bus_PlugInDevice(Device, Request, TRUE, &length);
-
-        break;
-
-    case IOCTL_VIGEM_UNPLUG_TARGET:
-
-        KdPrint((DRIVERNAME "IOCTL_VIGEM_UNPLUG_TARGET\n"));
-
-        status = Bus_UnPlugDevice(Device, Request, TRUE, &length);
-
-        break;
-    }
-
-    if (status != STATUS_PENDING)
-    {
-        WdfRequestCompleteWithInformation(Request, status, length);
-    }
-}
-
-//
 // Catches unsupported requests.
 // 
 VOID Bus_EvtIoDefault(
@@ -398,3 +399,5 @@ VOID Bus_EvtIoDefault(
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
 }
+
+EXTERN_C_END

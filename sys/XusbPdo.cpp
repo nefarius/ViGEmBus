@@ -11,10 +11,12 @@
 
 PCWSTR ViGEm::Bus::Targets::EmulationTargetXUSB::_deviceDescription = L"Virtual Xbox 360 Controller";
 
-ViGEm::Bus::Targets::EmulationTargetXUSB::EmulationTargetXUSB() : EmulationTargetPDO(0x045E, 0x028E)
+ViGEm::Bus::Targets::EmulationTargetXUSB::EmulationTargetXUSB(ULONG Serial, LONG SessionId, USHORT VendorId,
+                                                              USHORT ProductId) : EmulationTargetPDO(
+	Serial, SessionId, VendorId, ProductId)
 {
-	TargetType = Xbox360Wired;
-	UsbConfigurationDescriptionSize = XUSB_DESCRIPTOR_SIZE;
+	_TargetType = Xbox360Wired;
+	_UsbConfigurationDescriptionSize = XUSB_DESCRIPTOR_SIZE;
 }
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId,
@@ -35,7 +37,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareDevice(PWDFDEVICE_I
 	}
 
 	// Set hardware ID
-	RtlUnicodeStringPrintf(&buffer, L"USB\\VID_%04X&PID_%04X", this->VendorId, this->ProductId);
+	RtlUnicodeStringPrintf(&buffer, L"USB\\VID_%04X&PID_%04X", this->_VendorId, this->_ProductId);
 
 	RtlUnicodeStringCopy(DeviceId, &buffer);
 
@@ -110,7 +112,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareHardware()
 
 	dummyIface.Size = sizeof(INTERFACE);
 	dummyIface.Version = 1;
-	dummyIface.Context = static_cast<PVOID>(this->PdoDevice);
+	dummyIface.Context = static_cast<PVOID>(this->_PdoDevice);
 
 	dummyIface.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
 	dummyIface.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
@@ -128,7 +130,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareHardware()
 		nullptr
 	);
 
-	NTSTATUS status = WdfDeviceAddQueryInterface(this->PdoDevice, &ifaceCfg);
+	NTSTATUS status = WdfDeviceAddQueryInterface(this->_PdoDevice, &ifaceCfg);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
@@ -149,7 +151,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareHardware()
 		nullptr
 	);
 
-	status = WdfDeviceAddQueryInterface(this->PdoDevice, &ifaceCfg);
+	status = WdfDeviceAddQueryInterface(this->_PdoDevice, &ifaceCfg);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
@@ -170,7 +172,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareHardware()
 		nullptr
 	);
 
-	status = WdfDeviceAddQueryInterface(this->PdoDevice, &ifaceCfg);
+	status = WdfDeviceAddQueryInterface(this->_PdoDevice, &ifaceCfg);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
@@ -189,7 +191,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareHardware()
 
 	xusbInterface.Size = sizeof(USB_BUS_INTERFACE_USBDI_V1);
 	xusbInterface.Version = USB_BUSIF_USBDI_VERSION_1;
-	xusbInterface.BusContext = static_cast<PVOID>(this->PdoDevice);
+	xusbInterface.BusContext = static_cast<PVOID>(this->_PdoDevice);
 
 	xusbInterface.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
 	xusbInterface.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
@@ -207,7 +209,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareHardware()
 		nullptr
 	);
 
-	status = WdfDeviceAddQueryInterface(this->PdoDevice, &ifaceCfg);
+	status = WdfDeviceAddQueryInterface(this->_PdoDevice, &ifaceCfg);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
@@ -226,7 +228,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoInitContext()
 	PUCHAR blobBuffer;
 
 	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-	attributes.ParentObject = this->PdoDevice;
+	attributes.ParentObject = this->_PdoDevice;
 
 	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XUSB, "Initializing XUSB context...");
 
@@ -290,7 +292,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoInitContext()
 	WDF_IO_QUEUE_CONFIG_INIT(&holdingInQueueConfig, WdfIoQueueDispatchManual);
 
 	status = WdfIoQueueCreate(
-		this->PdoDevice,
+		this->_PdoDevice,
 		&holdingInQueueConfig,
 		WDF_NO_OBJECT_ATTRIBUTES,
 		&this->HoldingUsbInRequests
@@ -458,8 +460,8 @@ VOID ViGEm::Bus::Targets::EmulationTargetXUSB::UsbGetDeviceDescriptorType(PUSB_D
 	pDescriptor->bDeviceSubClass = 0xFF;
 	pDescriptor->bDeviceProtocol = 0xFF;
 	pDescriptor->bMaxPacketSize0 = 0x08;
-	pDescriptor->idVendor = this->VendorId;
-	pDescriptor->idProduct = this->ProductId;
+	pDescriptor->idVendor = this->_VendorId;
+	pDescriptor->idProduct = this->_ProductId;
 	pDescriptor->bcdDevice = 0x0114;
 	pDescriptor->iManufacturer = 0x01;
 	pDescriptor->iProduct = 0x02;
@@ -790,7 +792,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 				/* This request is sent periodically and relies on data the "feeder"
 				* has to supply, so we queue this request and return with STATUS_PENDING.
 				* The request gets completed as soon as the "feeder" sent an update. */
-				status = WdfRequestForwardToIoQueue(Request, this->PendingUsbInRequests);
+				status = WdfRequestForwardToIoQueue(Request, this->_PendingUsbInRequests);
 
 				return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
 			}
@@ -850,7 +852,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 			//
 			// Notify client library that PDO is ready
 			// 
-			KeSetEvent(&this->PdoBootNotificationEvent, 0, FALSE);
+			KeSetEvent(&this->_PdoBootNotificationEvent, 0, FALSE);
 		}
 	}
 
@@ -875,7 +877,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 	}
 
 	// Notify user-mode process that new data is available
-	status = WdfIoQueueRetrieveNextRequest(this->PendingNotificationRequests, &notifyRequest);
+	status = WdfIoQueueRetrieveNextRequest(this->_PendingNotificationRequests, &notifyRequest);
 
 	if (NT_SUCCESS(status))
 	{
@@ -892,7 +894,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 		{
 			// Assign values to output buffer
 			notify->Size = sizeof(XUSB_REQUEST_NOTIFICATION);
-			notify->SerialNo = this->SerialNo;
+			notify->SerialNo = this->_SerialNo;
 			notify->LedNumber = this->LedNumber;
 			notify->LargeMotor = this->Rumble[3];
 			notify->SmallMotor = this->Rumble[4];
@@ -958,5 +960,56 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbControlTransfer(PURB Urb)
 		break;
 	}
 
+	return status;
+}
+
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SubmitReport(PVOID NewReport)
+{
+	NTSTATUS    status = STATUS_SUCCESS;
+	BOOLEAN     changed;
+	WDFREQUEST  usbRequest;
+
+	changed = (RtlCompareMemory(&this->Packet.Report,
+	                            &static_cast<PXUSB_SUBMIT_REPORT>(NewReport)->Report,
+	                            sizeof(XUSB_REPORT)) != sizeof(XUSB_REPORT));
+
+	// Don't waste pending IRP if input hasn't changed
+	if (!changed)
+	{
+		TraceDbg(
+			TRACE_BUSENUM,
+			"Input report hasn't changed since last update, aborting with %!STATUS!",
+			status);
+		return status;
+	}
+
+	TraceDbg(
+		TRACE_BUSENUM,
+		"Received new report, processing");
+
+	status = WdfIoQueueRetrieveNextRequest(this->_PendingUsbInRequests, &usbRequest);
+
+	if (!NT_SUCCESS(status))
+		return status;
+
+	// Get pending IRP
+	PIRP pendingIrp = WdfRequestWdmGetIrp(usbRequest);
+
+	// Get USB request block
+	PURB urb = static_cast<PURB>(URB_FROM_IRP(pendingIrp));
+
+	// Get transfer buffer
+	auto Buffer = static_cast<PUCHAR>(urb->UrbBulkOrInterruptTransfer.TransferBuffer);
+
+	urb->UrbBulkOrInterruptTransfer.TransferBufferLength = sizeof(XUSB_INTERRUPT_IN_PACKET);
+
+	// Copy submitted report to cache
+	RtlCopyBytes(&this->Packet.Report, &(static_cast<PXUSB_SUBMIT_REPORT>(NewReport))->Report, sizeof(XUSB_REPORT));
+	// Copy cached report to URB transfer buffer
+	RtlCopyBytes(Buffer, &this->Packet, sizeof(XUSB_INTERRUPT_IN_PACKET));
+
+	// Complete pending request
+	WdfRequestComplete(usbRequest, status);
+	
 	return status;
 }

@@ -9,10 +9,12 @@
 
 PCWSTR ViGEm::Bus::Targets::EmulationTargetDS4::_deviceDescription = L"Virtual DualShock 4 Controller";
 
-ViGEm::Bus::Targets::EmulationTargetDS4::EmulationTargetDS4() : EmulationTargetPDO(0x054C, 0x05C4)
+ViGEm::Bus::Targets::EmulationTargetDS4::EmulationTargetDS4(ULONG Serial, LONG SessionId, USHORT VendorId,
+                                                            USHORT ProductId) : EmulationTargetPDO(
+	Serial, SessionId, VendorId, ProductId)
 {
-	TargetType = DualShock4Wired;
-	UsbConfigurationDescriptionSize = DS4_DESCRIPTOR_SIZE;
+	_TargetType = DualShock4Wired;
+	_UsbConfigurationDescriptionSize = DS4_DESCRIPTOR_SIZE;
 }
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit,
@@ -34,7 +36,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareDevice(PWDFDEVICE_IN
 
 	// Set hardware IDs
 	RtlUnicodeStringPrintf(&buffer, L"USB\\VID_%04X&PID_%04X&REV_0100",
-		this->VendorId, this->ProductId);
+		this->_VendorId, this->_ProductId);
 
 	status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
 	if (!NT_SUCCESS(status))
@@ -49,7 +51,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareDevice(PWDFDEVICE_IN
 	RtlUnicodeStringCopy(DeviceId, &buffer);
 
 	RtlUnicodeStringPrintf(&buffer, L"USB\\VID_%04X&PID_%04X",
-		this->VendorId, this->ProductId);
+		this->_VendorId, this->_ProductId);
 
 	status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
 	if (!NT_SUCCESS(status))
@@ -108,7 +110,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareHardware()
 
 	devinterfaceHid.Size = sizeof(INTERFACE);
 	devinterfaceHid.Version = 1;
-	devinterfaceHid.Context = static_cast<PVOID>(this->PdoDevice);
+	devinterfaceHid.Context = static_cast<PVOID>(this->_PdoDevice);
 
 	devinterfaceHid.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
 	devinterfaceHid.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
@@ -121,7 +123,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareHardware()
 		NULL
 	);
 
-	NTSTATUS status = WdfDeviceAddQueryInterface(this->PdoDevice, &ifaceCfg);
+	NTSTATUS status = WdfDeviceAddQueryInterface(this->_PdoDevice, &ifaceCfg);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
@@ -171,7 +173,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 	WDF_OBJECT_ATTRIBUTES_INIT(&timerAttribs);
 
 	// PDO is parent
-	timerAttribs.ParentObject = this->PdoDevice;
+	timerAttribs.ParentObject = this->_PdoDevice;
 
 	// Create timer
 	status = WdfTimerCreate(
@@ -251,7 +253,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 	}
 
 	DECLARE_UNICODE_STRING_SIZE(serialPath, 4);
-	RtlUnicodeStringPrintf(&serialPath, L"%04d", this->SerialNo);
+	RtlUnicodeStringPrintf(&serialPath, L"%04d", this->_SerialNo);
 
 	status = WdfRegistryCreateKey(
 		keyDS,
@@ -391,8 +393,8 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::UsbGetDeviceDescriptorType(PUSB_DE
 	pDescriptor->bDeviceSubClass = 0x00;
 	pDescriptor->bDeviceProtocol = 0x00;
 	pDescriptor->bMaxPacketSize0 = 0x40;
-	pDescriptor->idVendor = this->VendorId;
-	pDescriptor->idProduct = this->ProductId;
+	pDescriptor->idVendor = this->_VendorId;
+	pDescriptor->idProduct = this->_ProductId;
 	pDescriptor->bcdDevice = 0x0100;
 	pDescriptor->iManufacturer = 0x01;
 	pDescriptor->iProduct = 0x02;
@@ -872,7 +874,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbGetDescriptorFromInterface(
 		//
 		// Notify client library that PDO is ready
 		// 
-		KeSetEvent(&this->PdoBootNotificationEvent, 0, FALSE);
+		KeSetEvent(&this->_PdoBootNotificationEvent, 0, FALSE);
 	}
 
 	return status;
@@ -990,7 +992,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 		/* This request is sent periodically and relies on data the "feeder"
 		   has to supply, so we queue this request and return with STATUS_PENDING.
 		   The request gets completed as soon as the "feeder" sent an update. */
-		status = WdfRequestForwardToIoQueue(Request, this->PendingUsbInRequests);
+		status = WdfRequestForwardToIoQueue(Request, this->_PendingUsbInRequests);
 
 		return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
 	}
@@ -1001,7 +1003,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 		DS4_OUTPUT_BUFFER_LENGTH);
 
 	// Notify user-mode process that new data is available
-	status = WdfIoQueueRetrieveNextRequest(this->PendingNotificationRequests, &notifyRequest);
+	status = WdfIoQueueRetrieveNextRequest(this->_PendingNotificationRequests, &notifyRequest);
 
 	if (NT_SUCCESS(status))
 	{
@@ -1018,7 +1020,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 		{
 			// Assign values to output buffer
 			notify->Size = sizeof(DS4_REQUEST_NOTIFICATION);
-			notify->SerialNo = this->SerialNo;
+			notify->SerialNo = this->_SerialNo;
 			notify->Report = this->OutputReport;
 
 			WdfRequestCompleteWithInformation(notifyRequest, status, notify->Size);
@@ -1063,6 +1065,40 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbControlTransfer(PURB Urb)
 	return status;
 }
 
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::SubmitReport(PVOID NewReport)
+{
+	NTSTATUS    status;
+	WDFREQUEST  usbRequest;
+
+	status = WdfIoQueueRetrieveNextRequest(this->_PendingUsbInRequests, &usbRequest);
+
+	if (!NT_SUCCESS(status))
+		return status;
+
+	// Get pending IRP
+	PIRP pendingIrp = WdfRequestWdmGetIrp(usbRequest);
+
+	// Get USB request block
+	PURB urb = static_cast<PURB>(URB_FROM_IRP(pendingIrp));
+
+	// Get transfer buffer
+	auto Buffer = static_cast<PUCHAR>(urb->UrbBulkOrInterruptTransfer.TransferBuffer);
+
+	urb->UrbBulkOrInterruptTransfer.TransferBufferLength = DS4_REPORT_SIZE;
+
+	/* Copy report to cache and transfer buffer
+	 * Skip first byte as it contains the never changing report id */
+	RtlCopyBytes(this->Report + 1, &(static_cast<PDS4_SUBMIT_REPORT>(NewReport))->Report, sizeof(DS4_REPORT));
+
+	if (Buffer)
+		RtlCopyBytes(Buffer, this->Report, DS4_REPORT_SIZE);
+
+	// Complete pending request
+	WdfRequestComplete(usbRequest, status);
+
+	return status;
+}
+
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
 	_In_ WDFTIMER Timer
 )
@@ -1076,7 +1112,7 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
 	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_DS4, "%!FUNC! Entry");
 
 	// Get pending USB request
-	NTSTATUS status = WdfIoQueueRetrieveNextRequest(ctx->PendingUsbInRequests, &usbRequest);
+	NTSTATUS status = WdfIoQueueRetrieveNextRequest(ctx->_PendingUsbInRequests, &usbRequest);
 
 	if (NT_SUCCESS(status))
 	{

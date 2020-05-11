@@ -191,32 +191,26 @@
     <ClInclude Include="ByteArray.h" />
     <ClInclude Include="Context.h" />
     <ClInclude Include="CRTCPP.hpp" />
-    <ClInclude Include="Ds4.h" />
     <ClInclude Include="Ds4Pdo.hpp" />
     <ClInclude Include="EmulationTargetPDO.hpp" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="trace.h" />
-    <ClInclude Include="UsbPdo.h" />
     <ClInclude Include="Util.h" />
-    <ClInclude Include="Xusb.h" />
     <ClInclude Include="XusbPdo.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ViGEmBus.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="busenum.c" />
-    <ClCompile Include="buspdo.c" />
+    <ClCompile Include="busenum.cpp" />
+    <ClCompile Include="buspdo.cpp" />
     <ClCompile Include="ByteArray.c" />
-    <ClCompile Include="Driver.c" />
-    <ClCompile Include="Ds4.c" />
+    <ClCompile Include="Driver.cpp" />
     <ClCompile Include="Ds4Pdo.cpp" />
     <ClCompile Include="EmulationTargetPDO.cpp" />
-    <ClCompile Include="Queue.c" />
-    <ClCompile Include="UsbPdo.c" />
+    <ClCompile Include="Queue.cpp" />
     <ClCompile Include="Util.c" />
-    <ClCompile Include="xusb.c" />
     <ClCompile Include="XusbPdo.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

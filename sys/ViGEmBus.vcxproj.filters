@@ -42,16 +42,7 @@
     <ClInclude Include="Queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UsbPdo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Context.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Xusb.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Ds4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Util.h">
@@ -86,28 +77,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="busenum.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="buspdo.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="xusb.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Queue.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Ds4.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UsbPdo.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Util.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Driver.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ByteArray.c">
@@ -121,6 +91,18 @@
     </ClCompile>
     <ClCompile Include="Ds4Pdo.cpp">
       <Filter>Source Files\Targets</Filter>
+    </ClCompile>
+    <ClCompile Include="buspdo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="busenum.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Queue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Driver.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

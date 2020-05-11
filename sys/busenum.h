@@ -41,24 +41,17 @@
 #include <usbbusif.h>
 #include "Context.h"
 #include "Util.h"
-#include "UsbPdo.h"
-#include "Xusb.h"
-#include "Ds4.h"
+
 
 
 #pragma region Macros
 
-#define MAX_INSTANCE_ID_LEN             80
 #define HID_LANGUAGE_ID_LENGTH          0x04
 
-#define HID_REQUEST_GET_REPORT          0x01
-#define HID_REQUEST_SET_REPORT          0x09
-#define HID_REPORT_TYPE_FEATURE         0x03
+
 
 #define VIGEM_POOL_TAG                  0x45476956 // "EGiV"
-#define XUSB_POOL_TAG                   'BSUX'
 #define DRIVERNAME                      "ViGEm: "
-#define MAX_HARDWARE_ID_LENGTH          0xFF
 
 #define ORC_PC_FREQUENCY_DIVIDER        1000
 #define ORC_TIMER_START_DELAY           500 // ms
@@ -67,27 +60,9 @@
 
 #pragma endregion
 
-#pragma region Helpers
 
-//
-// Extracts the HID Report ID from the supplied class request.
-//
-#define HID_GET_REPORT_ID(_req_) ((_req_->Value) & 0xFF)
 
-//
-// Extracts the HID Report type from the supplied class request.
-//
-#define HID_GET_REPORT_TYPE(_req_) ((_req_->Value >> 8) & 0xFF)
-
-//
-// Some insane macro-magic =3
-// 
-#define P99_PROTECT(...) __VA_ARGS__
-#define COPY_BYTE_ARRAY(_dst_, _bytes_)   do {BYTE b[] = _bytes_; \
-                                            RtlCopyMemory(_dst_, b, RTL_NUMBER_OF_V1(b)); } while (0)
-
-#pragma endregion
-
+EXTERN_C_START
 
 #pragma region WDF callback prototypes
 
@@ -106,8 +81,6 @@ EVT_WDF_DEVICE_PREPARE_HARDWARE Pdo_EvtDevicePrepareHardware;
 EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL Pdo_EvtIoInternalDeviceControl;
 
 EVT_WDF_OBJECT_CONTEXT_CLEANUP Bus_EvtDriverContextCleanup;
-
-EVT_WDF_TIMER Bus_PlugInRequestCleanUpEvtTimerFunc;
 
 #pragma endregion
 
@@ -130,13 +103,6 @@ Bus_UnPlugDevice(
 );
 
 NTSTATUS
-Bus_CreatePdo(
-    _In_ WDFDEVICE Device,
-    _In_ PWDFDEVICE_INIT ChildInit,
-    _In_ PPDO_IDENTIFICATION_DESCRIPTION Description
-);
-
-NTSTATUS
 Bus_QueueNotification(
     WDFDEVICE Device,
     ULONG SerialNo,
@@ -151,11 +117,6 @@ Bus_SubmitReport(
     _In_ BOOLEAN FromInterface
 );
 
-WDFDEVICE 
-Bus_GetPdo(
-    IN WDFDEVICE Device, 
-    IN ULONG SerialNo);
-
 VOID
 Bus_PdoStageResult(
     _In_ PINTERFACE InterfaceHeader,
@@ -166,3 +127,4 @@ Bus_PdoStageResult(
 
 #pragma endregion
 
+EXTERN_C_END

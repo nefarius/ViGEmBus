@@ -8,6 +8,7 @@
 #include <usbbusif.h>
 
 #include <ViGEm/Common.h>
+#include <initguid.h>
 
 //
 // Some insane macro-magic =3
@@ -27,21 +28,22 @@ namespace ViGEm::Bus::Core
 	class EmulationTargetPDO
 	{
 	public:
-		EmulationTargetPDO(USHORT VID, USHORT PID);
+		EmulationTargetPDO(ULONG Serial, LONG SessionId, USHORT VendorId, USHORT ProductId);
 
 		virtual ~EmulationTargetPDO() = default;
 
+		static EmulationTargetPDO* GetPdoBySerial(IN WDFDEVICE ParentDevice, IN ULONG SerialNo);
+
 		virtual NTSTATUS PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit,
-		                               PUNICODE_STRING DeviceId,
-		                               PUNICODE_STRING DeviceDescription) = 0;
+		                                  PUNICODE_STRING DeviceId,
+		                                  PUNICODE_STRING DeviceDescription) = 0;
 
 		virtual NTSTATUS PdoPrepareHardware() = 0;
 
 		virtual NTSTATUS PdoInitContext() = 0;
-		
-		NTSTATUS PdoCreateDevice(_In_ WDFDEVICE Device,
-		                      _In_ PWDFDEVICE_INIT DeviceInit,
-		                      _In_ PPDO_IDENTIFICATION_DESCRIPTION Description);
+
+		NTSTATUS PdoCreateDevice(_In_ WDFDEVICE ParentDevice,
+		                         _In_ PWDFDEVICE_INIT DeviceInit);
 
 		VOID SetSerial(ULONG Serial);
 
@@ -49,11 +51,11 @@ namespace ViGEm::Bus::Core
 
 		bool operator==(EmulationTargetPDO& other) const
 		{
-			return (other.SerialNo == this->SerialNo);
+			return (other._SerialNo == this->_SerialNo);
 		}
 
 		virtual VOID UsbGetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) = 0;
-		
+
 		NTSTATUS UsbSelectConfiguration(PURB Urb);
 
 		void UsbAbortPipe();
@@ -68,10 +70,20 @@ namespace ViGEm::Bus::Core
 
 		virtual NTSTATUS UsbGetStringDescriptorType(PURB Urb) = 0;
 
-		virtual NTSTATUS UsbBulkOrInterruptTransfer(struct _URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request) = 0;
+		virtual NTSTATUS UsbBulkOrInterruptTransfer(struct _URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer,
+		                                            WDFREQUEST Request) = 0;
 
 		virtual NTSTATUS UsbControlTransfer(PURB Urb) = 0;
-		
+
+		virtual NTSTATUS SubmitReport(PVOID NewReport) = 0;
+
+		NTSTATUS EnqueueNotification(WDFREQUEST Request) const;
+
+		bool IsOwnerProcess() const;
+
+	private:
+		static unsigned long current_process_id();
+
 	protected:
 		static const ULONG _maxHardwareIdLength = 0xFF;
 
@@ -112,58 +124,79 @@ namespace ViGEm::Bus::Core
 		//
 		// Unique serial number of the device on the bus
 		// 
-		ULONG SerialNo{};
+		ULONG _SerialNo{};
 
 		// 
 		// PID of the process creating this PDO
 		// 
-		DWORD OwnerProcessId{};
+		DWORD _OwnerProcessId{};
+
+		//
+		// File object session ID
+		// 
+		LONG _SessionId{};
 
 		//
 		// Device type this PDO is emulating
 		// 
-		VIGEM_TARGET_TYPE TargetType;
+		VIGEM_TARGET_TYPE _TargetType;
 
 		//
 		// If set, the vendor ID the emulated device is reporting
 		// 
-		USHORT VendorId{};
+		USHORT _VendorId{};
 
 		//
 		// If set, the product ID the emulated device is reporting
 		// 
-		USHORT ProductId{};
+		USHORT _ProductId{};
 
 		//
 		// Queue for incoming data interrupt transfer
 		//
-		WDFQUEUE PendingUsbInRequests{};
+		WDFQUEUE _PendingUsbInRequests{};
 
 		//
 		// Queue for inverted calls
 		//
-		WDFQUEUE PendingNotificationRequests{};
+		WDFQUEUE _PendingNotificationRequests{};
 
 		//
 		// This child objects' device object
 		// 
-		WDFDEVICE PdoDevice{};
+		WDFDEVICE _PdoDevice{};
 
 		//
 		// Signals the bus that PDO is ready to receive data
 		// 
-		KEVENT PdoBootNotificationEvent;
+		KEVENT _PdoBootNotificationEvent;
 
 		//
 		// Configuration descriptor size
 		// 
-		ULONG UsbConfigurationDescriptionSize{};
+		ULONG _UsbConfigurationDescriptionSize{};
 	};
 
 	typedef struct _PDO_IDENTIFICATION_DESCRIPTION
 	{
+		//
+		// List entity header
+		// 
 		WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER Header;
 
+		//
+		// Primary key to identify PDO
+		// 
+		ULONG SerialNo;
+
+		//
+		// Session ID
+		// 
+		LONG SessionId;
+
+		//
+		// Context object of PDO
+		// 
 		EmulationTargetPDO* Target;
 	} PDO_IDENTIFICATION_DESCRIPTION, *PPDO_IDENTIFICATION_DESCRIPTION;
 
