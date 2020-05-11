@@ -917,3 +917,46 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 
 	return status;
 }
+
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbControlTransfer(PURB Urb)
+{
+	NTSTATUS status;
+	PUCHAR   blobBuffer;
+	
+	switch (Urb->UrbControlTransfer.SetupPacket[6])
+	{
+	case 0x04:
+
+			blobBuffer = (PUCHAR)WdfMemoryGetBuffer(this->InterruptBlobStorage, NULL);
+			//
+			// Xenon magic
+			// 
+			RtlCopyMemory(
+				Urb->UrbControlTransfer.TransferBuffer,
+				&blobBuffer[XUSB_BLOB_07_OFFSET],
+				0x04
+			);
+			status = STATUS_SUCCESS;
+		
+		break;
+	case 0x14:
+		//
+		// This is some weird USB 1.0 condition and _must fail_
+		// 
+		Urb->UrbControlTransfer.Hdr.Status = USBD_STATUS_STALL_PID;
+		status = STATUS_UNSUCCESSFUL;
+		break;
+	case 0x08:
+		//
+		// This is some weird USB 1.0 condition and _must fail_
+		// 
+		Urb->UrbControlTransfer.Hdr.Status = USBD_STATUS_STALL_PID;
+		status = STATUS_UNSUCCESSFUL;
+		break;
+	default:
+		status = STATUS_SUCCESS;
+		break;
+	}
+
+	return status;
+}

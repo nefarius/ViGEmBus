@@ -483,42 +483,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 				TRACE_BUSPDO,
 				">> >> URB_FUNCTION_CONTROL_TRANSFER");
 
-			//switch (urb->UrbControlTransfer.SetupPacket[6])
-			//{
-			//case 0x04:
-			//	if (pdoData->TargetType == Xbox360Wired)
-			//	{
-			//		pXusbData = XusbGetData(hDevice);
-			//		blobBuffer = WdfMemoryGetBuffer(pXusbData->InterruptBlobStorage, NULL);
-			//		//
-			//		// Xenon magic
-			//		// 
-			//		RtlCopyMemory(
-			//			urb->UrbControlTransfer.TransferBuffer,
-			//			&blobBuffer[XUSB_BLOB_07_OFFSET],
-			//			0x04
-			//		);
-			//		status = STATUS_SUCCESS;
-			//	}
-			//	break;
-			//case 0x14:
-			//	//
-			//	// This is some weird USB 1.0 condition and _must fail_
-			//	// 
-			//	urb->UrbControlTransfer.Hdr.Status = USBD_STATUS_STALL_PID;
-			//	status = STATUS_UNSUCCESSFUL;
-			//	break;
-			//case 0x08:
-			//	//
-			//	// This is some weird USB 1.0 condition and _must fail_
-			//	// 
-			//	urb->UrbControlTransfer.Hdr.Status = USBD_STATUS_STALL_PID;
-			//	status = STATUS_UNSUCCESSFUL;
-			//	break;
-			//default:
-			//	status = STATUS_SUCCESS;
-			//	break;
-			//}
+			status = ctx->Target->UsbControlTransfer(urb);
 
 			break;
 

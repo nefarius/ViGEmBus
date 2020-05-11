@@ -1033,6 +1033,34 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 	return status;
 }
 
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbControlTransfer(PURB Urb)
+{
+	NTSTATUS status;
+
+	switch (Urb->UrbControlTransfer.SetupPacket[6])
+	{
+	case 0x14:
+		//
+		// This is some weird USB 1.0 condition and _must fail_
+		// 
+		Urb->UrbControlTransfer.Hdr.Status = USBD_STATUS_STALL_PID;
+		status = STATUS_UNSUCCESSFUL;
+		break;
+	case 0x08:
+		//
+		// This is some weird USB 1.0 condition and _must fail_
+		// 
+		Urb->UrbControlTransfer.Hdr.Status = USBD_STATUS_STALL_PID;
+		status = STATUS_UNSUCCESSFUL;
+		break;
+	default:
+		status = STATUS_SUCCESS;
+		break;
+	}
+
+	return status;
+}
+
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
 	_In_ WDFTIMER Timer
 )

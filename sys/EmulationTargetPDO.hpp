@@ -70,6 +70,8 @@ namespace ViGEm::Bus::Core
 
 		virtual NTSTATUS UsbBulkOrInterruptTransfer(struct _URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request) = 0;
 
+		virtual NTSTATUS UsbControlTransfer(PURB Urb) = 0;
+		
 	protected:
 		static const ULONG _maxHardwareIdLength = 0xFF;
 
