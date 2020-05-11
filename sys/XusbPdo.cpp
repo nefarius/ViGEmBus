@@ -927,7 +927,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbControlTransfer(PURB Urb)
 	{
 	case 0x04:
 
-			blobBuffer = (PUCHAR)WdfMemoryGetBuffer(this->InterruptBlobStorage, NULL);
+			blobBuffer = static_cast<PUCHAR>(WdfMemoryGetBuffer(this->InterruptBlobStorage, nullptr));
 			//
 			// Xenon magic
 			// 
