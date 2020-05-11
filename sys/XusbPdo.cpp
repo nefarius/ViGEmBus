@@ -451,7 +451,7 @@ VOID ViGEm::Bus::Targets::EmulationTargetXUSB::GetConfigurationDescriptorType(PU
 	RtlCopyBytes(Buffer, XusbDescriptorData, Length);
 }
 
-VOID ViGEm::Bus::Targets::EmulationTargetXUSB::UsbGetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbGetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
 {
 	pDescriptor->bLength = 0x12;
 	pDescriptor->bDescriptorType = USB_DEVICE_DESCRIPTOR_TYPE;
@@ -467,6 +467,8 @@ VOID ViGEm::Bus::Targets::EmulationTargetXUSB::UsbGetDeviceDescriptorType(PUSB_D
 	pDescriptor->iProduct = 0x02;
 	pDescriptor->iSerialNumber = 0x03;
 	pDescriptor->bNumConfigurations = 0x01;
+
+	return STATUS_SUCCESS;
 }
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PURB Urb)
@@ -481,7 +483,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PURB Urb)
 
 	PUSBD_INTERFACE_INFORMATION pInfo = &Urb->UrbSelectConfiguration.Interface;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE,
+	TraceDbg(
 		TRACE_XUSB,
 		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
 		(int)pInfo->Length,
@@ -513,7 +515,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PURB Urb)
 
 	pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE,
+	TraceDbg(
 		TRACE_XUSB,
 		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
 		(int)pInfo->Length,
@@ -561,7 +563,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PURB Urb)
 
 	pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE,
+	TraceDbg(
 		TRACE_XUSB,
 		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
 		(int)pInfo->Length,
@@ -585,7 +587,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PURB Urb)
 
 	pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE,
+	TraceDbg(
 		TRACE_XUSB,
 		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
 		(int)pInfo->Length,
@@ -624,7 +626,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbSelectInterface(PURB Urb)
 {
 	PUSBD_INTERFACE_INFORMATION pInfo = &Urb->UrbSelectInterface.Interface;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE,
+	TraceDbg(
 		TRACE_USBPDO,
 		">> >> >> URB_FUNCTION_SELECT_INTERFACE: Length %d, Interface %d, Alternate %d, Pipes %d",
 		(int)pInfo->Length,
@@ -632,7 +634,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbSelectInterface(PURB Urb)
 		(int)pInfo->AlternateSetting,
 		pInfo->NumberOfPipes);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE,
+	TraceDbg(
 		TRACE_USBPDO,
 		">> >> >> URB_FUNCTION_SELECT_INTERFACE: Class %d, SubClass %d, Protocol %d",
 		(int)pInfo->Class,
@@ -965,6 +967,8 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbControlTransfer(PURB Urb)
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SubmitReport(PVOID NewReport)
 {
+	TraceDbg(TRACE_BUSENUM, "%!FUNC! Entry");
+	
 	NTSTATUS    status = STATUS_SUCCESS;
 	BOOLEAN     changed;
 	WDFREQUEST  usbRequest;
@@ -1010,6 +1014,8 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SubmitReport(PVOID NewReport)
 
 	// Complete pending request
 	WdfRequestComplete(usbRequest, status);
+
+	TraceDbg(TRACE_BUSENUM, "%!FUNC! Exit with status %!STATUS!", status);
 	
 	return status;
 }

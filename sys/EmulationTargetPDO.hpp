@@ -19,10 +19,6 @@
 
 namespace ViGEm::Bus::Core
 {
-	// {A8BA2D1F-894F-464A-B0CE-7A0C8FD65DF1}
-	DEFINE_GUID(GUID_DEVCLASS_VIGEM_RAWPDO,
-	            0xA8BA2D1F, 0x894F, 0x464A, 0xB0, 0xCE, 0x7A, 0x0C, 0x8F, 0xD6, 0x5D, 0xF1);
-
 	typedef struct _PDO_IDENTIFICATION_DESCRIPTION* PPDO_IDENTIFICATION_DESCRIPTION;
 
 	class EmulationTargetPDO
@@ -54,7 +50,7 @@ namespace ViGEm::Bus::Core
 			return (other._SerialNo == this->_SerialNo);
 		}
 
-		virtual VOID UsbGetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) = 0;
+		virtual NTSTATUS UsbGetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) = 0;
 
 		NTSTATUS UsbSelectConfiguration(PURB Urb);
 

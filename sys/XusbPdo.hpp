@@ -41,7 +41,7 @@ namespace ViGEm::Bus::Targets
 
 		VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) override;
 
-		VOID UsbGetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) override;
+		NTSTATUS UsbGetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) override;
 
 		NTSTATUS SelectConfiguration(PURB Urb) override;
 

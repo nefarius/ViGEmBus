@@ -384,7 +384,7 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::GetConfigurationDescriptorType(PUC
 	RtlCopyBytes(Buffer, Ds4DescriptorData, Length);
 }
 
-VOID ViGEm::Bus::Targets::EmulationTargetDS4::UsbGetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbGetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
 {
 	pDescriptor->bLength = 0x12;
 	pDescriptor->bDescriptorType = USB_DEVICE_DESCRIPTOR_TYPE;
@@ -400,6 +400,8 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::UsbGetDeviceDescriptorType(PUSB_DE
 	pDescriptor->iProduct = 0x02;
 	pDescriptor->iSerialNumber = 0x00;
 	pDescriptor->bNumConfigurations = 0x01;
+
+	return STATUS_SUCCESS;
 }
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::SelectConfiguration(PURB Urb)

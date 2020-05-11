@@ -6,6 +6,7 @@
 #include <ntstrsafe.h>
 #include <usbioctl.h>
 #include <usbiodef.h>
+#include <ViGEmBusDriver.h>
 
 
 PCWSTR ViGEm::Bus::Core::EmulationTargetPDO::_deviceLocation = L"Virtual Gamepad Emulation Bus";
@@ -25,6 +26,8 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 	WDF_IO_QUEUE_CONFIG notificationsQueueConfig;
 	PEMULATION_TARGET_PDO_CONTEXT pPdoContext;
 
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Entry");
+	
 	DECLARE_CONST_UNICODE_STRING(deviceLocation, L"Virtual Gamepad Emulation Bus");
 	DECLARE_UNICODE_STRING_SIZE(buffer, MAX_INSTANCE_ID_LEN);
 	// reserve space for device id
@@ -487,12 +490,18 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EvtDevicePrepareHardware(
 	_In_ WDFCMRESLIST ResourcesTranslated
 )
 {
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Entry");
+	
 	UNREFERENCED_PARAMETER(ResourcesRaw);
 	UNREFERENCED_PARAMETER(ResourcesTranslated);
 
 	const auto ctx = EmulationTargetPdoGetContext(Device);
 
-	return ctx->Target->PdoPrepareHardware();
+	NTSTATUS status = ctx->Target->PdoPrepareHardware();
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
+
+	return status;
 }
 
 VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
@@ -595,7 +604,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 				            TRACE_BUSPDO,
 				            ">> >> >> USB_DEVICE_DESCRIPTOR_TYPE");
 
-				ctx->Target->UsbGetDeviceDescriptorType(
+				status = ctx->Target->UsbGetDeviceDescriptorType(
 					static_cast<PUSB_DEVICE_DESCRIPTOR>(urb->UrbControlDescriptorRequest.TransferBuffer));
 
 				break;

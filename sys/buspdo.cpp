@@ -64,5 +64,5 @@ EXTERN_C BOOLEAN Bus_EvtChildListIdentificationDescriptionCompare(
         ViGEm::Bus::Core::PDO_IDENTIFICATION_DESCRIPTION,
         Header);
 
-    return (lhs->Target == rhs->Target) ? TRUE : FALSE;
+    return (lhs->SerialNo == rhs->SerialNo) ? TRUE : FALSE;
 }
