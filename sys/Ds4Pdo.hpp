@@ -8,6 +8,16 @@
 
 namespace ViGEm::Bus::Targets
 {
+	constexpr unsigned char hid_get_report_id(struct _URB_CONTROL_VENDOR_OR_CLASS_REQUEST* pReq)
+	{
+		return pReq->Value & 0xFF;
+	}
+
+	constexpr unsigned char hid_get_report_type(struct _URB_CONTROL_VENDOR_OR_CLASS_REQUEST* pReq)
+	{
+		return (pReq->Value >> 8) & 0xFF;
+	}
+	
 	class EmulationTargetDS4 : public Core::EmulationTargetPDO
 	{
 	public:
@@ -29,8 +39,13 @@ namespace ViGEm::Bus::Targets
 		NTSTATUS SelectConfiguration(PURB Urb) override;
 
 		void AbortPipe() override;
+		NTSTATUS UsbClassInterface(PURB Urb) override;
 	private:
 		static PCWSTR _deviceDescription;
+
+		static const int HID_REQUEST_GET_REPORT = 0x01;
+		static const int HID_REQUEST_SET_REPORT = 0x09;
+		static const int HID_REPORT_TYPE_FEATURE = 0x03;
 
 		static const int HID_GET_FEATURE_REPORT_SIZE_0 = 0x31;
 		static const int HID_GET_FEATURE_REPORT_SIZE_1 = 0x25;

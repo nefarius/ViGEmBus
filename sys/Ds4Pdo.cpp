@@ -449,6 +449,175 @@ void ViGEm::Bus::Targets::EmulationTargetDS4::AbortPipe()
     WdfTimerStop(this->PendingUsbInRequestsTimer, TRUE);
 }
 
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbClassInterface(PURB Urb)
+{
+    struct _URB_CONTROL_VENDOR_OR_CLASS_REQUEST* pRequest = &Urb->UrbControlVendorClassRequest;
+
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> URB_FUNCTION_CLASS_INTERFACE");
+    TraceEvents(TRACE_LEVEL_VERBOSE,
+        TRACE_USBPDO,
+        ">> >> >> TransferFlags = 0x%X, Request = 0x%X, Value = 0x%X, Index = 0x%X, BufLen = %d",
+        pRequest->TransferFlags,
+        pRequest->Request,
+        pRequest->Value,
+        pRequest->Index,
+        pRequest->TransferBufferLength);
+
+	switch (pRequest->Request)
+	{
+	case HID_REQUEST_GET_REPORT:
+	{
+	    UCHAR reportId = hid_get_report_id(pRequest);
+	    UCHAR reportType = hid_get_report_type(pRequest);
+
+	    TraceEvents(TRACE_LEVEL_VERBOSE,
+	        TRACE_USBPDO,
+	        ">> >> >> >> GET_REPORT(%d): %d",
+	        reportType, reportId);
+
+	    switch (reportType)
+	    {
+	    case HID_REPORT_TYPE_FEATURE:
+	    {
+	        switch (reportId)
+	        {
+	        case HID_REPORT_ID_0:
+	        {
+	            // Source: http://eleccelerator.com/wiki/index.php?title=DualShock_4#Class_Requests
+	            UCHAR Response[HID_GET_FEATURE_REPORT_SIZE_0] =
+	            {
+	                0xA3, 0x41, 0x75, 0x67, 0x20, 0x20, 0x33, 0x20,
+	                0x32, 0x30, 0x31, 0x33, 0x00, 0x00, 0x00, 0x00,
+	                0x00, 0x30, 0x37, 0x3A, 0x30, 0x31, 0x3A, 0x31,
+	                0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	                0x00, 0x00, 0x01, 0x00, 0x31, 0x03, 0x00, 0x00,
+	                0x00, 0x49, 0x00, 0x05, 0x00, 0x00, 0x80, 0x03,
+	                0x00
+	            };
+
+	            pRequest->TransferBufferLength = HID_GET_FEATURE_REPORT_SIZE_0;
+	            RtlCopyBytes(pRequest->TransferBuffer, Response, HID_GET_FEATURE_REPORT_SIZE_0);
+
+	            break;
+	        }
+	        case HID_REPORT_ID_1:
+	        {
+	            // Source: http://eleccelerator.com/wiki/index.php?title=DualShock_4#Class_Requests
+	            UCHAR Response[HID_GET_FEATURE_REPORT_SIZE_1] =
+	            {
+	                0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x87,
+	                0x22, 0x7B, 0xDD, 0xB2, 0x22, 0x47, 0xDD, 0xBD,
+	                0x22, 0x43, 0xDD, 0x1C, 0x02, 0x1C, 0x02, 0x7F,
+	                0x1E, 0x2E, 0xDF, 0x60, 0x1F, 0x4C, 0xE0, 0x3A,
+	                0x1D, 0xC6, 0xDE, 0x08, 0x00
+	            };
+
+	            pRequest->TransferBufferLength = HID_GET_FEATURE_REPORT_SIZE_1;
+	            RtlCopyBytes(pRequest->TransferBuffer, Response, HID_GET_FEATURE_REPORT_SIZE_1);
+
+	            break;
+	        }
+	        case HID_REPORT_MAC_ADDRESSES_ID:
+	        {
+	            // Source: http://eleccelerator.com/wiki/index.php?title=DualShock_4#Class_Requests
+	            UCHAR Response[HID_GET_FEATURE_REPORT_MAC_ADDRESSES_SIZE] =
+	            {
+	                0x12, 0x8B, 0x09, 0x07, 0x6D, 0x66, 0x1C, 0x08,
+	                0x25, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+	            };
+
+	            // Insert (auto-generated) target MAC address into response
+	            RtlCopyBytes(Response + 1, &this->TargetMacAddress, sizeof(MAC_ADDRESS));
+	            // Adjust byte order
+	            ReverseByteArray(Response + 1, sizeof(MAC_ADDRESS));
+
+	            // Insert (auto-generated) host MAC address into response
+	            RtlCopyBytes(Response + 10, &this->HostMacAddress, sizeof(MAC_ADDRESS));
+	            // Adjust byte order
+	            ReverseByteArray(Response + 10, sizeof(MAC_ADDRESS));
+
+	            pRequest->TransferBufferLength = HID_GET_FEATURE_REPORT_MAC_ADDRESSES_SIZE;
+	            RtlCopyBytes(pRequest->TransferBuffer, Response, HID_GET_FEATURE_REPORT_MAC_ADDRESSES_SIZE);
+
+	            break;
+	        }
+	        default:
+	            break;
+	        }
+	        break;
+	    }
+	    default:
+	        break;
+	    }
+
+	    break;
+	}
+	case HID_REQUEST_SET_REPORT:
+	{
+	    UCHAR reportId = hid_get_report_id(pRequest);
+	    UCHAR reportType = hid_get_report_type(pRequest);
+
+	    TraceEvents(TRACE_LEVEL_VERBOSE,
+	        TRACE_USBPDO,
+	        ">> >> >> >> SET_REPORT(%d): %d",
+	        reportType, reportId);
+
+	    switch (reportType)
+	    {
+	    case HID_REPORT_TYPE_FEATURE:
+	    {
+	        switch (reportId)
+	        {
+	        case HID_REPORT_ID_3:
+	        {
+	            // Source: http://eleccelerator.com/wiki/index.php?title=DualShock_4#Class_Requests
+	            UCHAR Response[HID_SET_FEATURE_REPORT_SIZE_0] =
+	            {
+	                0x13, 0xAC, 0x9E, 0x17, 0x94, 0x05, 0xB0, 0x56,
+	                0xE8, 0x81, 0x38, 0x08, 0x06, 0x51, 0x41, 0xC0,
+	                0x7F, 0x12, 0xAA, 0xD9, 0x66, 0x3C, 0xCE
+	            };
+
+	            pRequest->TransferBufferLength = HID_SET_FEATURE_REPORT_SIZE_0;
+	            RtlCopyBytes(pRequest->TransferBuffer, Response, HID_SET_FEATURE_REPORT_SIZE_0);
+
+	            break;
+	        }
+	        case HID_REPORT_ID_4:
+	        {
+	            // Source: http://eleccelerator.com/wiki/index.php?title=DualShock_4#Class_Requests
+	            UCHAR Response[HID_SET_FEATURE_REPORT_SIZE_1] =
+	            {
+	                0x14, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	                0x00
+	            };
+
+	            pRequest->TransferBufferLength = HID_SET_FEATURE_REPORT_SIZE_1;
+	            RtlCopyBytes(pRequest->TransferBuffer, Response, HID_SET_FEATURE_REPORT_SIZE_1);
+
+	            break;
+	        }
+	        default:
+	            break;
+	        }
+	        break;
+	    }
+	    default:
+	        break;
+	    }
+
+	    break;
+	}
+	default:
+	    break;
+	}
+
+    return STATUS_SUCCESS;
+}
+
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
     _In_ WDFTIMER Timer
 )
