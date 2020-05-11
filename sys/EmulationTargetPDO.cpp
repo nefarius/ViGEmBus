@@ -23,6 +23,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE Device,
 	WDF_OBJECT_ATTRIBUTES           attributes;
 	WDF_IO_QUEUE_CONFIG             usbInQueueConfig;
 	WDF_IO_QUEUE_CONFIG             notificationsQueueConfig;
+	PEMULATION_TARGET_PDO_CONTEXT	pPdoContext;
 
 	DECLARE_CONST_UNICODE_STRING(deviceLocation, L"Virtual Gamepad Emulation Bus");
 	DECLARE_UNICODE_STRING_SIZE(buffer, MAX_INSTANCE_ID_LEN);
@@ -179,6 +180,12 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE Device,
 
 #pragma region Set PDO contexts
 
+		//
+		// Bind this object and device context together
+		// 
+		pPdoContext = EmulationTargetPdoGetContext(this->PdoDevice);
+		pPdoContext->Target = this;
+		
 		status = this->PdoInitContext();
 
 		if (!NT_SUCCESS(status))
