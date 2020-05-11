@@ -147,7 +147,7 @@ namespace ViGEm::Bus::Core
 		//
 		// This child objects' device object
 		// 
-		WDFDEVICE PdoDevice;
+		WDFDEVICE PdoDevice{};
 
 		//
 		// Signals the bus that PDO is ready to receive data
@@ -157,7 +157,7 @@ namespace ViGEm::Bus::Core
 		//
 		// Configuration descriptor size
 		// 
-		ULONG UsbConfigurationDescriptionSize;
+		ULONG UsbConfigurationDescriptionSize{};
 	};
 
 	typedef struct _PDO_IDENTIFICATION_DESCRIPTION

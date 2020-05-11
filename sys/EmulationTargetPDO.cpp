@@ -451,13 +451,11 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 		
 	UNREFERENCED_PARAMETER(OutputBufferLength);
 	UNREFERENCED_PARAMETER(InputBufferLength);
-	UNREFERENCED_PARAMETER(IoControlCode);
 
 	NTSTATUS                status = STATUS_INVALID_PARAMETER;
 	PIRP                    irp;
 	PURB                    urb;
 	PIO_STACK_LOCATION      irpStack;
-	//PUCHAR                  blobBuffer;
 
 	TraceDbg(TRACE_BUSPDO, "%!FUNC! Entry");
 
