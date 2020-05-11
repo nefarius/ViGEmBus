@@ -32,7 +32,7 @@ namespace ViGEm::Bus::Core
 
 		virtual ~EmulationTargetPDO() = default;
 
-		static EmulationTargetPDO* GetPdoBySerial(IN WDFDEVICE ParentDevice, IN ULONG SerialNo);
+		static bool GetPdoBySerial(IN WDFDEVICE ParentDevice, IN ULONG SerialNo, OUT EmulationTargetPDO** Object);
 
 		virtual NTSTATUS PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit,
 		                                  PUNICODE_STRING DeviceId,

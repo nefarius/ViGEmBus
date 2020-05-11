@@ -456,8 +456,8 @@ EmulationTargetPDO(ULONG Serial, LONG SessionId, USHORT VendorId, USHORT Product
 	KeInitializeEvent(&this->_PdoBootNotificationEvent, NotificationEvent, FALSE);
 }
 
-ViGEm::Bus::Core::EmulationTargetPDO* ViGEm::Bus::Core::EmulationTargetPDO::GetPdoBySerial(
-	IN WDFDEVICE ParentDevice, IN ULONG SerialNo)
+bool ViGEm::Bus::Core::EmulationTargetPDO::GetPdoBySerial(
+	IN WDFDEVICE ParentDevice, IN ULONG SerialNo, OUT EmulationTargetPDO** Object)
 {
 	WDF_CHILD_RETRIEVE_INFO info;
 
@@ -474,9 +474,11 @@ ViGEm::Bus::Core::EmulationTargetPDO* ViGEm::Bus::Core::EmulationTargetPDO::GetP
 	const WDFDEVICE pdoDevice = WdfChildListRetrievePdo(list, &info);
 
 	if (pdoDevice == nullptr)
-		return nullptr;
+		return false;
 
-	return EmulationTargetPdoGetContext(pdoDevice)->Target;
+	*Object = EmulationTargetPdoGetContext(pdoDevice)->Target;
+	
+	return true;
 }
 
 NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EvtDevicePrepareHardware(

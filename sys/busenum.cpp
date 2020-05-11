@@ -384,13 +384,12 @@ EXTERN_C NTSTATUS Bus_XusbSubmitReport(WDFDEVICE Device, ULONG SerialNo, PXUSB_S
 EXTERN_C NTSTATUS Bus_QueueNotification(WDFDEVICE Device, ULONG SerialNo, WDFREQUEST Request)
 {
     NTSTATUS status;
+    EmulationTargetPDO* pdo;
 
     TraceDbg(TRACE_BUSENUM, "%!FUNC! Entry");
 
-    const auto pdo = EmulationTargetPDO::GetPdoBySerial(Device, SerialNo);
-
     // Validate child
-    if (pdo == nullptr)
+    if (!EmulationTargetPDO::GetPdoBySerial(Device, SerialNo, &pdo))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
             TRACE_BUSENUM,
@@ -420,12 +419,12 @@ NTSTATUS Bus_Ds4SubmitReport(WDFDEVICE Device, ULONG SerialNo, PDS4_SUBMIT_REPOR
 
 EXTERN_C NTSTATUS Bus_SubmitReport(WDFDEVICE Device, ULONG SerialNo, PVOID Report, BOOLEAN FromInterface)
 {
+    EmulationTargetPDO* pdo;
+	
     UNREFERENCED_PARAMETER(FromInterface);
 	
-    const auto pdo = EmulationTargetPDO::GetPdoBySerial(Device, SerialNo);
-
     // Validate child
-    if (pdo == nullptr)
+    if (!EmulationTargetPDO::GetPdoBySerial(Device, SerialNo, &pdo))
     {
         TraceEvents(TRACE_LEVEL_ERROR,
             TRACE_BUSENUM,

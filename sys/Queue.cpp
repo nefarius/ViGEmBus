@@ -164,9 +164,7 @@ VOID Bus_EvtIoDeviceControl(
                 break;
             }
 
-            pdo = EmulationTargetPDO::GetPdoBySerial(Device, xusbSubmit->SerialNo);
-
-            if (pdo == nullptr)
+            if (!EmulationTargetPDO::GetPdoBySerial(Device, xusbSubmit->SerialNo, &pdo))
                 status = STATUS_DEVICE_DOES_NOT_EXIST;
             else
                 status = pdo->SubmitReport(xusbSubmit);
@@ -262,10 +260,8 @@ VOID Bus_EvtIoDeviceControl(
                 status = STATUS_INVALID_PARAMETER;
                 break;
             }
-
-            pdo = EmulationTargetPDO::GetPdoBySerial(Device, ds4Submit->SerialNo);
-
-            if (pdo == nullptr)
+                        
+            if (!EmulationTargetPDO::GetPdoBySerial(Device, ds4Submit->SerialNo, &pdo))
                 status = STATUS_DEVICE_DOES_NOT_EXIST;
             else
                 status = pdo->SubmitReport(ds4Submit);
