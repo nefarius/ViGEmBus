@@ -15,7 +15,16 @@ namespace ViGEm::Bus::Targets
 		XUSB_REPORT Report;
 	} XUSB_INTERRUPT_IN_PACKET, *PXUSB_INTERRUPT_IN_PACKET;
 
+	constexpr bool xusb_is_data_pipe(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer)
+	{
+		return (pTransfer->PipeHandle == reinterpret_cast<USBD_PIPE_HANDLE>(0xFFFF0081));
+	}
 
+	constexpr bool xusb_is_control_pipe(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer)
+	{
+		return (pTransfer->PipeHandle == reinterpret_cast<USBD_PIPE_HANDLE>(0xFFFF0083));
+	}
+	
 	class EmulationTargetXUSB : public Core::EmulationTargetPDO
 	{
 	public:
@@ -42,7 +51,7 @@ namespace ViGEm::Bus::Targets
 		NTSTATUS UsbGetDescriptorFromInterface(PURB Urb) override;
 		NTSTATUS UsbSelectInterface(PURB Urb) override;
 		NTSTATUS UsbGetStringDescriptorType(PURB Urb) override;
-		NTSTATUS UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer) override;
+		NTSTATUS UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request) override;
 	private:
 		static PCWSTR _deviceDescription;
 

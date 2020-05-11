@@ -972,9 +972,10 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbGetStringDescriptorType(PUR
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request)
 {
 	UNREFERENCED_PARAMETER(pTransfer);
+	UNREFERENCED_PARAMETER(Request);
 	
 	return NTSTATUS();
 }

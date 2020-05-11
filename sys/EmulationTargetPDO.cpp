@@ -538,7 +538,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 				TRACE_BUSPDO,
 				">> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER");
 
-			//status = UsbPdo_BulkOrInterruptTransfer(urb, hDevice, Request);
+			status = ctx->Target->UsbBulkOrInterruptTransfer(&urb->UrbBulkOrInterruptTransfer, Request);
 
 			break;
 

@@ -6,6 +6,9 @@
 #include <wdmguid.h>
 
 
+#include "busenum.h"
+#include "ViGEmBusDriver.h"
+
 
 PCWSTR ViGEm::Bus::Targets::EmulationTargetXUSB::_deviceDescription = L"Virtual Xbox 360 Controller";
 
@@ -709,9 +712,209 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbGetStringDescriptorType(PU
 	return STATUS_NOT_IMPLEMENTED;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request)
 {
-	UNREFERENCED_PARAMETER(pTransfer);
-	
-	return NTSTATUS();
+	NTSTATUS     status;
+	WDFREQUEST   notifyRequest;
+
+	// Data coming FROM us TO higher driver
+	if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN)
+	{
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_USBPDO,
+			">> >> >> Incoming request, queuing...");
+
+		auto blobBuffer = static_cast<PUCHAR>(WdfMemoryGetBuffer(this->InterruptBlobStorage, nullptr));
+
+		if (xusb_is_data_pipe(pTransfer))
+		{
+			//
+			// Send "boot sequence" first, then the actual inputs
+			// 
+			switch (this->InterruptInitStage)
+			{
+			case 0:
+				pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
+				this->InterruptInitStage++;
+				RtlCopyMemory(
+					pTransfer->TransferBuffer,
+					&blobBuffer[XUSB_BLOB_00_OFFSET],
+					XUSB_INIT_STAGE_SIZE
+				);
+				return STATUS_SUCCESS;
+			case 1:
+				pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
+				this->InterruptInitStage++;
+				RtlCopyMemory(
+					pTransfer->TransferBuffer,
+					&blobBuffer[XUSB_BLOB_01_OFFSET],
+					XUSB_INIT_STAGE_SIZE
+				);
+				return STATUS_SUCCESS;
+			case 2:
+				pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
+				this->InterruptInitStage++;
+				RtlCopyMemory(
+					pTransfer->TransferBuffer,
+					&blobBuffer[XUSB_BLOB_02_OFFSET],
+					XUSB_INIT_STAGE_SIZE
+				);
+				return STATUS_SUCCESS;
+			case 3:
+				pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
+				this->InterruptInitStage++;
+				RtlCopyMemory(
+					pTransfer->TransferBuffer,
+					&blobBuffer[XUSB_BLOB_03_OFFSET],
+					XUSB_INIT_STAGE_SIZE
+				);
+				return STATUS_SUCCESS;
+			case 4:
+				pTransfer->TransferBufferLength = sizeof(XUSB_INTERRUPT_IN_PACKET);
+				this->InterruptInitStage++;
+				RtlCopyMemory(
+					pTransfer->TransferBuffer,
+					&blobBuffer[XUSB_BLOB_04_OFFSET],
+					sizeof(XUSB_INTERRUPT_IN_PACKET)
+				);
+				return STATUS_SUCCESS;
+			case 5:
+				pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
+				this->InterruptInitStage++;
+				RtlCopyMemory(
+					pTransfer->TransferBuffer,
+					&blobBuffer[XUSB_BLOB_05_OFFSET],
+					XUSB_INIT_STAGE_SIZE
+				);
+				return STATUS_SUCCESS;
+			default:
+				/* This request is sent periodically and relies on data the "feeder"
+				* has to supply, so we queue this request and return with STATUS_PENDING.
+				* The request gets completed as soon as the "feeder" sent an update. */
+				status = WdfRequestForwardToIoQueue(Request, this->PendingUsbInRequests);
+
+				return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
+			}
+		}
+
+		if (xusb_is_control_pipe(pTransfer))
+		{
+			if (!this->ReportedCapabilities && pTransfer->TransferBufferLength >= XUSB_INIT_STAGE_SIZE)
+			{
+				RtlCopyMemory(
+					pTransfer->TransferBuffer,
+					&blobBuffer[XUSB_BLOB_06_OFFSET],
+					XUSB_INIT_STAGE_SIZE
+				);
+
+				this->ReportedCapabilities = TRUE;
+
+				return STATUS_SUCCESS;
+			}
+
+			status = WdfRequestForwardToIoQueue(Request, this->HoldingUsbInRequests);
+
+			return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
+		}
+	}
+
+	// Data coming FROM the higher driver TO us
+	TraceEvents(TRACE_LEVEL_VERBOSE,
+		TRACE_USBPDO,
+		">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d",
+		pTransfer->PipeHandle,
+		pTransfer->TransferFlags,
+		pTransfer->TransferBufferLength);
+
+	if (pTransfer->TransferBufferLength == XUSB_LEDSET_SIZE) // Led
+	{
+		auto Buffer = static_cast<PUCHAR>(pTransfer->TransferBuffer);
+
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_USBPDO,
+			"-- LED Buffer: %02X %02X %02X",
+			Buffer[0], Buffer[1], Buffer[2]);
+
+		// extract LED byte to get controller slot
+		if (Buffer[0] == 0x01 && Buffer[1] == 0x03 && Buffer[2] >= 0x02)
+		{
+			if (Buffer[2] == 0x02)this->LedNumber = 0;
+			if (Buffer[2] == 0x03)this->LedNumber = 1;
+			if (Buffer[2] == 0x04)this->LedNumber = 2;
+			if (Buffer[2] == 0x05)this->LedNumber = 3;
+
+			TraceEvents(TRACE_LEVEL_INFORMATION,
+				TRACE_USBPDO,
+				"-- LED Number: %d",
+				this->LedNumber);
+
+			//
+			// Notify client library that PDO is ready
+			// 
+			KeSetEvent(&this->PdoBootNotificationEvent, 0, FALSE);
+		}
+	}
+
+	// Extract rumble (vibration) information
+	if (pTransfer->TransferBufferLength == XUSB_RUMBLE_SIZE)
+	{
+		auto Buffer = static_cast<PUCHAR>(pTransfer->TransferBuffer);
+
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_USBPDO,
+			"-- Rumble Buffer: %02X %02X %02X %02X %02X %02X %02X %02X",
+			Buffer[0],
+			Buffer[1],
+			Buffer[2],
+			Buffer[3],
+			Buffer[4],
+			Buffer[5],
+			Buffer[6],
+			Buffer[7]);
+
+		RtlCopyBytes(this->Rumble, Buffer, pTransfer->TransferBufferLength);
+	}
+
+	// Notify user-mode process that new data is available
+	status = WdfIoQueueRetrieveNextRequest(this->PendingNotificationRequests, &notifyRequest);
+
+	if (NT_SUCCESS(status))
+	{
+		PXUSB_REQUEST_NOTIFICATION notify = NULL;
+
+		status = WdfRequestRetrieveOutputBuffer(
+			notifyRequest,
+			sizeof(XUSB_REQUEST_NOTIFICATION),
+			reinterpret_cast<PVOID*>(&notify),
+			nullptr
+		);
+
+		if (NT_SUCCESS(status))
+		{
+			// Assign values to output buffer
+			notify->Size = sizeof(XUSB_REQUEST_NOTIFICATION);
+			notify->SerialNo = this->SerialNo;
+			notify->LedNumber = this->LedNumber;
+			notify->LargeMotor = this->Rumble[3];
+			notify->SmallMotor = this->Rumble[4];
+
+			WdfRequestCompleteWithInformation(notifyRequest, status, notify->Size);
+		}
+		else
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_USBPDO,
+				"WdfRequestRetrieveOutputBuffer failed with status %!STATUS!",
+				status);
+		}
+	}
+	else
+	{
+		TraceEvents(TRACE_LEVEL_WARNING,
+			TRACE_USBPDO,
+			"!! [XUSB] WdfIoQueueRetrieveNextRequest failed with status %!STATUS!",
+			status);
+	}
+
+	return status;
 }
