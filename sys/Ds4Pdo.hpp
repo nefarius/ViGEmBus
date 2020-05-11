@@ -41,6 +41,7 @@ namespace ViGEm::Bus::Targets
 		void AbortPipe() override;
 		NTSTATUS UsbClassInterface(PURB Urb) override;
 		NTSTATUS UsbGetDescriptorFromInterface(PURB Urb) override;
+		NTSTATUS UsbSelectInterface(PURB Urb) override;
 	private:
 		static PCWSTR _deviceDescription;
 

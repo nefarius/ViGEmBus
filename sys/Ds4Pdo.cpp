@@ -871,6 +871,13 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbGetDescriptorFromInterface(
     return status;
 }
 
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbSelectInterface(PURB Urb)
+{
+    UNREFERENCED_PARAMETER(Urb);
+	
+    return STATUS_NOT_IMPLEMENTED;
+}
+
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
     _In_ WDFTIMER Timer
 )

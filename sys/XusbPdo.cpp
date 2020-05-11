@@ -16,7 +16,7 @@ ViGEm::Bus::Targets::EmulationTargetXUSB::EmulationTargetXUSB() : EmulationTarge
 }
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId,
-                                                                 PUNICODE_STRING DeviceDescription)
+	PUNICODE_STRING DeviceDescription)
 {
 	NTSTATUS status;
 	DECLARE_UNICODE_STRING_SIZE(buffer, _maxHardwareIdLength);
@@ -26,9 +26,9 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_XUSB,
-		            "RtlUnicodeStringInit failed with status %!STATUS!",
-		            status);
+			TRACE_XUSB,
+			"RtlUnicodeStringInit failed with status %!STATUS!",
+			status);
 		return status;
 	}
 
@@ -41,9 +41,9 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_XUSB,
-		            "WdfPdoInitAddHardwareID failed with status %!STATUS!",
-		            status);
+			TRACE_XUSB,
+			"WdfPdoInitAddHardwareID failed with status %!STATUS!",
+			status);
 		return status;
 	}
 
@@ -55,9 +55,9 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_XUSB,
-		            "WdfPdoInitAddCompatibleID #1 failed with status %!STATUS!",
-		            status);
+			TRACE_XUSB,
+			"WdfPdoInitAddCompatibleID #1 failed with status %!STATUS!",
+			status);
 		return status;
 	}
 
@@ -67,9 +67,9 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_XUSB,
-		            "WdfPdoInitAddCompatibleID #2 failed with status %!STATUS!",
-		            status);
+			TRACE_XUSB,
+			"WdfPdoInitAddCompatibleID #2 failed with status %!STATUS!",
+			status);
 		return status;
 	}
 
@@ -79,9 +79,9 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_XUSB,
-		            "WdfPdoInitAddCompatibleID #3 failed with status %!STATUS!",
-		            status);
+			TRACE_XUSB,
+			"WdfPdoInitAddCompatibleID #3 failed with status %!STATUS!",
+			status);
 		return status;
 	}
 
@@ -91,9 +91,9 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_XUSB,
-		            "WdfPdoInitAddCompatibleID #4 failed with status %!STATUS!",
-		            status);
+			TRACE_XUSB,
+			"WdfPdoInitAddCompatibleID #4 failed with status %!STATUS!",
+			status);
 		return status;
 	}
 
@@ -130,10 +130,10 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware()
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_XUSB,
-		            "Couldn't register PNP_LOCATION dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-		            &GUID_PNP_LOCATION_INTERFACE,
-		            status);
+			TRACE_XUSB,
+			"Couldn't register PNP_LOCATION dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
+			&GUID_PNP_LOCATION_INTERFACE,
+			status);
 
 		return status;
 	}
@@ -151,10 +151,10 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware()
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_XUSB,
-		            "Couldn't register D3COLD_SUPPORT dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-		            &GUID_D3COLD_SUPPORT_INTERFACE,
-		            status);
+			TRACE_XUSB,
+			"Couldn't register D3COLD_SUPPORT dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
+			&GUID_D3COLD_SUPPORT_INTERFACE,
+			status);
 
 		return status;
 	}
@@ -172,10 +172,10 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware()
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_XUSB,
-		            "Couldn't register REENUM_SELF_STD dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-		            &GUID_REENUMERATE_SELF_INTERFACE_STANDARD,
-		            status);
+			TRACE_XUSB,
+			"Couldn't register REENUM_SELF_STD dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
+			&GUID_REENUMERATE_SELF_INTERFACE_STANDARD,
+			status);
 
 		return status;
 	}
@@ -209,9 +209,9 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware()
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_XUSB,
-		            "WdfDeviceAddQueryInterface failed with status %!STATUS!",
-		            status);
+			TRACE_XUSB,
+			"WdfDeviceAddQueryInterface failed with status %!STATUS!",
+			status);
 		return status;
 	}
 
@@ -229,10 +229,10 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::InitContext()
 	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XUSB, "Initializing XUSB context...");
 
 	RtlZeroMemory(this->Rumble, ARRAYSIZE(this->Rumble));
-	
+
 	// Is later overwritten by actual XInput slot
 	this->LedNumber = -1;
-	
+
 	RtlZeroMemory(&this->Packet, sizeof(XUSB_INTERRUPT_IN_PACKET));
 	// Packet size (20 bytes = 0x14)
 	this->Packet.Size = 0x14;
@@ -240,7 +240,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::InitContext()
 	this->ReportedCapabilities = FALSE;
 
 	this->InterruptInitStage = 0;
-	
+
 	// Allocate blob storage
 	NTSTATUS status = WdfMemoryCreate(
 		&attributes,
@@ -253,33 +253,33 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::InitContext()
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_XUSB,
-		            "WdfMemoryCreate failed with status %!STATUS!",
-		            status);
+			TRACE_XUSB,
+			"WdfMemoryCreate failed with status %!STATUS!",
+			status);
 		return status;
 	}
 
 	// Fill blob storage
 	COPY_BYTE_ARRAY(blobBuffer, P99_PROTECT({
-		                // 0
-		                0x01, 0x03, 0x0E,
-		                // 1
-		                0x02, 0x03, 0x00,
-		                // 2
-		                0x03, 0x03, 0x03,
-		                // 3
-		                0x08, 0x03, 0x00,
-		                // 4
-		                0x00, 0x14, 0x00, 0x00, 0x00, 0x00, 0xe4, 0xf2,
-		                0xb3, 0xf8, 0x49, 0xf3, 0xb0, 0xfc, 0x00, 0x00,
-		                0x00, 0x00, 0x00, 0x00,
-		                // 5
-		                0x01, 0x03, 0x03,
-		                // 6
-		                0x05, 0x03, 0x00,
-		                // 7
-		                0x31, 0x3F, 0xCF, 0xDC
-		                }));
+		// 0
+		0x01, 0x03, 0x0E,
+		// 1
+		0x02, 0x03, 0x00,
+		// 2
+		0x03, 0x03, 0x03,
+		// 3
+		0x08, 0x03, 0x00,
+		// 4
+		0x00, 0x14, 0x00, 0x00, 0x00, 0x00, 0xe4, 0xf2,
+		0xb3, 0xf8, 0x49, 0xf3, 0xb0, 0xfc, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00,
+		// 5
+		0x01, 0x03, 0x03,
+		// 6
+		0x05, 0x03, 0x00,
+		// 7
+		0x31, 0x3F, 0xCF, 0xDC
+		}));
 
 	// I/O Queue for pending IRPs
 	WDF_IO_QUEUE_CONFIG holdingInQueueConfig;
@@ -289,16 +289,16 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::InitContext()
 
 	status = WdfIoQueueCreate(
 		this->PdoDevice,
-		&holdingInQueueConfig, 
-		WDF_NO_OBJECT_ATTRIBUTES, 
+		&holdingInQueueConfig,
+		WDF_NO_OBJECT_ATTRIBUTES,
 		&this->HoldingUsbInRequests
 	);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_XUSB,
-		            "WdfIoQueueCreate (HoldingUsbInRequests) failed with status %!STATUS!",
-		            status);
+			TRACE_XUSB,
+			"WdfIoQueueCreate (HoldingUsbInRequests) failed with status %!STATUS!",
+			status);
 		return status;
 	}
 
@@ -474,9 +474,9 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PURB Urb)
 			">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor");
 		return STATUS_INVALID_PARAMETER;
 	}
-	
+
 	PUSBD_INTERFACE_INFORMATION pInfo = &Urb->UrbSelectConfiguration.Interface;
-	
+
 	TraceEvents(TRACE_LEVEL_VERBOSE,
 		TRACE_XUSB,
 		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
@@ -605,13 +605,99 @@ void ViGEm::Bus::Targets::EmulationTargetXUSB::AbortPipe()
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbClassInterface(PURB Urb)
 {
 	UNREFERENCED_PARAMETER(Urb);
-	
+
 	return STATUS_NOT_IMPLEMENTED;
 }
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbGetDescriptorFromInterface(PURB Urb)
 {
 	UNREFERENCED_PARAMETER(Urb);
-	
+
 	return STATUS_NOT_IMPLEMENTED;
+}
+
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbSelectInterface(PURB Urb)
+{
+	PUSBD_INTERFACE_INFORMATION pInfo = &Urb->UrbSelectInterface.Interface;
+
+	TraceEvents(TRACE_LEVEL_VERBOSE,
+		TRACE_USBPDO,
+		">> >> >> URB_FUNCTION_SELECT_INTERFACE: Length %d, Interface %d, Alternate %d, Pipes %d",
+		(int)pInfo->Length,
+		(int)pInfo->InterfaceNumber,
+		(int)pInfo->AlternateSetting,
+		pInfo->NumberOfPipes);
+
+	TraceEvents(TRACE_LEVEL_VERBOSE,
+		TRACE_USBPDO,
+		">> >> >> URB_FUNCTION_SELECT_INTERFACE: Class %d, SubClass %d, Protocol %d",
+		(int)pInfo->Class,
+		(int)pInfo->SubClass,
+		(int)pInfo->Protocol);
+
+	if (pInfo->InterfaceNumber == 1)
+	{
+		pInfo[0].Class = 0xFF;
+		pInfo[0].SubClass = 0x5D;
+		pInfo[0].Protocol = 0x03;
+		pInfo[0].NumberOfPipes = 0x04;
+
+		pInfo[0].InterfaceHandle = (USBD_INTERFACE_HANDLE)0xFFFF0000;
+
+		pInfo[0].Pipes[0].MaximumTransferSize = 0x00400000;
+		pInfo[0].Pipes[0].MaximumPacketSize = 0x20;
+		pInfo[0].Pipes[0].EndpointAddress = 0x82;
+		pInfo[0].Pipes[0].Interval = 0x04;
+		pInfo[0].Pipes[0].PipeType = (USBD_PIPE_TYPE)0x03;
+		pInfo[0].Pipes[0].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0082;
+		pInfo[0].Pipes[0].PipeFlags = 0x00;
+
+		pInfo[0].Pipes[1].MaximumTransferSize = 0x00400000;
+		pInfo[0].Pipes[1].MaximumPacketSize = 0x20;
+		pInfo[0].Pipes[1].EndpointAddress = 0x02;
+		pInfo[0].Pipes[1].Interval = 0x08;
+		pInfo[0].Pipes[1].PipeType = (USBD_PIPE_TYPE)0x03;
+		pInfo[0].Pipes[1].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0002;
+		pInfo[0].Pipes[1].PipeFlags = 0x00;
+
+		pInfo[0].Pipes[2].MaximumTransferSize = 0x00400000;
+		pInfo[0].Pipes[2].MaximumPacketSize = 0x20;
+		pInfo[0].Pipes[2].EndpointAddress = 0x83;
+		pInfo[0].Pipes[2].Interval = 0x08;
+		pInfo[0].Pipes[2].PipeType = (USBD_PIPE_TYPE)0x03;
+		pInfo[0].Pipes[2].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0083;
+		pInfo[0].Pipes[2].PipeFlags = 0x00;
+
+		pInfo[0].Pipes[3].MaximumTransferSize = 0x00400000;
+		pInfo[0].Pipes[3].MaximumPacketSize = 0x20;
+		pInfo[0].Pipes[3].EndpointAddress = 0x03;
+		pInfo[0].Pipes[3].Interval = 0x08;
+		pInfo[0].Pipes[3].PipeType = (USBD_PIPE_TYPE)0x03;
+		pInfo[0].Pipes[3].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0003;
+		pInfo[0].Pipes[3].PipeFlags = 0x00;
+
+		return STATUS_SUCCESS;
+	}
+
+	if (pInfo->InterfaceNumber == 2)
+	{
+		pInfo[0].Class = 0xFF;
+		pInfo[0].SubClass = 0x5D;
+		pInfo[0].Protocol = 0x02;
+		pInfo[0].NumberOfPipes = 0x01;
+
+		pInfo[0].InterfaceHandle = (USBD_INTERFACE_HANDLE)0xFFFF0000;
+
+		pInfo[0].Pipes[0].MaximumTransferSize = 0x00400000;
+		pInfo[0].Pipes[0].MaximumPacketSize = 0x20;
+		pInfo[0].Pipes[0].EndpointAddress = 0x84;
+		pInfo[0].Pipes[0].Interval = 0x04;
+		pInfo[0].Pipes[0].PipeType = (USBD_PIPE_TYPE)0x03;
+		pInfo[0].Pipes[0].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0084;
+		pInfo[0].Pipes[0].PipeFlags = 0x00;
+
+		return STATUS_SUCCESS;
+	}
+
+	return STATUS_INVALID_PARAMETER;
 }
