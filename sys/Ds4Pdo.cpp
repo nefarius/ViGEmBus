@@ -972,6 +972,13 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbGetStringDescriptorType(PUR
 	return STATUS_SUCCESS;
 }
 
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer)
+{
+	UNREFERENCED_PARAMETER(pTransfer);
+	
+	return NTSTATUS();
+}
+
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
 	_In_ WDFTIMER Timer
 )

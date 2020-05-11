@@ -708,3 +708,10 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbGetStringDescriptorType(PU
 
 	return STATUS_NOT_IMPLEMENTED;
 }
+
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer)
+{
+	UNREFERENCED_PARAMETER(pTransfer);
+	
+	return NTSTATUS();
+}
