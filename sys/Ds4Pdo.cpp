@@ -1105,7 +1105,7 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
 	_In_ WDFTIMER Timer
 )
 {
-	auto ctx = reinterpret_cast<EmulationTargetDS4*>(Core::EmulationTargetPdoGetContext(WdfTimerGetParentObject(Timer)));
+	auto ctx = reinterpret_cast<EmulationTargetDS4*>(Core::EmulationTargetPdoGetContext(WdfTimerGetParentObject(Timer))->Target);
 
 	WDFREQUEST              usbRequest;
 	PIRP                    pendingIrp;
