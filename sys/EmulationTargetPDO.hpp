@@ -62,6 +62,8 @@ namespace ViGEm::Bus::Core
 
 		virtual NTSTATUS UsbClassInterface(PURB Urb) = 0;
 
+		virtual NTSTATUS UsbGetDescriptorFromInterface(PURB Urb) = 0;
+
 	protected:
 		static const ULONG _maxHardwareIdLength = 0xFF;
 

@@ -40,6 +40,7 @@ namespace ViGEm::Bus::Targets
 
 		void AbortPipe() override;
 		NTSTATUS UsbClassInterface(PURB Urb) override;
+		NTSTATUS UsbGetDescriptorFromInterface(PURB Urb) override;
 	private:
 		static PCWSTR _deviceDescription;
 
@@ -59,7 +60,6 @@ namespace ViGEm::Bus::Targets
 #else
 		static const int DS4_CONFIGURATION_SIZE = 0x0070;
 #endif
-		static const int DS4_HID_REPORT_DESCRIPTOR_SIZE = 0x01D3;
 
 		static const int DS4_MANUFACTURER_NAME_LENGTH = 0x38;
 		static const int DS4_PRODUCT_NAME_LENGTH = 0x28;
