@@ -974,10 +974,63 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbGetStringDescriptorType(PUR
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request)
 {
-	UNREFERENCED_PARAMETER(pTransfer);
-	UNREFERENCED_PARAMETER(Request);
+	NTSTATUS     status;
+	WDFREQUEST   notifyRequest;
 	
-	return NTSTATUS();
+	// Data coming FROM us TO higher driver
+	if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN
+		&& pTransfer->PipeHandle == reinterpret_cast<USBD_PIPE_HANDLE>(0xFFFF0084))
+	{
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_USBPDO,
+			">> >> >> Incoming request, queuing...");
+
+		/* This request is sent periodically and relies on data the "feeder"
+		   has to supply, so we queue this request and return with STATUS_PENDING.
+		   The request gets completed as soon as the "feeder" sent an update. */
+		status = WdfRequestForwardToIoQueue(Request, this->PendingUsbInRequests);
+
+		return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
+	}
+
+	// Store relevant bytes of buffer in PDO context
+	RtlCopyBytes(&this->OutputReport,
+		static_cast<PUCHAR>(pTransfer->TransferBuffer) + DS4_OUTPUT_BUFFER_OFFSET,
+		DS4_OUTPUT_BUFFER_LENGTH);
+
+	// Notify user-mode process that new data is available
+	status = WdfIoQueueRetrieveNextRequest(this->PendingNotificationRequests, &notifyRequest);
+
+	if (NT_SUCCESS(status))
+	{
+		PDS4_REQUEST_NOTIFICATION notify = NULL;
+
+		status = WdfRequestRetrieveOutputBuffer(
+			notifyRequest, 
+			sizeof(DS4_REQUEST_NOTIFICATION), 
+			reinterpret_cast<PVOID*>(&notify),
+			nullptr
+		);
+
+		if (NT_SUCCESS(status))
+		{
+			// Assign values to output buffer
+			notify->Size = sizeof(DS4_REQUEST_NOTIFICATION);
+			notify->SerialNo = this->SerialNo;
+			notify->Report = this->OutputReport;
+
+			WdfRequestCompleteWithInformation(notifyRequest, status, notify->Size);
+		}
+		else
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_USBPDO,
+				"WdfRequestRetrieveOutputBuffer failed with status %!STATUS!",
+				status);
+		}
+	}
+	
+	return status;
 }
 
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
