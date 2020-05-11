@@ -597,3 +597,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PURB Urb)
 
 	return STATUS_SUCCESS;
 }
+
+void ViGEm::Bus::Targets::EmulationTargetXUSB::AbortPipe()
+{
+}

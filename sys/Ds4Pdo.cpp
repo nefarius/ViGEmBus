@@ -443,6 +443,12 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::SelectConfiguration(PURB Urb)
     return STATUS_SUCCESS;
 }
 
+void ViGEm::Bus::Targets::EmulationTargetDS4::AbortPipe()
+{
+    // Higher driver shutting down, emptying PDOs queues
+    WdfTimerStop(this->PendingUsbInRequestsTimer, TRUE);
+}
+
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
     _In_ WDFTIMER Timer
 )

@@ -36,6 +36,7 @@ namespace ViGEm::Bus::Targets
 
 		NTSTATUS SelectConfiguration(PURB Urb) override;
 
+		void AbortPipe() override;
 	private:
 		static PCWSTR _deviceDescription;
 
