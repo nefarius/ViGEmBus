@@ -31,17 +31,15 @@ namespace ViGEm::Bus::Core
 
 		virtual ~EmulationTargetPDO() = default;
 
-		virtual NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit,
+		virtual NTSTATUS PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit,
 		                               PUNICODE_STRING DeviceId,
 		                               PUNICODE_STRING DeviceDescription) = 0;
 
-		virtual NTSTATUS PrepareHardware() = 0;
+		virtual NTSTATUS PdoPrepareHardware() = 0;
 
-		virtual NTSTATUS InitContext() = 0;
-
-		virtual VOID GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) = 0;
-
-		NTSTATUS CreateDevice(_In_ WDFDEVICE Device,
+		virtual NTSTATUS PdoInitContext() = 0;
+		
+		NTSTATUS PdoCreateDevice(_In_ WDFDEVICE Device,
 		                      _In_ PWDFDEVICE_INIT DeviceInit,
 		                      _In_ PPDO_IDENTIFICATION_DESCRIPTION Description);
 
@@ -54,6 +52,8 @@ namespace ViGEm::Bus::Core
 			return (other.SerialNo == this->SerialNo);
 		}
 
+		virtual VOID UsbGetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) = 0;
+		
 		NTSTATUS UsbSelectConfiguration(PURB Urb);
 
 		void UsbAbortPipe();
@@ -75,9 +75,9 @@ namespace ViGEm::Bus::Core
 
 		static PCWSTR _deviceLocation;
 
-		static BOOLEAN USB_BUSIFFN UsbIsDeviceHighSpeed(IN PVOID BusContext);
+		static BOOLEAN USB_BUSIFFN UsbInterfaceIsDeviceHighSpeed(IN PVOID BusContext);
 
-		static NTSTATUS USB_BUSIFFN UsbQueryBusInformation(
+		static NTSTATUS USB_BUSIFFN UsbInterfaceQueryBusInformation(
 			IN PVOID BusContext,
 			IN ULONG Level,
 			IN OUT PVOID BusInformationBuffer,
@@ -85,11 +85,11 @@ namespace ViGEm::Bus::Core
 			OUT PULONG BusInformationActualLength
 		);
 
-		static NTSTATUS USB_BUSIFFN UsbSubmitIsoOutUrb(IN PVOID BusContext, IN PURB Urb);
+		static NTSTATUS USB_BUSIFFN UsbInterfaceSubmitIsoOutUrb(IN PVOID BusContext, IN PURB Urb);
 
-		static NTSTATUS USB_BUSIFFN UsbQueryBusTime(IN PVOID BusContext, IN OUT PULONG CurrentUsbFrame);
+		static NTSTATUS USB_BUSIFFN UsbInterfaceQueryBusTime(IN PVOID BusContext, IN OUT PULONG CurrentUsbFrame);
 
-		static VOID USB_BUSIFFN UsbGetUSBDIVersion(
+		static VOID USB_BUSIFFN UsbInterfaceGetUSBDIVersion(
 			IN PVOID BusContext,
 			IN OUT PUSBD_VERSION_INFORMATION VersionInformation,
 			IN OUT PULONG HcdCapabilities

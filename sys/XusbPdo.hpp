@@ -31,17 +31,17 @@ namespace ViGEm::Bus::Targets
 		EmulationTargetXUSB();
 		~EmulationTargetXUSB() = default;
 
-		NTSTATUS PrepareDevice(PWDFDEVICE_INIT DeviceInit,
+		NTSTATUS PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit,
 		                       PUNICODE_STRING DeviceId,
 		                       PUNICODE_STRING DeviceDescription) override;
 
-		NTSTATUS PrepareHardware() override;
+		NTSTATUS PdoPrepareHardware() override;
 
-		NTSTATUS InitContext() override;
+		NTSTATUS PdoInitContext() override;
 
 		VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) override;
 
-		VOID GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) override;
+		VOID UsbGetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor) override;
 
 		NTSTATUS SelectConfiguration(PURB Urb) override;
 

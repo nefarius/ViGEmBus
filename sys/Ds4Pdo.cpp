@@ -15,7 +15,7 @@ ViGEm::Bus::Targets::EmulationTargetDS4::EmulationTargetDS4() : EmulationTargetP
 	UsbConfigurationDescriptionSize = DS4_DESCRIPTOR_SIZE;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT DeviceInit,
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit,
 	PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription)
 {
 	NTSTATUS status;
@@ -99,7 +99,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PrepareDevice(PWDFDEVICE_INIT 
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PrepareHardware()
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareHardware()
 {
 	WDF_QUERY_INTERFACE_CONFIG ifaceCfg;
 	INTERFACE devinterfaceHid;
@@ -152,7 +152,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PrepareHardware()
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::InitContext()
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 {
 	NTSTATUS            status;
 
@@ -380,7 +380,7 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::GetConfigurationDescriptorType(PUC
 	RtlCopyBytes(Buffer, Ds4DescriptorData, Length);
 }
 
-VOID ViGEm::Bus::Targets::EmulationTargetDS4::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
+VOID ViGEm::Bus::Targets::EmulationTargetDS4::UsbGetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
 {
 	pDescriptor->bLength = 0x12;
 	pDescriptor->bDescriptorType = USB_DEVICE_DESCRIPTOR_TYPE;

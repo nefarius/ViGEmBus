@@ -7,7 +7,6 @@
 
 
 #include "busenum.h"
-#include "ViGEmBusDriver.h"
 
 
 PCWSTR ViGEm::Bus::Targets::EmulationTargetXUSB::_deviceDescription = L"Virtual Xbox 360 Controller";
@@ -18,7 +17,7 @@ ViGEm::Bus::Targets::EmulationTargetXUSB::EmulationTargetXUSB() : EmulationTarge
 	UsbConfigurationDescriptionSize = XUSB_DESCRIPTOR_SIZE;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId,
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId,
 	PUNICODE_STRING DeviceDescription)
 {
 	NTSTATUS status;
@@ -103,7 +102,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareDevice(PWDFDEVICE_INIT
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware()
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareHardware()
 {
 	WDF_QUERY_INTERFACE_CONFIG ifaceCfg;
 
@@ -195,11 +194,11 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware()
 	xusbInterface.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
 	xusbInterface.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
 
-	xusbInterface.SubmitIsoOutUrb = UsbSubmitIsoOutUrb;
-	xusbInterface.GetUSBDIVersion = UsbGetUSBDIVersion;
-	xusbInterface.QueryBusTime = UsbQueryBusTime;
-	xusbInterface.QueryBusInformation = UsbQueryBusInformation;
-	xusbInterface.IsDeviceHighSpeed = UsbIsDeviceHighSpeed;
+	xusbInterface.SubmitIsoOutUrb = UsbInterfaceSubmitIsoOutUrb;
+	xusbInterface.GetUSBDIVersion = UsbInterfaceGetUSBDIVersion;
+	xusbInterface.QueryBusTime = UsbInterfaceQueryBusTime;
+	xusbInterface.QueryBusInformation = UsbInterfaceQueryBusInformation;
+	xusbInterface.IsDeviceHighSpeed = UsbInterfaceIsDeviceHighSpeed;
 
 	WDF_QUERY_INTERFACE_CONFIG_INIT(
 		&ifaceCfg,
@@ -221,7 +220,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PrepareHardware()
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::InitContext()
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoInitContext()
 {
 	WDF_OBJECT_ATTRIBUTES attributes;
 	PUCHAR blobBuffer;
@@ -450,7 +449,7 @@ VOID ViGEm::Bus::Targets::EmulationTargetXUSB::GetConfigurationDescriptorType(PU
 	RtlCopyBytes(Buffer, XusbDescriptorData, Length);
 }
 
-VOID ViGEm::Bus::Targets::EmulationTargetXUSB::GetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
+VOID ViGEm::Bus::Targets::EmulationTargetXUSB::UsbGetDeviceDescriptorType(PUSB_DEVICE_DESCRIPTOR pDescriptor)
 {
 	pDescriptor->bLength = 0x12;
 	pDescriptor->bDescriptorType = USB_DEVICE_DESCRIPTOR_TYPE;

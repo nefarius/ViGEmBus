@@ -10,7 +10,7 @@
 
 PCWSTR ViGEm::Bus::Core::EmulationTargetPDO::_deviceLocation = L"Virtual Gamepad Emulation Bus";
 
-NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::CreateDevice(WDFDEVICE Device, PWDFDEVICE_INIT DeviceInit, PPDO_IDENTIFICATION_DESCRIPTION Description)
+NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE Device, PWDFDEVICE_INIT DeviceInit, PPDO_IDENTIFICATION_DESCRIPTION Description)
 {
 	NTSTATUS                        status = STATUS_UNSUCCESSFUL;
 	WDF_DEVICE_PNP_CAPABILITIES     pnpCaps;
@@ -69,7 +69,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::CreateDevice(WDFDEVICE Device, PW
 
 #pragma region Prepare PDO
 
-		status = this->PrepareDevice(DeviceInit, &deviceId, &deviceDescription);
+		status = this->PdoPrepareDevice(DeviceInit, &deviceId, &deviceDescription);
 
 		if (!NT_SUCCESS(status))
 			break;
@@ -179,7 +179,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::CreateDevice(WDFDEVICE Device, PW
 
 #pragma region Set PDO contexts
 
-		status = this->InitContext();
+		status = this->PdoInitContext();
 
 		if (!NT_SUCCESS(status))
 		{
@@ -311,14 +311,14 @@ ULONG ViGEm::Bus::Core::EmulationTargetPDO::GetSerial() const
 
 #pragma region USB Interface Functions
 
-BOOLEAN USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbIsDeviceHighSpeed(IN PVOID BusContext)
+BOOLEAN USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbInterfaceIsDeviceHighSpeed(IN PVOID BusContext)
 {
 	UNREFERENCED_PARAMETER(BusContext);
 
 	return TRUE;
 }
 
-NTSTATUS USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbQueryBusInformation(IN PVOID BusContext, IN ULONG Level,
+NTSTATUS USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbInterfaceQueryBusInformation(IN PVOID BusContext, IN ULONG Level,
 	IN OUT PVOID BusInformationBuffer,
 	IN OUT PULONG BusInformationBufferLength,
 	OUT PULONG BusInformationActualLength)
@@ -332,7 +332,7 @@ NTSTATUS USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbQueryBusInformatio
 	return STATUS_UNSUCCESSFUL;
 }
 
-NTSTATUS USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbSubmitIsoOutUrb(IN PVOID BusContext, IN PURB Urb)
+NTSTATUS USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbInterfaceSubmitIsoOutUrb(IN PVOID BusContext, IN PURB Urb)
 {
 	UNREFERENCED_PARAMETER(BusContext);
 	UNREFERENCED_PARAMETER(Urb);
@@ -340,7 +340,7 @@ NTSTATUS USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbSubmitIsoOutUrb(IN
 	return STATUS_UNSUCCESSFUL;
 }
 
-NTSTATUS USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbQueryBusTime(IN PVOID BusContext, IN OUT PULONG CurrentUsbFrame)
+NTSTATUS USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbInterfaceQueryBusTime(IN PVOID BusContext, IN OUT PULONG CurrentUsbFrame)
 {
 	UNREFERENCED_PARAMETER(BusContext);
 	UNREFERENCED_PARAMETER(CurrentUsbFrame);
@@ -348,7 +348,7 @@ NTSTATUS USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbQueryBusTime(IN PV
 	return STATUS_UNSUCCESSFUL;
 }
 
-VOID USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbGetUSBDIVersion(IN PVOID BusContext,
+VOID USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbInterfaceGetUSBDIVersion(IN PVOID BusContext,
 	IN OUT PUSBD_VERSION_INFORMATION VersionInformation,
 	IN OUT PULONG HcdCapabilities)
 {
@@ -436,7 +436,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EvtDevicePrepareHardware(
 
 	const auto ctx = EmulationTargetPdoGetContext(Device);
 
-	return ctx->Target->PrepareHardware();
+	return ctx->Target->PdoPrepareHardware();
 }
 
 VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
@@ -576,7 +576,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 					TRACE_BUSPDO,
 					">> >> >> USB_DEVICE_DESCRIPTOR_TYPE");
 
-				ctx->Target->GetDeviceDescriptorType(static_cast<PUSB_DEVICE_DESCRIPTOR>(urb->UrbControlDescriptorRequest.TransferBuffer));
+				ctx->Target->UsbGetDeviceDescriptorType(static_cast<PUSB_DEVICE_DESCRIPTOR>(urb->UrbControlDescriptorRequest.TransferBuffer));
 
 				break;
 
@@ -679,7 +679,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 			">> IOCTL_INTERNAL_USB_GET_PORT_STATUS");
 
 		// We report the (virtual) port as always active
-		*(unsigned long*)irpStack->Parameters.Others.Argument1 = USBD_PORT_ENABLED | USBD_PORT_CONNECTED;
+		*static_cast<unsigned long*>(irpStack->Parameters.Others.Argument1) = USBD_PORT_ENABLED | USBD_PORT_CONNECTED;
 
 		status = STATUS_SUCCESS;
 
@@ -702,7 +702,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 			TRACE_BUSPDO,
 			">> IOCTL_INTERNAL_USB_SUBMIT_IDLE_NOTIFICATION");
 
-		// TODO: implement
+		// TODO: implement?
 		// This happens if the I/O latency is too high so HIDUSB aborts communication.
 		status = STATUS_SUCCESS;
 
