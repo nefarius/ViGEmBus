@@ -19,7 +19,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareDevice(PWDFDEVICE_IN
 	PUNICODE_STRING DeviceId, PUNICODE_STRING DeviceDescription)
 {
 	NTSTATUS status;
-	UNICODE_STRING buffer;
+	DECLARE_UNICODE_STRING_SIZE(buffer, _maxHardwareIdLength);
 
 	// prepare device description
 	status = RtlUnicodeStringInit(DeviceDescription, _deviceDescription);
@@ -33,7 +33,8 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareDevice(PWDFDEVICE_IN
 	}
 
 	// Set hardware IDs
-	RtlUnicodeStringInit(&buffer, L"USB\\VID_054C&PID_05C4&REV_0100");
+	RtlUnicodeStringPrintf(&buffer, L"USB\\VID_%04X&PID_%04X&REV_0100",
+		this->VendorId, this->ProductId);
 
 	status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
 	if (!NT_SUCCESS(status))
@@ -47,7 +48,8 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareDevice(PWDFDEVICE_IN
 
 	RtlUnicodeStringCopy(DeviceId, &buffer);
 
-	RtlUnicodeStringInit(&buffer, L"USB\\VID_054C&PID_05C4");
+	RtlUnicodeStringPrintf(&buffer, L"USB\\VID_%04X&PID_%04X",
+		this->VendorId, this->ProductId);
 
 	status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
 	if (!NT_SUCCESS(status))
