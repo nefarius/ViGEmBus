@@ -701,3 +701,10 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbSelectInterface(PURB Urb)
 
 	return STATUS_INVALID_PARAMETER;
 }
+
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbGetStringDescriptorType(PURB Urb)
+{
+	UNREFERENCED_PARAMETER(Urb);
+
+	return STATUS_NOT_IMPLEMENTED;
+}

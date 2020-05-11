@@ -457,7 +457,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 	PIRP                    irp;
 	PURB                    urb;
 	PIO_STACK_LOCATION      irpStack;
-	PUCHAR                  blobBuffer;
+	//PUCHAR                  blobBuffer;
 
 	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Entry");
 
@@ -465,7 +465,263 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 	irp = WdfRequestWdmGetIrp(Request);
 	irpStack = IoGetCurrentIrpStackLocation(irp);
 
-	
-	
-	WdfRequestComplete(Request, STATUS_UNSUCCESSFUL);
+	switch (IoControlCode)
+	{
+	case IOCTL_INTERNAL_USB_SUBMIT_URB:
+
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_BUSPDO,
+			">> IOCTL_INTERNAL_USB_SUBMIT_URB");
+
+		urb = static_cast<PURB>(URB_FROM_IRP(irp));
+
+		switch (urb->UrbHeader.Function)
+		{
+		case URB_FUNCTION_CONTROL_TRANSFER:
+
+			TraceEvents(TRACE_LEVEL_VERBOSE,
+				TRACE_BUSPDO,
+				">> >> URB_FUNCTION_CONTROL_TRANSFER");
+
+			//switch (urb->UrbControlTransfer.SetupPacket[6])
+			//{
+			//case 0x04:
+			//	if (pdoData->TargetType == Xbox360Wired)
+			//	{
+			//		pXusbData = XusbGetData(hDevice);
+			//		blobBuffer = WdfMemoryGetBuffer(pXusbData->InterruptBlobStorage, NULL);
+			//		//
+			//		// Xenon magic
+			//		// 
+			//		RtlCopyMemory(
+			//			urb->UrbControlTransfer.TransferBuffer,
+			//			&blobBuffer[XUSB_BLOB_07_OFFSET],
+			//			0x04
+			//		);
+			//		status = STATUS_SUCCESS;
+			//	}
+			//	break;
+			//case 0x14:
+			//	//
+			//	// This is some weird USB 1.0 condition and _must fail_
+			//	// 
+			//	urb->UrbControlTransfer.Hdr.Status = USBD_STATUS_STALL_PID;
+			//	status = STATUS_UNSUCCESSFUL;
+			//	break;
+			//case 0x08:
+			//	//
+			//	// This is some weird USB 1.0 condition and _must fail_
+			//	// 
+			//	urb->UrbControlTransfer.Hdr.Status = USBD_STATUS_STALL_PID;
+			//	status = STATUS_UNSUCCESSFUL;
+			//	break;
+			//default:
+			//	status = STATUS_SUCCESS;
+			//	break;
+			//}
+
+			break;
+
+		case URB_FUNCTION_CONTROL_TRANSFER_EX:
+
+			TraceEvents(TRACE_LEVEL_VERBOSE,
+				TRACE_BUSPDO,
+				">> >> URB_FUNCTION_CONTROL_TRANSFER_EX");
+
+			status = STATUS_UNSUCCESSFUL;
+
+			break;
+
+		case URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER:
+
+			TraceEvents(TRACE_LEVEL_VERBOSE,
+				TRACE_BUSPDO,
+				">> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER");
+
+			//status = UsbPdo_BulkOrInterruptTransfer(urb, hDevice, Request);
+
+			break;
+
+		case URB_FUNCTION_SELECT_CONFIGURATION:
+
+			TraceEvents(TRACE_LEVEL_VERBOSE,
+				TRACE_BUSPDO,
+				">> >> URB_FUNCTION_SELECT_CONFIGURATION");
+
+			status = ctx->Target->UsbSelectConfiguration(urb);
+
+			break;
+
+		case URB_FUNCTION_SELECT_INTERFACE:
+
+			TraceEvents(TRACE_LEVEL_VERBOSE,
+				TRACE_BUSPDO,
+				">> >> URB_FUNCTION_SELECT_INTERFACE");
+
+			status = ctx->Target->UsbSelectInterface(urb);
+
+			break;
+
+		case URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE:
+
+			TraceEvents(TRACE_LEVEL_VERBOSE,
+				TRACE_BUSPDO,
+				">> >> URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE");
+
+			switch (urb->UrbControlDescriptorRequest.DescriptorType)
+			{
+			case USB_DEVICE_DESCRIPTOR_TYPE:
+
+				TraceEvents(TRACE_LEVEL_VERBOSE,
+					TRACE_BUSPDO,
+					">> >> >> USB_DEVICE_DESCRIPTOR_TYPE");
+
+				ctx->Target->GetDeviceDescriptorType(static_cast<PUSB_DEVICE_DESCRIPTOR>(urb->UrbControlDescriptorRequest.TransferBuffer));
+
+				break;
+
+			case USB_CONFIGURATION_DESCRIPTOR_TYPE:
+
+				TraceEvents(TRACE_LEVEL_VERBOSE,
+					TRACE_BUSPDO,
+					">> >> >> USB_CONFIGURATION_DESCRIPTOR_TYPE");
+
+				status = ctx->Target->UsbGetConfigurationDescriptorType(urb);
+
+				break;
+
+			case USB_STRING_DESCRIPTOR_TYPE:
+
+				TraceEvents(TRACE_LEVEL_VERBOSE,
+					TRACE_BUSPDO,
+					">> >> >> USB_STRING_DESCRIPTOR_TYPE");
+
+				status = ctx->Target->UsbGetStringDescriptorType(urb);
+
+				break;
+
+			default:
+
+				TraceEvents(TRACE_LEVEL_VERBOSE,
+					TRACE_BUSPDO,
+					">> >> >> Unknown descriptor type");
+
+				break;
+			}
+
+			TraceEvents(TRACE_LEVEL_VERBOSE,
+				TRACE_BUSPDO,
+				"<< <<");
+
+			break;
+
+		case URB_FUNCTION_GET_STATUS_FROM_DEVICE:
+
+			TraceEvents(TRACE_LEVEL_VERBOSE,
+				TRACE_BUSPDO,
+				">> >> URB_FUNCTION_GET_STATUS_FROM_DEVICE");
+
+			// Defaults always succeed
+			status = STATUS_SUCCESS;
+
+			break;
+
+		case URB_FUNCTION_ABORT_PIPE:
+
+			TraceEvents(TRACE_LEVEL_VERBOSE,
+				TRACE_BUSPDO,
+				">> >> URB_FUNCTION_ABORT_PIPE");
+
+			ctx->Target->UsbAbortPipe();
+
+			break;
+
+		case URB_FUNCTION_CLASS_INTERFACE:
+
+			TraceEvents(TRACE_LEVEL_VERBOSE,
+				TRACE_BUSPDO,
+				">> >> URB_FUNCTION_CLASS_INTERFACE");
+
+			status = ctx->Target->UsbClassInterface(urb);
+
+			break;
+
+		case URB_FUNCTION_GET_DESCRIPTOR_FROM_INTERFACE:
+
+			TraceEvents(TRACE_LEVEL_VERBOSE,
+				TRACE_BUSPDO,
+				">> >> URB_FUNCTION_GET_DESCRIPTOR_FROM_INTERFACE");
+
+			status = ctx->Target->UsbGetDescriptorFromInterface(urb);
+
+			break;
+
+		default:
+
+			TraceEvents(TRACE_LEVEL_VERBOSE,
+				TRACE_BUSPDO,
+				">> >>  Unknown function: 0x%X",
+				urb->UrbHeader.Function);
+
+			break;
+		}
+
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_BUSPDO,
+			"<<");
+
+		break;
+
+	case IOCTL_INTERNAL_USB_GET_PORT_STATUS:
+
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_BUSPDO,
+			">> IOCTL_INTERNAL_USB_GET_PORT_STATUS");
+
+		// We report the (virtual) port as always active
+		*(unsigned long*)irpStack->Parameters.Others.Argument1 = USBD_PORT_ENABLED | USBD_PORT_CONNECTED;
+
+		status = STATUS_SUCCESS;
+
+		break;
+
+	case IOCTL_INTERNAL_USB_RESET_PORT:
+
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_BUSPDO,
+			">> IOCTL_INTERNAL_USB_RESET_PORT");
+
+		// Sure, why not ;)
+		status = STATUS_SUCCESS;
+
+		break;
+
+	case IOCTL_INTERNAL_USB_SUBMIT_IDLE_NOTIFICATION:
+
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_BUSPDO,
+			">> IOCTL_INTERNAL_USB_SUBMIT_IDLE_NOTIFICATION");
+
+		// TODO: implement
+		// This happens if the I/O latency is too high so HIDUSB aborts communication.
+		status = STATUS_SUCCESS;
+
+		break;
+
+	default:
+
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_BUSPDO,
+			">> Unknown I/O control code 0x%X",
+			IoControlCode);
+
+		break;
+	}
+
+	if (status != STATUS_PENDING)
+	{
+		WdfRequestComplete(Request, status);
+	}
+
+	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
 }
