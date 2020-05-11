@@ -486,7 +486,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbClassInterface(PURB Urb)
 	        case HID_REPORT_ID_0:
 	        {
 	            // Source: http://eleccelerator.com/wiki/index.php?title=DualShock_4#Class_Requests
-	            UCHAR Response[HID_GET_FEATURE_REPORT_SIZE_0] =
+	            UCHAR Response[] =
 	            {
 	                0xA3, 0x41, 0x75, 0x67, 0x20, 0x20, 0x33, 0x20,
 	                0x32, 0x30, 0x31, 0x33, 0x00, 0x00, 0x00, 0x00,
@@ -497,15 +497,15 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbClassInterface(PURB Urb)
 	                0x00
 	            };
 
-	            pRequest->TransferBufferLength = HID_GET_FEATURE_REPORT_SIZE_0;
-	            RtlCopyBytes(pRequest->TransferBuffer, Response, HID_GET_FEATURE_REPORT_SIZE_0);
+	            pRequest->TransferBufferLength = ARRAYSIZE(Response);
+	            RtlCopyBytes(pRequest->TransferBuffer, Response, ARRAYSIZE(Response));
 
 	            break;
 	        }
 	        case HID_REPORT_ID_1:
 	        {
 	            // Source: http://eleccelerator.com/wiki/index.php?title=DualShock_4#Class_Requests
-	            UCHAR Response[HID_GET_FEATURE_REPORT_SIZE_1] =
+	            UCHAR Response[] =
 	            {
 	                0x02, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x87,
 	                0x22, 0x7B, 0xDD, 0xB2, 0x22, 0x47, 0xDD, 0xBD,
@@ -514,15 +514,15 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbClassInterface(PURB Urb)
 	                0x1D, 0xC6, 0xDE, 0x08, 0x00
 	            };
 
-	            pRequest->TransferBufferLength = HID_GET_FEATURE_REPORT_SIZE_1;
-	            RtlCopyBytes(pRequest->TransferBuffer, Response, HID_GET_FEATURE_REPORT_SIZE_1);
+	            pRequest->TransferBufferLength = ARRAYSIZE(Response);
+	            RtlCopyBytes(pRequest->TransferBuffer, Response, ARRAYSIZE(Response));
 
 	            break;
 	        }
 	        case HID_REPORT_MAC_ADDRESSES_ID:
 	        {
 	            // Source: http://eleccelerator.com/wiki/index.php?title=DualShock_4#Class_Requests
-	            UCHAR Response[HID_GET_FEATURE_REPORT_MAC_ADDRESSES_SIZE] =
+	            UCHAR Response[] =
 	            {
 	                0x12, 0x8B, 0x09, 0x07, 0x6D, 0x66, 0x1C, 0x08,
 	                0x25, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
@@ -538,8 +538,8 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbClassInterface(PURB Urb)
 	            // Adjust byte order
 	            ReverseByteArray(Response + 10, sizeof(MAC_ADDRESS));
 
-	            pRequest->TransferBufferLength = HID_GET_FEATURE_REPORT_MAC_ADDRESSES_SIZE;
-	            RtlCopyBytes(pRequest->TransferBuffer, Response, HID_GET_FEATURE_REPORT_MAC_ADDRESSES_SIZE);
+	            pRequest->TransferBufferLength = ARRAYSIZE(Response);
+	            RtlCopyBytes(pRequest->TransferBuffer, Response, ARRAYSIZE(Response));
 
 	            break;
 	        }
@@ -573,30 +573,30 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbClassInterface(PURB Urb)
 	        case HID_REPORT_ID_3:
 	        {
 	            // Source: http://eleccelerator.com/wiki/index.php?title=DualShock_4#Class_Requests
-	            UCHAR Response[HID_SET_FEATURE_REPORT_SIZE_0] =
+	            UCHAR Response[] =
 	            {
 	                0x13, 0xAC, 0x9E, 0x17, 0x94, 0x05, 0xB0, 0x56,
 	                0xE8, 0x81, 0x38, 0x08, 0x06, 0x51, 0x41, 0xC0,
 	                0x7F, 0x12, 0xAA, 0xD9, 0x66, 0x3C, 0xCE
 	            };
 
-	            pRequest->TransferBufferLength = HID_SET_FEATURE_REPORT_SIZE_0;
-	            RtlCopyBytes(pRequest->TransferBuffer, Response, HID_SET_FEATURE_REPORT_SIZE_0);
+	            pRequest->TransferBufferLength = ARRAYSIZE(Response);
+	            RtlCopyBytes(pRequest->TransferBuffer, Response, ARRAYSIZE(Response));
 
 	            break;
 	        }
 	        case HID_REPORT_ID_4:
 	        {
 	            // Source: http://eleccelerator.com/wiki/index.php?title=DualShock_4#Class_Requests
-	            UCHAR Response[HID_SET_FEATURE_REPORT_SIZE_1] =
+	            UCHAR Response[] =
 	            {
 	                0x14, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	                0x00
 	            };
 
-	            pRequest->TransferBufferLength = HID_SET_FEATURE_REPORT_SIZE_1;
-	            RtlCopyBytes(pRequest->TransferBuffer, Response, HID_SET_FEATURE_REPORT_SIZE_1);
+	            pRequest->TransferBufferLength = ARRAYSIZE(Response);
+	            RtlCopyBytes(pRequest->TransferBuffer, Response, ARRAYSIZE(Response));
 
 	            break;
 	        }

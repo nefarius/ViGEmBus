@@ -47,13 +47,6 @@ namespace ViGEm::Bus::Targets
 		static const int HID_REQUEST_SET_REPORT = 0x09;
 		static const int HID_REPORT_TYPE_FEATURE = 0x03;
 
-		static const int HID_GET_FEATURE_REPORT_SIZE_0 = 0x31;
-		static const int HID_GET_FEATURE_REPORT_SIZE_1 = 0x25;
-		static const int HID_GET_FEATURE_REPORT_MAC_ADDRESSES_SIZE = 0x10;
-
-		static const int HID_SET_FEATURE_REPORT_SIZE_0 = 0x17;
-		static const int HID_SET_FEATURE_REPORT_SIZE_1 = 0x11;
-
 		static const int HID_REPORT_ID_0 = 0xA3;
 		static const int HID_REPORT_ID_1 = 0x02;
 		static const int HID_REPORT_MAC_ADDRESSES_ID = 0x12;
