@@ -29,6 +29,8 @@
 
 #include <ntifs.h>
 
+EXTERN_C_START
+
 #define INITIAL_ARRAY_CAPACITY PAGE_SIZE
 #define ARRAY_POOL_TAG    'arrA'
 
@@ -54,3 +56,5 @@ NTSTATUS SetElementByteArray(IN PBYTE_ARRAY Array, IN ULONG Index, IN PVOID Elem
 NTSTATUS SetElementsByteArray(IN PBYTE_ARRAY Array, IN ULONG Index, IN PVOID Elements, IN ULONG NumElements);
 
 NTSTATUS FreeByteArray(IN PBYTE_ARRAY Array);
+
+EXTERN_C_END
