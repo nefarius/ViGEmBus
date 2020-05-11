@@ -719,7 +719,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 	// Data coming FROM us TO higher driver
 	if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN)
 	{
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceDbg(
 			TRACE_USBPDO,
 			">> >> >> Incoming request, queuing...");
 
@@ -818,7 +818,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 	}
 
 	// Data coming FROM the higher driver TO us
-	TraceEvents(TRACE_LEVEL_VERBOSE,
+	TraceDbg(
 		TRACE_USBPDO,
 		">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d",
 		pTransfer->PipeHandle,
@@ -829,7 +829,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 	{
 		auto Buffer = static_cast<PUCHAR>(pTransfer->TransferBuffer);
 
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceDbg(
 			TRACE_USBPDO,
 			"-- LED Buffer: %02X %02X %02X",
 			Buffer[0], Buffer[1], Buffer[2]);
@@ -842,7 +842,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 			if (Buffer[2] == 0x04)this->LedNumber = 2;
 			if (Buffer[2] == 0x05)this->LedNumber = 3;
 
-			TraceEvents(TRACE_LEVEL_INFORMATION,
+			TraceDbg(
 				TRACE_USBPDO,
 				"-- LED Number: %d",
 				this->LedNumber);
@@ -859,7 +859,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 	{
 		auto Buffer = static_cast<PUCHAR>(pTransfer->TransferBuffer);
 
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceDbg(
 			TRACE_USBPDO,
 			"-- Rumble Buffer: %02X %02X %02X %02X %02X %02X %02X %02X",
 			Buffer[0],
@@ -911,7 +911,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 	{
 		TraceEvents(TRACE_LEVEL_WARNING,
 			TRACE_USBPDO,
-			"!! [XUSB] WdfIoQueueRetrieveNextRequest failed with status %!STATUS!",
+			"!! WdfIoQueueRetrieveNextRequest failed with status %!STATUS!",
 			status);
 	}
 

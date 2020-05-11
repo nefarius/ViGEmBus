@@ -981,7 +981,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 	if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN
 		&& pTransfer->PipeHandle == reinterpret_cast<USBD_PIPE_HANDLE>(0xFFFF0084))
 	{
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceDbg(
 			TRACE_USBPDO,
 			">> >> >> Incoming request, queuing...");
 

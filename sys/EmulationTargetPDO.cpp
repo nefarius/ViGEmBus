@@ -459,7 +459,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 	PIO_STACK_LOCATION      irpStack;
 	//PUCHAR                  blobBuffer;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Entry");
+	TraceDbg(TRACE_BUSPDO, "%!FUNC! Entry");
 
 	// No help from the framework available from here on
 	irp = WdfRequestWdmGetIrp(Request);
@@ -534,7 +534,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 		case URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER:
 
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceDbg(
 				TRACE_BUSPDO,
 				">> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER");
 
@@ -723,5 +723,5 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 		WdfRequestComplete(Request, status);
 	}
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
+	TraceDbg(TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
 }
