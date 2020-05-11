@@ -80,6 +80,8 @@ namespace ViGEm::Bus::Core
 	private:
 		static unsigned long current_process_id();
 
+		static EVT_WDF_DEVICE_CONTEXT_CLEANUP EvtDeviceContextCleanup;
+
 	protected:
 		static const ULONG _maxHardwareIdLength = 0xFF;
 

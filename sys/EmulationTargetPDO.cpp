@@ -145,6 +145,8 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		// Add common device data context
 		WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&pdoAttributes, EMULATION_TARGET_PDO_CONTEXT);
 
+		pdoAttributes.EvtCleanupCallback = EvtDeviceContextCleanup;
+		
 		status = WdfDeviceCreate(&DeviceInit, &pdoAttributes, &this->_PdoDevice);
 		if (!NT_SUCCESS(status))
 		{
@@ -306,6 +308,22 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
 
 	return status;
+}
+
+VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtDeviceContextCleanup(
+	IN WDFOBJECT Device
+)
+{
+	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Entry");
+	
+	const auto ctx = EmulationTargetPdoGetContext(Device);
+
+	//
+	// PDO device object getting disposed, free context object 
+	// 
+	delete ctx->Target;
+	
+	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Exit");
 }
 
 VOID ViGEm::Bus::Core::EmulationTargetPDO::SetSerial(ULONG Serial)
