@@ -447,10 +447,25 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 	_In_ ULONG IoControlCode
 )
 {
-	UNREFERENCED_PARAMETER(Queue);
+	const auto ctx = EmulationTargetPdoGetContext(WdfIoQueueGetDevice(Queue));
+		
 	UNREFERENCED_PARAMETER(OutputBufferLength);
 	UNREFERENCED_PARAMETER(InputBufferLength);
 	UNREFERENCED_PARAMETER(IoControlCode);
 
+	NTSTATUS                status = STATUS_INVALID_PARAMETER;
+	PIRP                    irp;
+	PURB                    urb;
+	PIO_STACK_LOCATION      irpStack;
+	PUCHAR                  blobBuffer;
+
+	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Entry");
+
+	// No help from the framework available from here on
+	irp = WdfRequestWdmGetIrp(Request);
+	irpStack = IoGetCurrentIrpStackLocation(irp);
+
+	
+	
 	WdfRequestComplete(Request, STATUS_UNSUCCESSFUL);
 }
