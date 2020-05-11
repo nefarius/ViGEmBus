@@ -232,18 +232,18 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoInitContext()
 
 	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XUSB, "Initializing XUSB context...");
 
-	RtlZeroMemory(this->Rumble, ARRAYSIZE(this->Rumble));
+	RtlZeroMemory(this->_Rumble, ARRAYSIZE(this->_Rumble));
 
 	// Is later overwritten by actual XInput slot
-	this->LedNumber = -1;
+	this->_LedNumber = -1;
 
-	RtlZeroMemory(&this->Packet, sizeof(XUSB_INTERRUPT_IN_PACKET));
+	RtlZeroMemory(&this->_Packet, sizeof(XUSB_INTERRUPT_IN_PACKET));
 	// Packet size (20 bytes = 0x14)
-	this->Packet.Size = 0x14;
+	this->_Packet.Size = 0x14;
 
-	this->ReportedCapabilities = FALSE;
+	this->_ReportedCapabilities = FALSE;
 
-	this->InterruptInitStage = 0;
+	this->_InterruptInitStage = 0;
 
 	// Allocate blob storage
 	NTSTATUS status = WdfMemoryCreate(
@@ -251,7 +251,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoInitContext()
 		NonPagedPoolNx,
 		XUSB_POOL_TAG,
 		XUSB_BLOB_STORAGE_SIZE,
-		&this->InterruptBlobStorage,
+		&this->_InterruptBlobStorage,
 		reinterpret_cast<PVOID*>(&blobBuffer)
 	);
 	if (!NT_SUCCESS(status))
@@ -295,7 +295,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoInitContext()
 		this->_PdoDevice,
 		&holdingInQueueConfig,
 		WDF_NO_OBJECT_ATTRIBUTES,
-		&this->HoldingUsbInRequests
+		&this->_HoldingUsbInRequests
 	);
 	if (!NT_SUCCESS(status))
 	{
@@ -725,18 +725,18 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 			TRACE_USBPDO,
 			">> >> >> Incoming request, queuing...");
 
-		auto blobBuffer = static_cast<PUCHAR>(WdfMemoryGetBuffer(this->InterruptBlobStorage, nullptr));
+		auto blobBuffer = static_cast<PUCHAR>(WdfMemoryGetBuffer(this->_InterruptBlobStorage, nullptr));
 
 		if (xusb_is_data_pipe(pTransfer))
 		{
 			//
 			// Send "boot sequence" first, then the actual inputs
 			// 
-			switch (this->InterruptInitStage)
+			switch (this->_InterruptInitStage)
 			{
 			case 0:
 				pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
-				this->InterruptInitStage++;
+				this->_InterruptInitStage++;
 				RtlCopyMemory(
 					pTransfer->TransferBuffer,
 					&blobBuffer[XUSB_BLOB_00_OFFSET],
@@ -745,7 +745,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 				return STATUS_SUCCESS;
 			case 1:
 				pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
-				this->InterruptInitStage++;
+				this->_InterruptInitStage++;
 				RtlCopyMemory(
 					pTransfer->TransferBuffer,
 					&blobBuffer[XUSB_BLOB_01_OFFSET],
@@ -754,7 +754,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 				return STATUS_SUCCESS;
 			case 2:
 				pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
-				this->InterruptInitStage++;
+				this->_InterruptInitStage++;
 				RtlCopyMemory(
 					pTransfer->TransferBuffer,
 					&blobBuffer[XUSB_BLOB_02_OFFSET],
@@ -763,7 +763,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 				return STATUS_SUCCESS;
 			case 3:
 				pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
-				this->InterruptInitStage++;
+				this->_InterruptInitStage++;
 				RtlCopyMemory(
 					pTransfer->TransferBuffer,
 					&blobBuffer[XUSB_BLOB_03_OFFSET],
@@ -772,7 +772,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 				return STATUS_SUCCESS;
 			case 4:
 				pTransfer->TransferBufferLength = sizeof(XUSB_INTERRUPT_IN_PACKET);
-				this->InterruptInitStage++;
+				this->_InterruptInitStage++;
 				RtlCopyMemory(
 					pTransfer->TransferBuffer,
 					&blobBuffer[XUSB_BLOB_04_OFFSET],
@@ -781,7 +781,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 				return STATUS_SUCCESS;
 			case 5:
 				pTransfer->TransferBufferLength = XUSB_INIT_STAGE_SIZE;
-				this->InterruptInitStage++;
+				this->_InterruptInitStage++;
 				RtlCopyMemory(
 					pTransfer->TransferBuffer,
 					&blobBuffer[XUSB_BLOB_05_OFFSET],
@@ -800,7 +800,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 
 		if (xusb_is_control_pipe(pTransfer))
 		{
-			if (!this->ReportedCapabilities && pTransfer->TransferBufferLength >= XUSB_INIT_STAGE_SIZE)
+			if (!this->_ReportedCapabilities && pTransfer->TransferBufferLength >= XUSB_INIT_STAGE_SIZE)
 			{
 				RtlCopyMemory(
 					pTransfer->TransferBuffer,
@@ -808,12 +808,12 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 					XUSB_INIT_STAGE_SIZE
 				);
 
-				this->ReportedCapabilities = TRUE;
+				this->_ReportedCapabilities = TRUE;
 
 				return STATUS_SUCCESS;
 			}
 
-			status = WdfRequestForwardToIoQueue(Request, this->HoldingUsbInRequests);
+			status = WdfRequestForwardToIoQueue(Request, this->_HoldingUsbInRequests);
 
 			return (NT_SUCCESS(status)) ? STATUS_PENDING : status;
 		}
@@ -839,15 +839,15 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 		// extract LED byte to get controller slot
 		if (Buffer[0] == 0x01 && Buffer[1] == 0x03 && Buffer[2] >= 0x02)
 		{
-			if (Buffer[2] == 0x02)this->LedNumber = 0;
-			if (Buffer[2] == 0x03)this->LedNumber = 1;
-			if (Buffer[2] == 0x04)this->LedNumber = 2;
-			if (Buffer[2] == 0x05)this->LedNumber = 3;
+			if (Buffer[2] == 0x02)this->_LedNumber = 0;
+			if (Buffer[2] == 0x03)this->_LedNumber = 1;
+			if (Buffer[2] == 0x04)this->_LedNumber = 2;
+			if (Buffer[2] == 0x05)this->_LedNumber = 3;
 
 			TraceDbg(
 				TRACE_USBPDO,
 				"-- LED Number: %d",
-				this->LedNumber);
+				this->_LedNumber);
 
 			//
 			// Notify client library that PDO is ready
@@ -873,7 +873,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 			Buffer[6],
 			Buffer[7]);
 
-		RtlCopyBytes(this->Rumble, Buffer, pTransfer->TransferBufferLength);
+		RtlCopyBytes(this->_Rumble, Buffer, pTransfer->TransferBufferLength);
 	}
 
 	// Notify user-mode process that new data is available
@@ -895,9 +895,9 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 			// Assign values to output buffer
 			notify->Size = sizeof(XUSB_REQUEST_NOTIFICATION);
 			notify->SerialNo = this->_SerialNo;
-			notify->LedNumber = this->LedNumber;
-			notify->LargeMotor = this->Rumble[3];
-			notify->SmallMotor = this->Rumble[4];
+			notify->LedNumber = this->_LedNumber;
+			notify->LargeMotor = this->_Rumble[3];
+			notify->SmallMotor = this->_Rumble[4];
 
 			WdfRequestCompleteWithInformation(notifyRequest, status, notify->Size);
 		}
@@ -929,7 +929,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbControlTransfer(PURB Urb)
 	{
 	case 0x04:
 
-			blobBuffer = static_cast<PUCHAR>(WdfMemoryGetBuffer(this->InterruptBlobStorage, nullptr));
+			blobBuffer = static_cast<PUCHAR>(WdfMemoryGetBuffer(this->_InterruptBlobStorage, nullptr));
 			//
 			// Xenon magic
 			// 
@@ -969,7 +969,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SubmitReport(PVOID NewReport)
 	BOOLEAN     changed;
 	WDFREQUEST  usbRequest;
 
-	changed = (RtlCompareMemory(&this->Packet.Report,
+	changed = (RtlCompareMemory(&this->_Packet.Report,
 	                            &static_cast<PXUSB_SUBMIT_REPORT>(NewReport)->Report,
 	                            sizeof(XUSB_REPORT)) != sizeof(XUSB_REPORT));
 
@@ -1004,9 +1004,9 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SubmitReport(PVOID NewReport)
 	urb->UrbBulkOrInterruptTransfer.TransferBufferLength = sizeof(XUSB_INTERRUPT_IN_PACKET);
 
 	// Copy submitted report to cache
-	RtlCopyBytes(&this->Packet.Report, &(static_cast<PXUSB_SUBMIT_REPORT>(NewReport))->Report, sizeof(XUSB_REPORT));
+	RtlCopyBytes(&this->_Packet.Report, &(static_cast<PXUSB_SUBMIT_REPORT>(NewReport))->Report, sizeof(XUSB_REPORT));
 	// Copy cached report to URB transfer buffer
-	RtlCopyBytes(Buffer, &this->Packet, sizeof(XUSB_INTERRUPT_IN_PACKET));
+	RtlCopyBytes(Buffer, &this->_Packet, sizeof(XUSB_INTERRUPT_IN_PACKET));
 
 	// Complete pending request
 	WdfRequestComplete(usbRequest, status);

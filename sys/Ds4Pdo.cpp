@@ -147,11 +147,11 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareHardware()
 	};
 
 	// Initialize HID reports to defaults
-	RtlCopyBytes(this->Report, DefaultHidReport, DS4_REPORT_SIZE);
-	RtlZeroMemory(&this->OutputReport, sizeof(DS4_OUTPUT_REPORT));
+	RtlCopyBytes(this->_Report, DefaultHidReport, DS4_REPORT_SIZE);
+	RtlZeroMemory(&this->_OutputReport, sizeof(DS4_OUTPUT_REPORT));
 
 	// Start pending IRP queue flush timer
-	WdfTimerStart(this->PendingUsbInRequestsTimer, DS4_QUEUE_FLUSH_PERIOD);
+	WdfTimerStart(this->_PendingUsbInRequestsTimer, DS4_QUEUE_FLUSH_PERIOD);
 
 	return STATUS_SUCCESS;
 }
@@ -179,7 +179,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 	status = WdfTimerCreate(
 		&timerConfig,
 		&timerAttribs,
-		&this->PendingUsbInRequestsTimer
+		&this->_PendingUsbInRequestsTimer
 	);
 	if (!NT_SUCCESS(status))
 	{
@@ -279,7 +279,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 		keySerial,
 		&valueName,
 		sizeof(MAC_ADDRESS),
-		&this->TargetMacAddress,
+		&this->_TargetMacAddress,
 		NULL,
 		NULL
 	);
@@ -287,23 +287,23 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 	TraceEvents(TRACE_LEVEL_INFORMATION,
 		TRACE_DS4,
 		"MAC-Address: %02X:%02X:%02X:%02X:%02X:%02X\n",
-		this->TargetMacAddress.Vendor0,
-		this->TargetMacAddress.Vendor1,
-		this->TargetMacAddress.Vendor2,
-		this->TargetMacAddress.Nic0,
-		this->TargetMacAddress.Nic1,
-		this->TargetMacAddress.Nic2);
+		this->_TargetMacAddress.Vendor0,
+		this->_TargetMacAddress.Vendor1,
+		this->_TargetMacAddress.Vendor2,
+		this->_TargetMacAddress.Nic0,
+		this->_TargetMacAddress.Nic1,
+		this->_TargetMacAddress.Nic2);
 
 	if (status == STATUS_OBJECT_NAME_NOT_FOUND)
 	{
-		GenerateRandomMacAddress(&this->TargetMacAddress);
+		GenerateRandomMacAddress(&this->_TargetMacAddress);
 
 		status = WdfRegistryAssignValue(
 			keySerial,
 			&valueName,
 			REG_BINARY,
 			sizeof(MAC_ADDRESS),
-			static_cast<PVOID>(&this->TargetMacAddress)
+			static_cast<PVOID>(&this->_TargetMacAddress)
 		);
 		if (!NT_SUCCESS(status))
 		{
@@ -450,7 +450,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::SelectConfiguration(PURB Urb)
 void ViGEm::Bus::Targets::EmulationTargetDS4::AbortPipe()
 {
 	// Higher driver shutting down, emptying PDOs queues
-	WdfTimerStop(this->PendingUsbInRequestsTimer, TRUE);
+	WdfTimerStop(this->_PendingUsbInRequestsTimer, TRUE);
 }
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbClassInterface(PURB Urb)
@@ -533,12 +533,12 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbClassInterface(PURB Urb)
 				};
 
 				// Insert (auto-generated) target MAC address into response
-				RtlCopyBytes(Response + 1, &this->TargetMacAddress, sizeof(MAC_ADDRESS));
+				RtlCopyBytes(Response + 1, &this->_TargetMacAddress, sizeof(MAC_ADDRESS));
 				// Adjust byte order
 				ReverseByteArray(Response + 1, sizeof(MAC_ADDRESS));
 
 				// Insert (auto-generated) host MAC address into response
-				RtlCopyBytes(Response + 10, &this->HostMacAddress, sizeof(MAC_ADDRESS));
+				RtlCopyBytes(Response + 10, &this->_HostMacAddress, sizeof(MAC_ADDRESS));
 				// Adjust byte order
 				ReverseByteArray(Response + 10, sizeof(MAC_ADDRESS));
 
@@ -998,7 +998,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 	}
 
 	// Store relevant bytes of buffer in PDO context
-	RtlCopyBytes(&this->OutputReport,
+	RtlCopyBytes(&this->_OutputReport,
 		static_cast<PUCHAR>(pTransfer->TransferBuffer) + DS4_OUTPUT_BUFFER_OFFSET,
 		DS4_OUTPUT_BUFFER_LENGTH);
 
@@ -1021,7 +1021,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 			// Assign values to output buffer
 			notify->Size = sizeof(DS4_REQUEST_NOTIFICATION);
 			notify->SerialNo = this->_SerialNo;
-			notify->Report = this->OutputReport;
+			notify->Report = this->_OutputReport;
 
 			WdfRequestCompleteWithInformation(notifyRequest, status, notify->Size);
 		}
@@ -1088,10 +1088,10 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::SubmitReport(PVOID NewReport)
 
 	/* Copy report to cache and transfer buffer
 	 * Skip first byte as it contains the never changing report id */
-	RtlCopyBytes(this->Report + 1, &(static_cast<PDS4_SUBMIT_REPORT>(NewReport))->Report, sizeof(DS4_REPORT));
+	RtlCopyBytes(this->_Report + 1, &(static_cast<PDS4_SUBMIT_REPORT>(NewReport))->Report, sizeof(DS4_REPORT));
 
 	if (Buffer)
-		RtlCopyBytes(Buffer, this->Report, DS4_REPORT_SIZE);
+		RtlCopyBytes(Buffer, this->_Report, DS4_REPORT_SIZE);
 
 	// Complete pending request
 	WdfRequestComplete(usbRequest, status);
@@ -1130,7 +1130,7 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
 
 		// Copy cached report to transfer buffer 
 		if (Buffer)
-			RtlCopyBytes(Buffer, ctx->Report, DS4_REPORT_SIZE);
+			RtlCopyBytes(Buffer, ctx->_Report, DS4_REPORT_SIZE);
 
 		// Complete pending request
 		WdfRequestComplete(usbRequest, status);

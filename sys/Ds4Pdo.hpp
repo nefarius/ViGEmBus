@@ -77,27 +77,27 @@ namespace ViGEm::Bus::Targets
 		//
 		// HID Input Report buffer
 		//
-		UCHAR Report[DS4_REPORT_SIZE];
+		UCHAR _Report[DS4_REPORT_SIZE];
 
 		//
 		// Output report cache
 		//
-		DS4_OUTPUT_REPORT OutputReport;
+		DS4_OUTPUT_REPORT _OutputReport;
 
 		//
 		// Timer for dispatching interrupt transfer
 		//
-		WDFTIMER PendingUsbInRequestsTimer;
+		WDFTIMER _PendingUsbInRequestsTimer;
 
 		//
 		// Auto-generated MAC address of the target device
 		//
-		MAC_ADDRESS TargetMacAddress;
+		MAC_ADDRESS _TargetMacAddress;
 
 		//
 		// Default MAC address of the host (not used)
 		//
-		MAC_ADDRESS HostMacAddress;
+		MAC_ADDRESS _HostMacAddress;
 
 		static EVT_WDF_TIMER PendingUsbRequestsTimerFunc;
 	};

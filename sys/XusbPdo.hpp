@@ -81,36 +81,36 @@ namespace ViGEm::Bus::Targets
 		//
 		// Rumble buffer
 		//
-		UCHAR Rumble[XUSB_RUMBLE_SIZE];
+		UCHAR _Rumble[XUSB_RUMBLE_SIZE];
 
 		//
 		// LED number (represents XInput slot index)
 		//
-		CHAR LedNumber;
+		CHAR _LedNumber;
 
 		//
 		// Report packet
 		//
-		XUSB_INTERRUPT_IN_PACKET Packet;
+		XUSB_INTERRUPT_IN_PACKET _Packet;
 
 		//
 		// Queue for incoming control interrupt transfer
 		//
-		WDFQUEUE HoldingUsbInRequests;
+		WDFQUEUE _HoldingUsbInRequests;
 
 		//
 		// Required for XInputGetCapabilities to work
 		// 
-		BOOLEAN ReportedCapabilities;
+		BOOLEAN _ReportedCapabilities;
 
 		//
 		// Required for XInputGetCapabilities to work
 		// 
-		ULONG InterruptInitStage;
+		ULONG _InterruptInitStage;
 
 		//
 		// Storage of binary blobs (packets) for PDO initialization
 		// 
-		WDFMEMORY InterruptBlobStorage;
+		WDFMEMORY _InterruptBlobStorage;
 	};
 }
