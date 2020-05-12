@@ -193,7 +193,7 @@
     <ClInclude Include="CRTCPP.hpp" />
     <ClInclude Include="Ds4Pdo.hpp" />
     <ClInclude Include="EmulationTargetPDO.hpp" />
-    <ClInclude Include="Queue.h" />
+    <ClInclude Include="Queue.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="trace.h" />
     <ClInclude Include="Util.h" />

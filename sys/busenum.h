@@ -36,7 +36,7 @@
 #include <initguid.h>
 #include "ViGEmBusDriver.h"
 #include <ViGEm/km/BusShared.h>
-#include "Queue.h"
+#include "Queue.hpp"
 #include <usb.h>
 #include <usbbusif.h>
 #include "Context.h"
@@ -69,7 +69,9 @@ EXTERN_C_START
 DRIVER_INITIALIZE DriverEntry;
 
 EVT_WDF_DRIVER_DEVICE_ADD Bus_EvtDeviceAdd;
+
 EVT_WDF_DEVICE_FILE_CREATE Bus_DeviceFileCreate;
+
 EVT_WDF_FILE_CLOSE Bus_FileClose;
 
 EVT_WDF_CHILD_LIST_CREATE_DEVICE Bus_EvtDeviceListCreatePdo;

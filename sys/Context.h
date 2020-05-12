@@ -29,56 +29,6 @@
 
 
 
-
-//
-// The PDO device-extension (context).
-//
-typedef struct _PDO_DEVICE_DATA
-{
-    //
-    // Unique serial number of the device on the bus
-    // 
-    ULONG SerialNo;
-
-    // 
-    // PID of the process creating this PDO
-    // 
-    DWORD OwnerProcessId;
-
-    //
-    // Device type this PDO is emulating
-    // 
-    VIGEM_TARGET_TYPE TargetType;
-
-    //
-    // If set, the vendor ID the emulated device is reporting
-    // 
-    USHORT VendorId;
-
-    //
-    // If set, the product ID the emulated device is reporting
-    // 
-    USHORT ProductId;
-
-    //
-    // Interface for PDO to FDO communication
-    // 
-    VIGEM_BUS_INTERFACE BusInterface;
-
-    //
-    // Queue for incoming data interrupt transfer
-    //
-    WDFQUEUE PendingUsbInRequests;
-
-    //
-    // Queue for inverted calls
-    //
-    WDFQUEUE PendingNotificationRequests;
-
-} PDO_DEVICE_DATA, *PPDO_DEVICE_DATA;
-
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(PDO_DEVICE_DATA, PdoGetData)
-
 //
 // FDO (bus device) context data
 // 
@@ -93,16 +43,6 @@ typedef struct _FDO_DEVICE_DATA
     // Next SessionId to assign to a file handle
     // 
     LONG NextSessionId;
-
-    //
-    // Collection holding pending plugin requests
-    // 
-    WDFCOLLECTION PendingPluginRequests;
-
-    //
-    // Sync lock for pending request collection
-    // 
-    WDFSPINLOCK PendingPluginRequestsLock;
 
     //
     // Periodic timer sweeping up orphaned requests
