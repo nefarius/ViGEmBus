@@ -80,6 +80,8 @@ namespace ViGEm::Bus::Targets
 		NTSTATUS UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request) override;
 		NTSTATUS UsbControlTransfer(PURB Urb) override;
 		NTSTATUS SubmitReportImpl(PVOID NewReport) override;
+
+		NTSTATUS GetUserIndex(PULONG UserIndex) const;
 	private:
 		static PCWSTR _deviceDescription;
 

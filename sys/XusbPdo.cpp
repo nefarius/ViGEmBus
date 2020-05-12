@@ -38,8 +38,8 @@
 PCWSTR ViGEm::Bus::Targets::EmulationTargetXUSB::_deviceDescription = L"Virtual Xbox 360 Controller";
 
 ViGEm::Bus::Targets::EmulationTargetXUSB::EmulationTargetXUSB(ULONG Serial, LONG SessionId, USHORT VendorId,
-                                                              USHORT ProductId) : EmulationTargetPDO(
-	Serial, SessionId, VendorId, ProductId)
+	USHORT ProductId) : EmulationTargetPDO(
+		Serial, SessionId, VendorId, ProductId)
 {
 	_TargetType = Xbox360Wired;
 	_UsbConfigurationDescriptionSize = XUSB_DESCRIPTOR_SIZE;
@@ -952,22 +952,22 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbControlTransfer(PURB Urb)
 {
 	NTSTATUS status;
 	PUCHAR   blobBuffer;
-	
+
 	switch (Urb->UrbControlTransfer.SetupPacket[6])
 	{
 	case 0x04:
 
-			blobBuffer = static_cast<PUCHAR>(WdfMemoryGetBuffer(this->_InterruptBlobStorage, nullptr));
-			//
-			// Xenon magic
-			// 
-			RtlCopyMemory(
-				Urb->UrbControlTransfer.TransferBuffer,
-				&blobBuffer[XUSB_BLOB_07_OFFSET],
-				0x04
-			);
-			status = STATUS_SUCCESS;
-		
+		blobBuffer = static_cast<PUCHAR>(WdfMemoryGetBuffer(this->_InterruptBlobStorage, nullptr));
+		//
+		// Xenon magic
+		// 
+		RtlCopyMemory(
+			Urb->UrbControlTransfer.TransferBuffer,
+			&blobBuffer[XUSB_BLOB_07_OFFSET],
+			0x04
+		);
+		status = STATUS_SUCCESS;
+
 		break;
 	case 0x14:
 		//
@@ -994,14 +994,14 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbControlTransfer(PURB Urb)
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SubmitReportImpl(PVOID NewReport)
 {
 	TraceDbg(TRACE_BUSENUM, "%!FUNC! Entry");
-	
+
 	NTSTATUS    status = STATUS_SUCCESS;
 	BOOLEAN     changed;
 	WDFREQUEST  usbRequest;
 
 	changed = (RtlCompareMemory(&this->_Packet.Report,
-	                            &static_cast<PXUSB_SUBMIT_REPORT>(NewReport)->Report,
-	                            sizeof(XUSB_REPORT)) != sizeof(XUSB_REPORT));
+		&static_cast<PXUSB_SUBMIT_REPORT>(NewReport)->Report,
+		sizeof(XUSB_REPORT)) != sizeof(XUSB_REPORT));
 
 	// Don't waste pending IRP if input hasn't changed
 	if (!changed)
@@ -1042,6 +1042,25 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SubmitReportImpl(PVOID NewRep
 	WdfRequestComplete(usbRequest, status);
 
 	TraceDbg(TRACE_BUSENUM, "%!FUNC! Exit with status %!STATUS!", status);
-	
+
 	return status;
+}
+
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::GetUserIndex(PULONG UserIndex) const
+{
+	if (!this->IsOwnerProcess())
+		return STATUS_ACCESS_DENIED;
+
+	if (!UserIndex)
+		return STATUS_INVALID_PARAMETER;
+	
+	if (this->_LedNumber >= 0)
+	{
+		*UserIndex = static_cast<ULONG>(this->_LedNumber);
+		return STATUS_SUCCESS;
+	}
+
+	// If the index is negative at this stage, we've exceeded XUSER_MAX_COUNT
+	// and need to fail this request with a distinct status.
+	return STATUS_INVALID_DEVICE_OBJECT_PARAMETER;
 }

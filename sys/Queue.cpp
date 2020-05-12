@@ -33,7 +33,6 @@
 #include "Ds4Pdo.hpp"
 
 
-
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (PAGE, Bus_EvtIoDefault)
 #endif
@@ -50,350 +49,367 @@ EXTERN_C_START
 // Responds to I/O control requests sent to the FDO.
 // 
 VOID Bus_EvtIoDeviceControl(
-    IN WDFQUEUE Queue,
-    IN WDFREQUEST Request,
-    IN size_t OutputBufferLength,
-    IN size_t InputBufferLength,
-    IN ULONG IoControlCode
+	IN WDFQUEUE Queue,
+	IN WDFREQUEST Request,
+	IN size_t OutputBufferLength,
+	IN size_t InputBufferLength,
+	IN ULONG IoControlCode
 )
 {
-    NTSTATUS                    status = STATUS_INVALID_PARAMETER;
-    WDFDEVICE                   Device;
-    size_t                      length = 0;
-    PXUSB_SUBMIT_REPORT         xusbSubmit = NULL;
-    PXUSB_REQUEST_NOTIFICATION  xusbNotify = NULL;
-    PDS4_SUBMIT_REPORT          ds4Submit = NULL;
-    PDS4_REQUEST_NOTIFICATION   ds4Notify = NULL;
-    PVIGEM_CHECK_VERSION        pCheckVersion = NULL;
-    PXUSB_GET_USER_INDEX        pXusbGetUserIndex = NULL;
-    EmulationTargetPDO          *pdo;
+	NTSTATUS                    status = STATUS_INVALID_PARAMETER;
+	WDFDEVICE                   Device;
+	size_t                      length = 0;
+	PXUSB_SUBMIT_REPORT         xusbSubmit = NULL;
+	PXUSB_REQUEST_NOTIFICATION  xusbNotify = NULL;
+	PDS4_SUBMIT_REPORT          ds4Submit = NULL;
+	PDS4_REQUEST_NOTIFICATION   ds4Notify = NULL;
+	PVIGEM_CHECK_VERSION        pCheckVersion = NULL;
+	PXUSB_GET_USER_INDEX        pXusbGetUserIndex = NULL;
+	EmulationTargetPDO* pdo;
 
-    Device = WdfIoQueueGetDevice(Queue);
+	Device = WdfIoQueueGetDevice(Queue);
 
-    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_QUEUE, "%!FUNC! Entry (device: 0x%p)", Device);
+	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_QUEUE, "%!FUNC! Entry (device: 0x%p)", Device);
 
-    switch (IoControlCode)
-    {
+	switch (IoControlCode)
+	{
 #pragma region IOCTL_VIGEM_CHECK_VERSION
-    case IOCTL_VIGEM_CHECK_VERSION:
+	case IOCTL_VIGEM_CHECK_VERSION:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_QUEUE,
-            "IOCTL_VIGEM_CHECK_VERSION");
+		TraceEvents(TRACE_LEVEL_INFORMATION,
+			TRACE_QUEUE,
+			"IOCTL_VIGEM_CHECK_VERSION");
 
-        status = WdfRequestRetrieveInputBuffer(
-            Request, 
-            sizeof(VIGEM_CHECK_VERSION),
-            (PVOID*)&pCheckVersion, 
-            &length
-        );
+		status = WdfRequestRetrieveInputBuffer(
+			Request,
+			sizeof(VIGEM_CHECK_VERSION),
+			(PVOID*)&pCheckVersion,
+			&length
+		);
 
-        if (!NT_SUCCESS(status) || length != sizeof(VIGEM_CHECK_VERSION))
-        {
-            status = STATUS_INVALID_PARAMETER;
-            break;
-        }
+		if (!NT_SUCCESS(status) || length != sizeof(VIGEM_CHECK_VERSION))
+		{
+			status = STATUS_INVALID_PARAMETER;
+			break;
+		}
 
-        status = (pCheckVersion->Version == VIGEM_COMMON_VERSION) ? STATUS_SUCCESS : STATUS_NOT_SUPPORTED;
+		status = (pCheckVersion->Version == VIGEM_COMMON_VERSION) ? STATUS_SUCCESS : STATUS_NOT_SUPPORTED;
 
-        TraceEvents(TRACE_LEVEL_VERBOSE,
-            TRACE_QUEUE,
-            "Requested version: 0x%04X, compiled version: 0x%04X",
-            pCheckVersion->Version, VIGEM_COMMON_VERSION);
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_QUEUE,
+			"Requested version: 0x%04X, compiled version: 0x%04X",
+			pCheckVersion->Version, VIGEM_COMMON_VERSION);
 
-        break;
+		break;
 #pragma endregion 
 
 #pragma region IOCTL_VIGEM_PLUGIN_TARGET
-    case IOCTL_VIGEM_PLUGIN_TARGET:
+	case IOCTL_VIGEM_PLUGIN_TARGET:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_QUEUE,
-            "IOCTL_VIGEM_PLUGIN_TARGET");
+		TraceEvents(TRACE_LEVEL_INFORMATION,
+			TRACE_QUEUE,
+			"IOCTL_VIGEM_PLUGIN_TARGET");
 
-        status = Bus_PlugInDevice(Device, Request, FALSE, &length);
+		status = Bus_PlugInDevice(Device, Request, FALSE, &length);
 
-        break;
+		break;
 #pragma endregion 
 
 #pragma region IOCTL_VIGEM_UNPLUG_TARGET
-    case IOCTL_VIGEM_UNPLUG_TARGET:
+	case IOCTL_VIGEM_UNPLUG_TARGET:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_QUEUE,
-            "IOCTL_VIGEM_UNPLUG_TARGET");
+		TraceEvents(TRACE_LEVEL_INFORMATION,
+			TRACE_QUEUE,
+			"IOCTL_VIGEM_UNPLUG_TARGET");
 
-        status = Bus_UnPlugDevice(Device, Request, FALSE, &length);
+		status = Bus_UnPlugDevice(Device, Request, FALSE, &length);
 
-        break;
+		break;
 #pragma endregion 
 
 #pragma region IOCTL_XUSB_SUBMIT_REPORT
-    case IOCTL_XUSB_SUBMIT_REPORT:
+	case IOCTL_XUSB_SUBMIT_REPORT:
 
-        TraceEvents(TRACE_LEVEL_VERBOSE,
-            TRACE_QUEUE,
-            "IOCTL_XUSB_SUBMIT_REPORT");
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_QUEUE,
+			"IOCTL_XUSB_SUBMIT_REPORT");
 
-        status = WdfRequestRetrieveInputBuffer(
-            Request, 
-            sizeof(XUSB_SUBMIT_REPORT), 
-            (PVOID*)&xusbSubmit,
-            &length
-        );
+		status = WdfRequestRetrieveInputBuffer(
+			Request,
+			sizeof(XUSB_SUBMIT_REPORT),
+			(PVOID*)&xusbSubmit,
+			&length
+		);
 
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE,
-                "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
-                status);
-            break;
-        }
+		if (!NT_SUCCESS(status))
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_QUEUE,
+				"WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+				status);
+			break;
+		}
 
-        if ((sizeof(XUSB_SUBMIT_REPORT) == xusbSubmit->Size) && (length == InputBufferLength))
-        {
-            // This request only supports a single PDO at a time
-            if (xusbSubmit->SerialNo == 0)
-            {
-                TraceEvents(TRACE_LEVEL_ERROR,
-                    TRACE_QUEUE,
-                    "Invalid serial 0 submitted");
+		if ((sizeof(XUSB_SUBMIT_REPORT) == xusbSubmit->Size) && (length == InputBufferLength))
+		{
+			// This request only supports a single PDO at a time
+			if (xusbSubmit->SerialNo == 0)
+			{
+				TraceEvents(TRACE_LEVEL_ERROR,
+					TRACE_QUEUE,
+					"Invalid serial 0 submitted");
 
-                status = STATUS_INVALID_PARAMETER;
-                break;
-            }
+				status = STATUS_INVALID_PARAMETER;
+				break;
+			}
 
-            if (!EmulationTargetPDO::GetPdoBySerial(Device, xusbSubmit->SerialNo, &pdo))
-                status = STATUS_DEVICE_DOES_NOT_EXIST;
-            else
-                status = pdo->SubmitReport(xusbSubmit);
-        }
+			if (!EmulationTargetPDO::GetPdoBySerial(Device, xusbSubmit->SerialNo, &pdo))
+				status = STATUS_DEVICE_DOES_NOT_EXIST;
+			else
+				status = pdo->SubmitReport(xusbSubmit);
+		}
 
-        break;
+		break;
 #pragma endregion 
 
 #pragma region IOCTL_XUSB_REQUEST_NOTIFICATION
-    case IOCTL_XUSB_REQUEST_NOTIFICATION:
+	case IOCTL_XUSB_REQUEST_NOTIFICATION:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_QUEUE,
-            "IOCTL_XUSB_REQUEST_NOTIFICATION");
+		TraceEvents(TRACE_LEVEL_INFORMATION,
+			TRACE_QUEUE,
+			"IOCTL_XUSB_REQUEST_NOTIFICATION");
 
-        // Don't accept the request if the output buffer can't hold the results
-        if (OutputBufferLength < sizeof(XUSB_REQUEST_NOTIFICATION))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE,
-                "Output buffer %d too small, require at least %d",
-                (int)OutputBufferLength, (int)sizeof(XUSB_REQUEST_NOTIFICATION));
-            break;
-        }
+		// Don't accept the request if the output buffer can't hold the results
+		if (OutputBufferLength < sizeof(XUSB_REQUEST_NOTIFICATION))
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_QUEUE,
+				"Output buffer %d too small, require at least %d",
+				(int)OutputBufferLength, (int)sizeof(XUSB_REQUEST_NOTIFICATION));
+			break;
+		}
 
-        status = WdfRequestRetrieveInputBuffer(
-            Request, 
-            sizeof(XUSB_REQUEST_NOTIFICATION), 
-            (PVOID*)&xusbNotify, 
-            &length
-        );
+		status = WdfRequestRetrieveInputBuffer(
+			Request,
+			sizeof(XUSB_REQUEST_NOTIFICATION),
+			(PVOID*)&xusbNotify,
+			&length
+		);
 
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE,
-                "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
-                status);
-            break;
-        }
+		if (!NT_SUCCESS(status))
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_QUEUE,
+				"WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+				status);
+			break;
+		}
 
-        if ((sizeof(XUSB_REQUEST_NOTIFICATION) == xusbNotify->Size) && (length == InputBufferLength))
-        {
-            // This request only supports a single PDO at a time
-            if (xusbNotify->SerialNo == 0)
-            {
-                TraceEvents(TRACE_LEVEL_ERROR,
-                    TRACE_QUEUE,
-                    "Invalid serial 0 submitted");
+		if ((sizeof(XUSB_REQUEST_NOTIFICATION) == xusbNotify->Size) && (length == InputBufferLength))
+		{
+			// This request only supports a single PDO at a time
+			if (xusbNotify->SerialNo == 0)
+			{
+				TraceEvents(TRACE_LEVEL_ERROR,
+					TRACE_QUEUE,
+					"Invalid serial 0 submitted");
 
-                status = STATUS_INVALID_PARAMETER;
-                break;
-            }
+				status = STATUS_INVALID_PARAMETER;
+				break;
+			}
 
-            status = Bus_QueueNotification(Device, xusbNotify->SerialNo, Request);
-        }
+			status = Bus_QueueNotification(Device, xusbNotify->SerialNo, Request);
+		}
 
-        break;
+		break;
 #pragma endregion 
 
 #pragma region IOCTL_DS4_SUBMIT_REPORT
-    case IOCTL_DS4_SUBMIT_REPORT:
+	case IOCTL_DS4_SUBMIT_REPORT:
 
-        TraceEvents(TRACE_LEVEL_VERBOSE,
-            TRACE_QUEUE,
-            "IOCTL_DS4_SUBMIT_REPORT");
+		TraceEvents(TRACE_LEVEL_VERBOSE,
+			TRACE_QUEUE,
+			"IOCTL_DS4_SUBMIT_REPORT");
 
-        status = WdfRequestRetrieveInputBuffer(
-            Request, 
-            sizeof(DS4_SUBMIT_REPORT), 
-            (PVOID*)&ds4Submit, 
-            &length
-        );
+		status = WdfRequestRetrieveInputBuffer(
+			Request,
+			sizeof(DS4_SUBMIT_REPORT),
+			(PVOID*)&ds4Submit,
+			&length
+		);
 
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE,
-                "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
-                status);
-            break;
-        }
+		if (!NT_SUCCESS(status))
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_QUEUE,
+				"WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+				status);
+			break;
+		}
 
-        if ((sizeof(DS4_SUBMIT_REPORT) == ds4Submit->Size) && (length == InputBufferLength))
-        {
-            // This request only supports a single PDO at a time
-            if (ds4Submit->SerialNo == 0)
-            {
-                TraceEvents(TRACE_LEVEL_ERROR,
-                    TRACE_QUEUE,
-                    "Invalid serial 0 submitted");
+		if ((sizeof(DS4_SUBMIT_REPORT) == ds4Submit->Size) && (length == InputBufferLength))
+		{
+			// This request only supports a single PDO at a time
+			if (ds4Submit->SerialNo == 0)
+			{
+				TraceEvents(TRACE_LEVEL_ERROR,
+					TRACE_QUEUE,
+					"Invalid serial 0 submitted");
 
-                status = STATUS_INVALID_PARAMETER;
-                break;
-            }
-                        
-            if (!EmulationTargetPDO::GetPdoBySerial(Device, ds4Submit->SerialNo, &pdo))
-                status = STATUS_DEVICE_DOES_NOT_EXIST;
-            else
-                status = pdo->SubmitReport(ds4Submit);
-        }
+				status = STATUS_INVALID_PARAMETER;
+				break;
+			}
 
-        break;
+			if (!EmulationTargetPDO::GetPdoBySerial(Device, ds4Submit->SerialNo, &pdo))
+				status = STATUS_DEVICE_DOES_NOT_EXIST;
+			else
+				status = pdo->SubmitReport(ds4Submit);
+		}
+
+		break;
 #pragma endregion 
 
 #pragma region IOCTL_DS4_REQUEST_NOTIFICATION
-    case IOCTL_DS4_REQUEST_NOTIFICATION:
+	case IOCTL_DS4_REQUEST_NOTIFICATION:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_QUEUE,
-            "IOCTL_DS4_REQUEST_NOTIFICATION");
+		TraceEvents(TRACE_LEVEL_INFORMATION,
+			TRACE_QUEUE,
+			"IOCTL_DS4_REQUEST_NOTIFICATION");
 
-        // Don't accept the request if the output buffer can't hold the results
-        if (OutputBufferLength < sizeof(DS4_REQUEST_NOTIFICATION))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE,
-                "Output buffer %d too small, require at least %d",
-                (int)OutputBufferLength, (int)sizeof(DS4_REQUEST_NOTIFICATION));
-            break;
-        }
+		// Don't accept the request if the output buffer can't hold the results
+		if (OutputBufferLength < sizeof(DS4_REQUEST_NOTIFICATION))
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_QUEUE,
+				"Output buffer %d too small, require at least %d",
+				(int)OutputBufferLength, (int)sizeof(DS4_REQUEST_NOTIFICATION));
+			break;
+		}
 
-        status = WdfRequestRetrieveInputBuffer(
-            Request, 
-            sizeof(DS4_REQUEST_NOTIFICATION), 
-            (PVOID*)&ds4Notify,
-            &length
-        );
+		status = WdfRequestRetrieveInputBuffer(
+			Request,
+			sizeof(DS4_REQUEST_NOTIFICATION),
+			(PVOID*)&ds4Notify,
+			&length
+		);
 
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE,
-                "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
-                status);
-            break;
-        }
+		if (!NT_SUCCESS(status))
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_QUEUE,
+				"WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+				status);
+			break;
+		}
 
-        if ((sizeof(DS4_REQUEST_NOTIFICATION) == ds4Notify->Size) && (length == InputBufferLength))
-        {
-            // This request only supports a single PDO at a time
-            if (ds4Notify->SerialNo == 0)
-            {
-                TraceEvents(TRACE_LEVEL_ERROR,
-                    TRACE_QUEUE,
-                    "Invalid serial 0 submitted");
+		if ((sizeof(DS4_REQUEST_NOTIFICATION) == ds4Notify->Size) && (length == InputBufferLength))
+		{
+			// This request only supports a single PDO at a time
+			if (ds4Notify->SerialNo == 0)
+			{
+				TraceEvents(TRACE_LEVEL_ERROR,
+					TRACE_QUEUE,
+					"Invalid serial 0 submitted");
 
-                status = STATUS_INVALID_PARAMETER;
-                break;
-            }
+				status = STATUS_INVALID_PARAMETER;
+				break;
+			}
 
-            status = Bus_QueueNotification(Device, ds4Notify->SerialNo, Request);
-        }
+			status = Bus_QueueNotification(Device, ds4Notify->SerialNo, Request);
+		}
 
-        break;
+		break;
 #pragma endregion 
 
 #pragma region IOCTL_XUSB_GET_USER_INDEX
-    case IOCTL_XUSB_GET_USER_INDEX:
+		
+	case IOCTL_XUSB_GET_USER_INDEX:
 
-        KdPrint((DRIVERNAME "IOCTL_XUSB_GET_USER_INDEX"));
+		KdPrint((DRIVERNAME "IOCTL_XUSB_GET_USER_INDEX"));
 
-        // Don't accept the request if the output buffer can't hold the results
-        if (OutputBufferLength < sizeof(XUSB_GET_USER_INDEX))
-        {
-            KdPrint((DRIVERNAME "IOCTL_XUSB_GET_USER_INDEX: output buffer too small: %ul\n", OutputBufferLength));
-            break;
-        }
+		// Don't accept the request if the output buffer can't hold the results
+		if (OutputBufferLength < sizeof(XUSB_GET_USER_INDEX))
+		{
+			KdPrint((DRIVERNAME "IOCTL_XUSB_GET_USER_INDEX: output buffer too small: %ul\n", OutputBufferLength));
+			break;
+		}
 
-        status = WdfRequestRetrieveInputBuffer(
-            Request, 
-            sizeof(XUSB_GET_USER_INDEX), 
-            (PVOID*)&pXusbGetUserIndex, 
-            &length);
+		status = WdfRequestRetrieveInputBuffer(
+			Request,
+			sizeof(XUSB_GET_USER_INDEX),
+			(PVOID*)&pXusbGetUserIndex,
+			&length);
 
-        if (!NT_SUCCESS(status))
-        {
-            KdPrint((DRIVERNAME "WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
-            break;
-        }
+		if (!NT_SUCCESS(status))
+		{
+			KdPrint((DRIVERNAME "WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
+			break;
+		}
 
-        if ((sizeof(XUSB_GET_USER_INDEX) == pXusbGetUserIndex->Size) && (length == InputBufferLength))
-        {
-            // This request only supports a single PDO at a time
-            if (pXusbGetUserIndex->SerialNo == 0)
-            {
-                status = STATUS_INVALID_PARAMETER;
-                break;
-            }
+		if ((sizeof(XUSB_GET_USER_INDEX) == pXusbGetUserIndex->Size) && (length == InputBufferLength))
+		{
+			// This request only supports a single PDO at a time
+			if (pXusbGetUserIndex->SerialNo == 0)
+			{
+				status = STATUS_INVALID_PARAMETER;
+				break;
+			}
 
-            //status = Xusb_GetUserIndex(Device, pXusbGetUserIndex);
-        }
+			if (!EmulationTargetPDO::GetPdoBySerial(Device, pXusbGetUserIndex->SerialNo, &pdo))
+			{
+				status = STATUS_DEVICE_DOES_NOT_EXIST;
+				break;
+			}
 
-        break;
+			//
+			// Poor man's RTTI check
+			// 
+			if (pdo->GetType() != Xbox360Wired)
+			{
+				status = STATUS_INVALID_DEVICE_REQUEST;
+				break;
+			}
+
+			status = static_cast<EmulationTargetXUSB*>(pdo)->GetUserIndex(&pXusbGetUserIndex->UserIndex);
+		}
+
+		break;
+		
 #pragma endregion
 
-    default:
+	default:
 
-        TraceEvents(TRACE_LEVEL_WARNING,
-            TRACE_QUEUE,
-            "Unknown I/O control code 0x%X", IoControlCode);
+		TraceEvents(TRACE_LEVEL_WARNING,
+			TRACE_QUEUE,
+			"Unknown I/O control code 0x%X", IoControlCode);
 
-        break; // default status is STATUS_INVALID_PARAMETER
-    }
+		break; // default status is STATUS_INVALID_PARAMETER
+	}
 
-    if (status != STATUS_PENDING)
-    {
-        WdfRequestCompleteWithInformation(Request, status, length);
-    }
-    
-    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_QUEUE, "%!FUNC! Exit with status %!STATUS!", status);
+	if (status != STATUS_PENDING)
+	{
+		WdfRequestCompleteWithInformation(Request, status, length);
+	}
+
+	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_QUEUE, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
 //
 // Catches unsupported requests.
 // 
 VOID Bus_EvtIoDefault(
-    _In_ WDFQUEUE Queue,
-    _In_ WDFREQUEST Request
+	_In_ WDFQUEUE Queue,
+	_In_ WDFREQUEST Request
 )
 {
-    UNREFERENCED_PARAMETER(Queue);
-    UNREFERENCED_PARAMETER(Request);
+	UNREFERENCED_PARAMETER(Queue);
+	UNREFERENCED_PARAMETER(Request);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
 
-    WdfRequestComplete(Request, STATUS_INVALID_DEVICE_REQUEST);
+	WdfRequestComplete(Request, STATUS_INVALID_DEVICE_REQUEST);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
 }
 
 EXTERN_C_END

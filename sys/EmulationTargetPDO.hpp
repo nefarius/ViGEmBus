@@ -103,6 +103,8 @@ namespace ViGEm::Bus::Core
 
 		bool IsOwnerProcess() const;
 
+		VIGEM_TARGET_TYPE GetType() const;
+
 	private:
 		static unsigned long current_process_id();
 

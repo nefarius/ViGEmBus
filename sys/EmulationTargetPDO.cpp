@@ -381,6 +381,11 @@ bool ViGEm::Bus::Core::EmulationTargetPDO::IsOwnerProcess() const
 	return this->_OwnerProcessId == current_process_id();
 }
 
+VIGEM_TARGET_TYPE ViGEm::Bus::Core::EmulationTargetPDO::GetType() const
+{
+	return this->_TargetType;
+}
+
 unsigned long ViGEm::Bus::Core::EmulationTargetPDO::current_process_id()
 {
 	return static_cast<DWORD>((DWORD_PTR)PsGetCurrentProcessId() & 0xFFFFFFFF);
