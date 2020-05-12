@@ -102,29 +102,6 @@ Bus_UnPlugDevice(
     _Out_ size_t* Transferred
 );
 
-NTSTATUS
-Bus_QueueNotification(
-    WDFDEVICE Device,
-    ULONG SerialNo,
-    WDFREQUEST Request
-);
-
-NTSTATUS
-Bus_SubmitReport(
-    WDFDEVICE Device,
-    ULONG SerialNo,
-    PVOID Report,
-    _In_ BOOLEAN FromInterface
-);
-
-VOID
-Bus_PdoStageResult(
-    _In_ PINTERFACE InterfaceHeader,
-    _In_ VIGEM_PDO_STAGE Stage,
-    _In_ ULONG Serial,
-    _In_ NTSTATUS Status
-);
-
 #pragma endregion
 
 EXTERN_C_END

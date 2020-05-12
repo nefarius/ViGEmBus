@@ -540,6 +540,11 @@ bool ViGEm::Bus::Core::EmulationTargetPDO::GetPdoBySerial(
 	return true;
 }
 
+bool ViGEm::Bus::Core::EmulationTargetPDO::GetPdoByTypeAndSerial(IN WDFDEVICE ParentDevice, IN VIGEM_TARGET_TYPE Type, IN ULONG SerialNo, OUT EmulationTargetPDO** Object)
+{
+	return (GetPdoBySerial(ParentDevice, SerialNo, Object) && (*Object)->GetType() == Type);
+}
+
 NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EvtDevicePrepareHardware(
 	_In_ WDFDEVICE Device,
 	_In_ WDFCMRESLIST ResourcesRaw,

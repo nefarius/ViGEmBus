@@ -162,7 +162,7 @@ VOID Bus_EvtIoDeviceControl(
 				break;
 			}
 
-			if (!EmulationTargetPDO::GetPdoBySerial(Device, xusbSubmit->SerialNo, &pdo))
+			if (!EmulationTargetPDO::GetPdoByTypeAndSerial(Device, Xbox360Wired, xusbSubmit->SerialNo, &pdo))
 				status = STATUS_DEVICE_DOES_NOT_EXIST;
 			else
 				status = pdo->SubmitReport(xusbSubmit);
@@ -217,7 +217,14 @@ VOID Bus_EvtIoDeviceControl(
 				break;
 			}
 
-			status = Bus_QueueNotification(Device, xusbNotify->SerialNo, Request);
+			if (!EmulationTargetPDO::GetPdoByTypeAndSerial(Device, Xbox360Wired, xusbNotify->SerialNo, &pdo))
+				status = STATUS_DEVICE_DOES_NOT_EXIST;
+			else
+			{
+				status = pdo->EnqueueNotification(Request);
+
+				status = (NT_SUCCESS(status)) ? STATUS_PENDING : status;
+			}
 		}
 
 		break;
@@ -259,7 +266,7 @@ VOID Bus_EvtIoDeviceControl(
 				break;
 			}
 
-			if (!EmulationTargetPDO::GetPdoBySerial(Device, ds4Submit->SerialNo, &pdo))
+			if (!EmulationTargetPDO::GetPdoByTypeAndSerial(Device, DualShock4Wired, ds4Submit->SerialNo, &pdo))
 				status = STATUS_DEVICE_DOES_NOT_EXIST;
 			else
 				status = pdo->SubmitReport(ds4Submit);
@@ -314,7 +321,14 @@ VOID Bus_EvtIoDeviceControl(
 				break;
 			}
 
-			status = Bus_QueueNotification(Device, ds4Notify->SerialNo, Request);
+			if (!EmulationTargetPDO::GetPdoByTypeAndSerial(Device, DualShock4Wired, ds4Notify->SerialNo, &pdo))
+				status = STATUS_DEVICE_DOES_NOT_EXIST;
+			else
+			{
+				status = pdo->EnqueueNotification(Request);
+
+				status = (NT_SUCCESS(status)) ? STATUS_PENDING : status;
+			}
 		}
 
 		break;
@@ -355,18 +369,9 @@ VOID Bus_EvtIoDeviceControl(
 				break;
 			}
 
-			if (!EmulationTargetPDO::GetPdoBySerial(Device, pXusbGetUserIndex->SerialNo, &pdo))
+			if (!EmulationTargetPDO::GetPdoByTypeAndSerial(Device, Xbox360Wired, pXusbGetUserIndex->SerialNo, &pdo))
 			{
 				status = STATUS_DEVICE_DOES_NOT_EXIST;
-				break;
-			}
-
-			//
-			// Poor man's RTTI check
-			// 
-			if (pdo->GetType() != Xbox360Wired)
-			{
-				status = STATUS_INVALID_DEVICE_REQUEST;
 				break;
 			}
 
