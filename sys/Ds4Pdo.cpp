@@ -1093,7 +1093,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbControlTransfer(PURB Urb)
 	return status;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::SubmitReport(PVOID NewReport)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::SubmitReportImpl(PVOID NewReport)
 {
 	NTSTATUS    status;
 	WDFREQUEST  usbRequest;

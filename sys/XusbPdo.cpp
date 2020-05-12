@@ -991,7 +991,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbControlTransfer(PURB Urb)
 	return status;
 }
 
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SubmitReport(PVOID NewReport)
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SubmitReportImpl(PVOID NewReport)
 {
 	TraceDbg(TRACE_BUSENUM, "%!FUNC! Entry");
 	

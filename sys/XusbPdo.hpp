@@ -79,7 +79,7 @@ namespace ViGEm::Bus::Targets
 		NTSTATUS UsbGetStringDescriptorType(PURB Urb) override;
 		NTSTATUS UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request) override;
 		NTSTATUS UsbControlTransfer(PURB Urb) override;
-		NTSTATUS SubmitReport(PVOID NewReport) override;
+		NTSTATUS SubmitReportImpl(PVOID NewReport) override;
 	private:
 		static PCWSTR _deviceDescription;
 

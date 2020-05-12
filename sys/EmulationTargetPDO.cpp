@@ -53,7 +53,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 	PEMULATION_TARGET_PDO_CONTEXT pPdoContext;
 
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Entry");
-	
+
 	DECLARE_CONST_UNICODE_STRING(deviceLocation, L"Virtual Gamepad Emulation Bus");
 	DECLARE_UNICODE_STRING_SIZE(buffer, MAX_INSTANCE_ID_LEN);
 	// reserve space for device id
@@ -172,7 +172,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&pdoAttributes, EMULATION_TARGET_PDO_CONTEXT);
 
 		pdoAttributes.EvtCleanupCallback = EvtDeviceContextCleanup;
-		
+
 		status = WdfDeviceCreate(&DeviceInit, &pdoAttributes, &this->_PdoDevice);
 		if (!NT_SUCCESS(status))
 		{
@@ -341,14 +341,14 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtDeviceContextCleanup(
 )
 {
 	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Entry");
-	
+
 	const auto ctx = EmulationTargetPdoGetContext(Device);
 
 	//
 	// PDO device object getting disposed, free context object 
 	// 
 	delete ctx->Target;
-	
+
 	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Exit");
 }
 
@@ -360,6 +360,13 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::SetSerial(ULONG Serial)
 ULONG ViGEm::Bus::Core::EmulationTargetPDO::GetSerial() const
 {
 	return this->_SerialNo;
+}
+
+NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::SubmitReport(PVOID NewReport)
+{
+	return (this->IsOwnerProcess())
+		       ? this->SubmitReportImpl(NewReport)
+		       : STATUS_ACCESS_DENIED;
 }
 
 NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueueNotification(WDFREQUEST Request) const
@@ -524,7 +531,7 @@ bool ViGEm::Bus::Core::EmulationTargetPDO::GetPdoBySerial(
 		return false;
 
 	*Object = EmulationTargetPdoGetContext(pdoDevice)->Target;
-	
+
 	return true;
 }
 
@@ -535,7 +542,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EvtDevicePrepareHardware(
 )
 {
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Entry");
-	
+
 	UNREFERENCED_PARAMETER(ResourcesRaw);
 	UNREFERENCED_PARAMETER(ResourcesTranslated);
 

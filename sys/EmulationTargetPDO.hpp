@@ -97,7 +97,7 @@ namespace ViGEm::Bus::Core
 
 		virtual NTSTATUS UsbControlTransfer(PURB Urb) = 0;
 
-		virtual NTSTATUS SubmitReport(PVOID NewReport) = 0;
+		NTSTATUS SubmitReport(PVOID NewReport);
 
 		NTSTATUS EnqueueNotification(WDFREQUEST Request) const;
 
@@ -145,6 +145,8 @@ namespace ViGEm::Bus::Core
 
 		virtual void AbortPipe() = 0;
 
+		virtual NTSTATUS SubmitReportImpl(PVOID NewReport) = 0;
+		
 		//
 		// Unique serial number of the device on the bus
 		// 
