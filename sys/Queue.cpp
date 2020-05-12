@@ -69,16 +69,15 @@ VOID Bus_EvtIoDeviceControl(
 
 	Device = WdfIoQueueGetDevice(Queue);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_QUEUE, "%!FUNC! Entry (device: 0x%p)", Device);
+	TraceDbg(TRACE_QUEUE, "%!FUNC! Entry (device: 0x%p)", Device);
 
 	switch (IoControlCode)
 	{
 #pragma region IOCTL_VIGEM_CHECK_VERSION
+		
 	case IOCTL_VIGEM_CHECK_VERSION:
 
-		TraceEvents(TRACE_LEVEL_INFORMATION,
-			TRACE_QUEUE,
-			"IOCTL_VIGEM_CHECK_VERSION");
+		TraceDbg(TRACE_QUEUE, "IOCTL_VIGEM_CHECK_VERSION");
 
 		status = WdfRequestRetrieveInputBuffer(
 			Request,
@@ -101,38 +100,38 @@ VOID Bus_EvtIoDeviceControl(
 			pCheckVersion->Version, VIGEM_COMMON_VERSION);
 
 		break;
+		
 #pragma endregion 
 
 #pragma region IOCTL_VIGEM_PLUGIN_TARGET
+		
 	case IOCTL_VIGEM_PLUGIN_TARGET:
 
-		TraceEvents(TRACE_LEVEL_INFORMATION,
-			TRACE_QUEUE,
-			"IOCTL_VIGEM_PLUGIN_TARGET");
+		TraceDbg(TRACE_QUEUE, "IOCTL_VIGEM_PLUGIN_TARGET");
 
 		status = Bus_PlugInDevice(Device, Request, FALSE, &length);
 
 		break;
+		
 #pragma endregion 
 
 #pragma region IOCTL_VIGEM_UNPLUG_TARGET
+		
 	case IOCTL_VIGEM_UNPLUG_TARGET:
-
-		TraceEvents(TRACE_LEVEL_INFORMATION,
-			TRACE_QUEUE,
-			"IOCTL_VIGEM_UNPLUG_TARGET");
+				
+		TraceDbg(TRACE_QUEUE, "IOCTL_VIGEM_UNPLUG_TARGET");
 
 		status = Bus_UnPlugDevice(Device, Request, FALSE, &length);
 
 		break;
+		
 #pragma endregion 
 
 #pragma region IOCTL_XUSB_SUBMIT_REPORT
+		
 	case IOCTL_XUSB_SUBMIT_REPORT:
-
-		TraceEvents(TRACE_LEVEL_VERBOSE,
-			TRACE_QUEUE,
-			"IOCTL_XUSB_SUBMIT_REPORT");
+				
+		TraceDbg(TRACE_QUEUE, "IOCTL_XUSB_SUBMIT_REPORT");
 
 		status = WdfRequestRetrieveInputBuffer(
 			Request,
@@ -170,14 +169,14 @@ VOID Bus_EvtIoDeviceControl(
 		}
 
 		break;
+		
 #pragma endregion 
 
 #pragma region IOCTL_XUSB_REQUEST_NOTIFICATION
+		
 	case IOCTL_XUSB_REQUEST_NOTIFICATION:
-
-		TraceEvents(TRACE_LEVEL_INFORMATION,
-			TRACE_QUEUE,
-			"IOCTL_XUSB_REQUEST_NOTIFICATION");
+				
+		TraceDbg(TRACE_QUEUE, "IOCTL_XUSB_REQUEST_NOTIFICATION");
 
 		// Don't accept the request if the output buffer can't hold the results
 		if (OutputBufferLength < sizeof(XUSB_REQUEST_NOTIFICATION))
@@ -222,14 +221,14 @@ VOID Bus_EvtIoDeviceControl(
 		}
 
 		break;
+		
 #pragma endregion 
 
 #pragma region IOCTL_DS4_SUBMIT_REPORT
+		
 	case IOCTL_DS4_SUBMIT_REPORT:
-
-		TraceEvents(TRACE_LEVEL_VERBOSE,
-			TRACE_QUEUE,
-			"IOCTL_DS4_SUBMIT_REPORT");
+				
+		TraceDbg(TRACE_QUEUE, "IOCTL_DS4_SUBMIT_REPORT");
 
 		status = WdfRequestRetrieveInputBuffer(
 			Request,
@@ -267,14 +266,14 @@ VOID Bus_EvtIoDeviceControl(
 		}
 
 		break;
+		
 #pragma endregion 
 
 #pragma region IOCTL_DS4_REQUEST_NOTIFICATION
+
 	case IOCTL_DS4_REQUEST_NOTIFICATION:
 
-		TraceEvents(TRACE_LEVEL_INFORMATION,
-			TRACE_QUEUE,
-			"IOCTL_DS4_REQUEST_NOTIFICATION");
+		TraceDbg(TRACE_QUEUE, "IOCTL_DS4_REQUEST_NOTIFICATION");
 
 		// Don't accept the request if the output buffer can't hold the results
 		if (OutputBufferLength < sizeof(DS4_REQUEST_NOTIFICATION))
@@ -319,14 +318,15 @@ VOID Bus_EvtIoDeviceControl(
 		}
 
 		break;
+		
 #pragma endregion 
 
 #pragma region IOCTL_XUSB_GET_USER_INDEX
 		
 	case IOCTL_XUSB_GET_USER_INDEX:
 
-		KdPrint((DRIVERNAME "IOCTL_XUSB_GET_USER_INDEX"));
-
+		TraceDbg(TRACE_QUEUE, "IOCTL_XUSB_GET_USER_INDEX");
+		
 		// Don't accept the request if the output buffer can't hold the results
 		if (OutputBufferLength < sizeof(XUSB_GET_USER_INDEX))
 		{
@@ -391,7 +391,7 @@ VOID Bus_EvtIoDeviceControl(
 		WdfRequestCompleteWithInformation(Request, status, length);
 	}
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_QUEUE, "%!FUNC! Exit with status %!STATUS!", status);
+	TraceDbg(TRACE_QUEUE, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
 //
