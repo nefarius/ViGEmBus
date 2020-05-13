@@ -39,13 +39,7 @@
     <ClInclude Include="busenum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Context.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ByteArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="$(SolutionDir)\Include\ViGEmBusDriver.h">
@@ -80,9 +74,6 @@
     <ClCompile Include="Util.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ByteArray.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="XusbPdo.cpp">
       <Filter>Source Files\Targets</Filter>
     </ClCompile>
@@ -109,8 +100,5 @@
     <ResourceCompile Include="ViGEmBus.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

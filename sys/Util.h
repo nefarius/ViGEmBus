@@ -28,13 +28,6 @@
 #pragma once
 
 //
-// Returns the current caller process id.
-// 
-#define CURRENT_PROCESS_ID() ((DWORD)((DWORD_PTR)PsGetCurrentProcessId() & 0xFFFFFFFF))
-
-#define IS_OWNER(_pdo_) (_pdo_->OwnerProcessId == CURRENT_PROCESS_ID())
-
-//
 // Represents a MAC address.
 //
 typedef struct _MAC_ADDRESS

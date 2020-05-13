@@ -188,8 +188,6 @@
     <ClInclude Include="$(SolutionDir)\Include\ViGEmBusDriver.h" />
     <ClInclude Include="..\client\include\ViGEm\km\BusShared.h" />
     <ClInclude Include="busenum.h" />
-    <ClInclude Include="ByteArray.h" />
-    <ClInclude Include="Context.h" />
     <ClInclude Include="CRTCPP.hpp" />
     <ClInclude Include="Ds4Pdo.hpp" />
     <ClInclude Include="EmulationTargetPDO.hpp" />
@@ -205,16 +203,12 @@
   <ItemGroup>
     <ClCompile Include="busenum.cpp" />
     <ClCompile Include="buspdo.cpp" />
-    <ClCompile Include="ByteArray.c" />
     <ClCompile Include="Driver.cpp" />
     <ClCompile Include="Ds4Pdo.cpp" />
     <ClCompile Include="EmulationTargetPDO.cpp" />
     <ClCompile Include="Queue.cpp" />
     <ClCompile Include="Util.c" />
     <ClCompile Include="XusbPdo.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

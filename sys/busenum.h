@@ -39,27 +39,51 @@
 #include "Queue.hpp"
 #include <usb.h>
 #include <usbbusif.h>
-#include "Context.h"
 #include "Util.h"
 
 
 
 #pragma region Macros
 
-#define HID_LANGUAGE_ID_LENGTH          0x04
-
-
-
 #define VIGEM_POOL_TAG                  0x45476956 // "EGiV"
 #define DRIVERNAME                      "ViGEm: "
 
-#define ORC_PC_FREQUENCY_DIVIDER        1000
-#define ORC_TIMER_START_DELAY           500 // ms
-#define ORC_TIMER_PERIODIC_DUE_TIME     500 // ms
-#define ORC_REQUEST_MAX_AGE             500 // ms
-
 #pragma endregion
 
+//
+// FDO (bus device) context data
+// 
+typedef struct _FDO_DEVICE_DATA
+{
+    //
+    // Counter of interface references
+    // 
+    LONG InterfaceReferenceCounter;
+
+    //
+    // Next SessionId to assign to a file handle
+    // 
+    LONG NextSessionId;
+
+} FDO_DEVICE_DATA, * PFDO_DEVICE_DATA;
+
+#define FDO_FIRST_SESSION_ID 100
+
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(FDO_DEVICE_DATA, FdoGetData)
+
+// 
+// Context data associated with file objects created by user mode applications
+// 
+typedef struct _FDO_FILE_DATA
+{
+    //
+    // SessionId associated with file handle.  Used to map file handles to emulated gamepad devices
+    // 
+    LONG SessionId;
+
+} FDO_FILE_DATA, * PFDO_FILE_DATA;
+
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(FDO_FILE_DATA, FileObjectGetData)
 
 
 EXTERN_C_START
@@ -77,10 +101,6 @@ EVT_WDF_FILE_CLOSE Bus_FileClose;
 EVT_WDF_CHILD_LIST_CREATE_DEVICE Bus_EvtDeviceListCreatePdo;
 
 EVT_WDF_CHILD_LIST_IDENTIFICATION_DESCRIPTION_COMPARE Bus_EvtChildListIdentificationDescriptionCompare;
-
-EVT_WDF_DEVICE_PREPARE_HARDWARE Pdo_EvtDevicePrepareHardware;
-
-EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL Pdo_EvtIoInternalDeviceControl;
 
 EVT_WDF_OBJECT_CONTEXT_CLEANUP Bus_EvtDriverContextCleanup;
 
