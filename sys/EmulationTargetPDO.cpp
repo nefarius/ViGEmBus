@@ -416,7 +416,7 @@ VIGEM_TARGET_TYPE ViGEm::Bus::Core::EmulationTargetPDO::GetType() const
 
 unsigned long ViGEm::Bus::Core::EmulationTargetPDO::current_process_id()
 {
-	return static_cast<DWORD>((DWORD_PTR)PsGetCurrentProcessId() & 0xFFFFFFFF);
+	return static_cast<DWORD>(reinterpret_cast<DWORD_PTR>(PsGetCurrentProcessId()) & 0xFFFFFFFF);
 }
 
 #pragma region USB Interface Functions
@@ -517,14 +517,14 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::UsbGetConfigurationDescriptorType
 
 NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::UsbSelectConfiguration(PURB Urb)
 {
-	TraceEvents(TRACE_LEVEL_VERBOSE,
+	TraceDbg(
 	            TRACE_USBPDO,
 	            ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: TotalLength %d",
 	            Urb->UrbHeader.Length);
 
 	if (Urb->UrbHeader.Length == sizeof(struct _URB_SELECT_CONFIGURATION))
 	{
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceDbg(
 		            TRACE_USBPDO,
 		            ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: NULL ConfigurationDescriptor");
 		return STATUS_SUCCESS;
@@ -554,6 +554,9 @@ bool ViGEm::Bus::Core::EmulationTargetPDO::GetPdoBySerial(
 
 	WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(&description.Header, sizeof(description));
 
+	//
+	// Identify by serial number
+	// 
 	description.SerialNo = SerialNo;
 
 	WDF_CHILD_RETRIEVE_INFO_INIT(&info, &description.Header);
@@ -621,7 +624,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 	{
 	case IOCTL_INTERNAL_USB_SUBMIT_URB:
 
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceDbg(
 		            TRACE_BUSPDO,
 		            ">> IOCTL_INTERNAL_USB_SUBMIT_URB");
 
@@ -727,7 +730,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 				break;
 			}
 
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceDbg(
 			            TRACE_BUSPDO,
 			            "<< <<");
 
@@ -784,7 +787,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 			break;
 		}
 
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceDbg(
 		            TRACE_BUSPDO,
 		            "<<");
 
