@@ -39,9 +39,6 @@
     <ClInclude Include="busenum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="$(SolutionDir)\Include\ViGEmBusDriver.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
@@ -71,9 +68,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Util.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="XusbPdo.cpp">
       <Filter>Source Files\Targets</Filter>
     </ClCompile>

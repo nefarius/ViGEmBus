@@ -29,11 +29,22 @@
 #include "EmulationTargetPDO.hpp"
 #include <ViGEm/km/BusShared.h>
 
-#include "Util.h"
-
 
 namespace ViGEm::Bus::Targets
 {
+	//
+	// Represents a MAC address.
+	//
+	typedef struct _MAC_ADDRESS
+	{
+		UCHAR Vendor0;
+		UCHAR Vendor1;
+		UCHAR Vendor2;
+		UCHAR Nic0;
+		UCHAR Nic1;
+		UCHAR Nic2;
+	} MAC_ADDRESS, * PMAC_ADDRESS;
+	
 	constexpr unsigned char hid_get_report_id(struct _URB_CONTROL_VENDOR_OR_CLASS_REQUEST* pReq)
 	{
 		return pReq->Value & 0xFF;
@@ -126,5 +137,9 @@ namespace ViGEm::Bus::Targets
 		MAC_ADDRESS _HostMacAddress;
 
 		static EVT_WDF_TIMER PendingUsbRequestsTimerFunc;
+
+		static VOID ReverseByteArray(PUCHAR Array, INT Length);
+
+		static VOID GenerateRandomMacAddress(PMAC_ADDRESS Address);
 	};
 }

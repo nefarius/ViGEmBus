@@ -194,7 +194,6 @@
     <ClInclude Include="Queue.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="trace.h" />
-    <ClInclude Include="Util.h" />
     <ClInclude Include="XusbPdo.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -207,7 +206,6 @@
     <ClCompile Include="Ds4Pdo.cpp" />
     <ClCompile Include="EmulationTargetPDO.cpp" />
     <ClCompile Include="Queue.cpp" />
-    <ClCompile Include="Util.c" />
     <ClCompile Include="XusbPdo.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

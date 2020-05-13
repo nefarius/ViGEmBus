@@ -39,13 +39,11 @@
 #include "Queue.hpp"
 #include <usb.h>
 #include <usbbusif.h>
-#include "Util.h"
 
 
 
 #pragma region Macros
 
-#define VIGEM_POOL_TAG                  0x45476956 // "EGiV"
 #define DRIVERNAME                      "ViGEm: "
 
 #pragma endregion
