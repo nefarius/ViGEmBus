@@ -191,6 +191,11 @@ namespace ViGEm::Bus::Core
 		USHORT _ProductId{};
 
 		//
+		// Queue for blocking plugin requests
+		// 
+		WDFQUEUE _PendingPlugInRequests{};
+		
+		//
 		// Queue for incoming data interrupt transfer
 		//
 		WDFQUEUE _PendingUsbInRequests{};

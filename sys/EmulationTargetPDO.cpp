@@ -48,6 +48,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 	WDFQUEUE defaultPdoQueue;
 	UNICODE_STRING deviceDescription;
 	WDF_OBJECT_ATTRIBUTES attributes;
+	WDF_IO_QUEUE_CONFIG plugInQueueConfig;
 	WDF_IO_QUEUE_CONFIG usbInQueueConfig;
 	WDF_IO_QUEUE_CONFIG notificationsQueueConfig;
 	PEMULATION_TARGET_PDO_CONTEXT pPdoContext;
@@ -235,6 +236,27 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		attributes.ParentObject = this->_PdoDevice;
 
 		// Create and assign queue for incoming interrupt transfer
+		WDF_IO_QUEUE_CONFIG_INIT(&plugInQueueConfig, WdfIoQueueDispatchManual);
+
+		status = WdfIoQueueCreate(
+			ParentDevice,
+			&plugInQueueConfig,
+			WDF_NO_OBJECT_ATTRIBUTES,
+			&this->_PendingPlugInRequests
+		);
+		if (!NT_SUCCESS(status))
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_BUSPDO,
+				"WdfIoQueueCreate (PendingPlugInRequests) failed with status %!STATUS!",
+				status);
+			break;
+		}
+
+		WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+		attributes.ParentObject = this->_PdoDevice;
+		
+		// Create and assign queue for incoming interrupt transfer
 		WDF_IO_QUEUE_CONFIG_INIT(&usbInQueueConfig, WdfIoQueueDispatchManual);
 
 		status = WdfIoQueueCreate(
@@ -252,6 +274,9 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 			break;
 		}
 
+		WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+		attributes.ParentObject = this->_PdoDevice;
+		
 		// Create and assign queue for user-land notification requests
 		WDF_IO_QUEUE_CONFIG_INIT(&notificationsQueueConfig, WdfIoQueueDispatchManual);
 
@@ -273,7 +298,10 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 #pragma endregion
 
 #pragma region Default I/O queue setup
-
+		
+		WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+		attributes.ParentObject = this->_PdoDevice;
+		
 		WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&defaultPdoQueueConfig, WdfIoQueueDispatchParallel);
 
 		defaultPdoQueueConfig.EvtIoInternalDeviceControl = EvtIoInternalDeviceControl;
