@@ -72,10 +72,6 @@ namespace ViGEm::Bus::Core
 		NTSTATUS PdoCreateDevice(_In_ WDFDEVICE ParentDevice,
 		                         _In_ PWDFDEVICE_INIT DeviceInit);
 
-		VOID SetSerial(ULONG Serial);
-
-		ULONG GetSerial() const;
-
 		bool operator==(EmulationTargetPDO& other) const
 		{
 			return (other._SerialNo == this->_SerialNo);
@@ -110,6 +106,10 @@ namespace ViGEm::Bus::Core
 
 		VIGEM_TARGET_TYPE GetType() const;
 
+		NTSTATUS EnqueuePlugin(WDFREQUEST Request);
+
+		NTSTATUS PdoPrepare(WDFDEVICE ParentDevice);
+	
 	private:
 		static unsigned long current_process_id();
 
@@ -121,6 +121,8 @@ namespace ViGEm::Bus::Core
 			OUT EmulationTargetPDO** Object
 		);
 
+		HANDLE _PluginRequestCompletionWorkerThreadHandle{};
+		
 	protected:
 		static const ULONG _maxHardwareIdLength = 0xFF;
 
@@ -149,6 +151,8 @@ namespace ViGEm::Bus::Core
 		static EVT_WDF_DEVICE_PREPARE_HARDWARE EvtDevicePrepareHardware;
 
 		static EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL EvtIoInternalDeviceControl;
+
+		static VOID PluginRequestCompletionWorkerRoutine(IN PVOID StartContext);
 
 		static const int MAX_INSTANCE_ID_LEN = 80;
 
@@ -209,16 +213,16 @@ namespace ViGEm::Bus::Core
 		// This child objects' device object
 		// 
 		WDFDEVICE _PdoDevice{};
+		
+		//
+		// Configuration descriptor size
+		// 
+		ULONG _UsbConfigurationDescriptionSize{};
 
 		//
 		// Signals the bus that PDO is ready to receive data
 		// 
 		KEVENT _PdoBootNotificationEvent;
-
-		//
-		// Configuration descriptor size
-		// 
-		ULONG _UsbConfigurationDescriptionSize{};
 	};
 
 	typedef struct _PDO_IDENTIFICATION_DESCRIPTION
