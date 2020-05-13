@@ -126,6 +126,8 @@ namespace ViGEm::Bus::Core
 	protected:
 		static const ULONG _maxHardwareIdLength = 0xFF;
 
+		static const int MAX_INSTANCE_ID_LEN = 80;
+		
 		static PCWSTR _deviceLocation;
 
 		static BOOLEAN USB_BUSIFFN UsbInterfaceIsDeviceHighSpeed(IN PVOID BusContext);
@@ -153,9 +155,7 @@ namespace ViGEm::Bus::Core
 		static EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL EvtIoInternalDeviceControl;
 
 		static VOID PluginRequestCompletionWorkerRoutine(IN PVOID StartContext);
-
-		static const int MAX_INSTANCE_ID_LEN = 80;
-
+		
 		virtual VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) = 0;
 
 		virtual NTSTATUS SelectConfiguration(PURB Urb) = 0;

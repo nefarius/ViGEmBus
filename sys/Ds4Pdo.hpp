@@ -76,14 +76,28 @@ namespace ViGEm::Bus::Targets
 		NTSTATUS SelectConfiguration(PURB Urb) override;
 
 		void AbortPipe() override;
+		
 		NTSTATUS UsbClassInterface(PURB Urb) override;
+		
 		NTSTATUS UsbGetDescriptorFromInterface(PURB Urb) override;
+		
 		NTSTATUS UsbSelectInterface(PURB Urb) override;
+		
 		NTSTATUS UsbGetStringDescriptorType(PURB Urb) override;
+		
 		NTSTATUS UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request) override;
+		
 		NTSTATUS UsbControlTransfer(PURB Urb) override;
+		
 		NTSTATUS SubmitReportImpl(PVOID NewReport) override;
+		
 	private:
+		static EVT_WDF_TIMER PendingUsbRequestsTimerFunc;
+
+		static VOID ReverseByteArray(PUCHAR Array, INT Length);
+
+		static VOID GenerateRandomMacAddress(PMAC_ADDRESS Address);
+		
 		static PCWSTR _deviceDescription;
 
 		static const int HID_REQUEST_GET_REPORT = 0x01;
@@ -134,12 +148,6 @@ namespace ViGEm::Bus::Targets
 		//
 		// Default MAC address of the host (not used)
 		//
-		MAC_ADDRESS _HostMacAddress;
-
-		static EVT_WDF_TIMER PendingUsbRequestsTimerFunc;
-
-		static VOID ReverseByteArray(PUCHAR Array, INT Length);
-
-		static VOID GenerateRandomMacAddress(PMAC_ADDRESS Address);
+		MAC_ADDRESS _HostMacAddress;	
 	};
 }
