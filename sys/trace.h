@@ -68,6 +68,6 @@
 // begin_wpp config
 // FUNC Trace{FLAG=MYDRIVER_ALL_INFO}(LEVEL, MSG, ...);
 // FUNC TraceEvents(LEVEL, FLAGS, MSG, ...);
-// FUNC TraceDbg{LEVEL=TRACE_LEVEL_INFORMATION}(FLAGS, MSG, ...);
+// FUNC TraceDbg{LEVEL=TRACE_LEVEL_VERBOSE}(FLAGS, MSG, ...);
 // end_wpp
 //
