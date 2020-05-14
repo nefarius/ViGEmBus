@@ -392,14 +392,10 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueuePlugin(WDFREQUEST Request)
 	NTSTATUS status;
 
 	if (!this->IsOwnerProcess())
-	{
 		return STATUS_ACCESS_DENIED;
-	}
 
 	if (!this->_PendingPlugInRequests)
-	{
 		return STATUS_INVALID_DEVICE_STATE;
-	}
 	
 	status = WdfRequestForwardToIoQueue(Request, this->_PendingPlugInRequests);
 
@@ -543,11 +539,11 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(
 
 	WDFREQUEST pluginRequest;
 	LARGE_INTEGER timeout;
-	timeout.QuadPart = WDF_REL_TIMEOUT_IN_SEC(1);;
+	timeout.QuadPart = WDF_REL_TIMEOUT_IN_SEC(1);
 
 	TraceEvents(TRACE_LEVEL_INFORMATION,
-		TRACE_BUSPDO,
-		"Waiting for 1 second to complete PDO boot..."
+	            TRACE_BUSPDO,
+	            "Waiting for 1 second to complete PDO boot..."
 	);
 
 	NTSTATUS status = KeWaitForSingleObject(
@@ -566,8 +562,8 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(
 		if (!NT_SUCCESS(WdfIoQueueRetrieveNextRequest(ctx->_PendingPlugInRequests, &pluginRequest)))
 		{
 			TraceEvents(TRACE_LEVEL_WARNING,
-				TRACE_BUSPDO,
-				"No pending plugin request available"
+			            TRACE_BUSPDO,
+			            "No pending plugin request available"
 			);
 			break;
 		}
@@ -575,10 +571,10 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(
 		if (status == STATUS_TIMEOUT)
 		{
 			TraceEvents(TRACE_LEVEL_WARNING,
-				TRACE_BUSPDO,
-				"Plugin request timed out, completing with error"
+			            TRACE_BUSPDO,
+			            "Plugin request timed out, completing with error"
 			);
-			
+
 			//
 			// We haven't hit a path where the event gets signaled, report error
 			// 
@@ -589,19 +585,21 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(
 		if (NT_SUCCESS(status))
 		{
 			TraceEvents(TRACE_LEVEL_INFORMATION,
-				TRACE_BUSPDO,
-				"Plugin request completed successfully"
+			            TRACE_BUSPDO,
+			            "Plugin request completed successfully"
 			);
-			
+
 			//
 			// Event triggered in time, complete with success
 			// 
 			WdfRequestComplete(pluginRequest, STATUS_SUCCESS);
 			break;
 		}
-	} while (FALSE);
+	}
+	while (FALSE);
 
 	KeClearEvent(&ctx->_PdoBootNotificationEvent);
+	(void)PsTerminateSystemThread(0);
 }
 
 void ViGEm::Bus::Core::EmulationTargetPDO::UsbAbortPipe()
