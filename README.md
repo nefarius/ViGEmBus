@@ -93,6 +93,8 @@ This list is non-exhaustive, if you'd like to see your project included, contact
 - [DS4Windows](https://ryochan7.github.io/ds4windows-site/)
 - [XOutput](https://github.com/csutorasa/XOutput)
 - [RdpGamepad](https://github.com/microsoft/RdpGamepad)
+- [Touchmote](https://github.com/Ryochan7/Touchmote/tree/ryochan7)
+- [Mi-ViGEm](https://github.com/grayver/mi-vigem)
 
 ## License
 
