@@ -56,15 +56,15 @@ VOID Bus_EvtIoDeviceControl(
 	IN ULONG IoControlCode
 )
 {
-	NTSTATUS                    status = STATUS_INVALID_PARAMETER;
-	WDFDEVICE                   Device;
-	size_t                      length = 0;
-	PXUSB_SUBMIT_REPORT         xusbSubmit = NULL;
-	PXUSB_REQUEST_NOTIFICATION  xusbNotify = NULL;
-	PDS4_SUBMIT_REPORT          ds4Submit = NULL;
-	PDS4_REQUEST_NOTIFICATION   ds4Notify = NULL;
-	PVIGEM_CHECK_VERSION        pCheckVersion = NULL;
-	PXUSB_GET_USER_INDEX        pXusbGetUserIndex = NULL;
+	NTSTATUS status = STATUS_INVALID_PARAMETER;
+	WDFDEVICE Device;
+	size_t length = 0;
+	PXUSB_SUBMIT_REPORT xusbSubmit = nullptr;
+	PXUSB_REQUEST_NOTIFICATION xusbNotify = nullptr;
+	PDS4_SUBMIT_REPORT ds4Submit = nullptr;
+	PDS4_REQUEST_NOTIFICATION ds4Notify = nullptr;
+	PVIGEM_CHECK_VERSION pCheckVersion = nullptr;
+	PXUSB_GET_USER_INDEX pXusbGetUserIndex = nullptr;
 	EmulationTargetPDO* pdo;
 
 	Device = WdfIoQueueGetDevice(Queue);
@@ -74,7 +74,7 @@ VOID Bus_EvtIoDeviceControl(
 	switch (IoControlCode)
 	{
 #pragma region IOCTL_VIGEM_CHECK_VERSION
-		
+
 	case IOCTL_VIGEM_CHECK_VERSION:
 
 		TraceDbg(TRACE_QUEUE, "IOCTL_VIGEM_CHECK_VERSION");
@@ -82,7 +82,7 @@ VOID Bus_EvtIoDeviceControl(
 		status = WdfRequestRetrieveInputBuffer(
 			Request,
 			sizeof(VIGEM_CHECK_VERSION),
-			(PVOID*)&pCheckVersion,
+			reinterpret_cast<PVOID*>(&pCheckVersion),
 			&length
 		);
 
@@ -95,16 +95,16 @@ VOID Bus_EvtIoDeviceControl(
 		status = (pCheckVersion->Version == VIGEM_COMMON_VERSION) ? STATUS_SUCCESS : STATUS_NOT_SUPPORTED;
 
 		TraceEvents(TRACE_LEVEL_VERBOSE,
-			TRACE_QUEUE,
-			"Requested version: 0x%04X, compiled version: 0x%04X",
-			pCheckVersion->Version, VIGEM_COMMON_VERSION);
+		            TRACE_QUEUE,
+		            "Requested version: 0x%04X, compiled version: 0x%04X",
+		            pCheckVersion->Version, VIGEM_COMMON_VERSION);
 
 		break;
-		
-#pragma endregion 
+
+#pragma endregion
 
 #pragma region IOCTL_VIGEM_PLUGIN_TARGET
-		
+
 	case IOCTL_VIGEM_PLUGIN_TARGET:
 
 		TraceDbg(TRACE_QUEUE, "IOCTL_VIGEM_PLUGIN_TARGET");
@@ -112,40 +112,40 @@ VOID Bus_EvtIoDeviceControl(
 		status = Bus_PlugInDevice(Device, Request, FALSE, &length);
 
 		break;
-		
-#pragma endregion 
+
+#pragma endregion
 
 #pragma region IOCTL_VIGEM_UNPLUG_TARGET
-		
+
 	case IOCTL_VIGEM_UNPLUG_TARGET:
-				
+
 		TraceDbg(TRACE_QUEUE, "IOCTL_VIGEM_UNPLUG_TARGET");
 
 		status = Bus_UnPlugDevice(Device, Request, FALSE, &length);
 
 		break;
-		
-#pragma endregion 
+
+#pragma endregion
 
 #pragma region IOCTL_XUSB_SUBMIT_REPORT
-		
+
 	case IOCTL_XUSB_SUBMIT_REPORT:
-				
+
 		TraceDbg(TRACE_QUEUE, "IOCTL_XUSB_SUBMIT_REPORT");
 
 		status = WdfRequestRetrieveInputBuffer(
 			Request,
 			sizeof(XUSB_SUBMIT_REPORT),
-			(PVOID*)&xusbSubmit,
+			reinterpret_cast<PVOID*>(&xusbSubmit),
 			&length
 		);
 
 		if (!NT_SUCCESS(status))
 		{
 			TraceEvents(TRACE_LEVEL_ERROR,
-				TRACE_QUEUE,
-				"WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
-				status);
+			            TRACE_QUEUE,
+			            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+			            status);
 			break;
 		}
 
@@ -155,8 +155,8 @@ VOID Bus_EvtIoDeviceControl(
 			if (xusbSubmit->SerialNo == 0)
 			{
 				TraceEvents(TRACE_LEVEL_ERROR,
-					TRACE_QUEUE,
-					"Invalid serial 0 submitted");
+				            TRACE_QUEUE,
+				            "Invalid serial 0 submitted");
 
 				status = STATUS_INVALID_PARAMETER;
 				break;
@@ -169,38 +169,38 @@ VOID Bus_EvtIoDeviceControl(
 		}
 
 		break;
-		
-#pragma endregion 
+
+#pragma endregion
 
 #pragma region IOCTL_XUSB_REQUEST_NOTIFICATION
-		
+
 	case IOCTL_XUSB_REQUEST_NOTIFICATION:
-				
+
 		TraceDbg(TRACE_QUEUE, "IOCTL_XUSB_REQUEST_NOTIFICATION");
 
 		// Don't accept the request if the output buffer can't hold the results
 		if (OutputBufferLength < sizeof(XUSB_REQUEST_NOTIFICATION))
 		{
 			TraceEvents(TRACE_LEVEL_ERROR,
-				TRACE_QUEUE,
-				"Output buffer %d too small, require at least %d",
-				(int)OutputBufferLength, (int)sizeof(XUSB_REQUEST_NOTIFICATION));
+			            TRACE_QUEUE,
+			            "Output buffer %d too small, require at least %d",
+			            static_cast<int>(OutputBufferLength), static_cast<int>(sizeof(XUSB_REQUEST_NOTIFICATION)));
 			break;
 		}
 
 		status = WdfRequestRetrieveInputBuffer(
 			Request,
 			sizeof(XUSB_REQUEST_NOTIFICATION),
-			(PVOID*)&xusbNotify,
+			reinterpret_cast<PVOID*>(&xusbNotify),
 			&length
 		);
 
 		if (!NT_SUCCESS(status))
 		{
 			TraceEvents(TRACE_LEVEL_ERROR,
-				TRACE_QUEUE,
-				"WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
-				status);
+			            TRACE_QUEUE,
+			            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+			            status);
 			break;
 		}
 
@@ -210,8 +210,8 @@ VOID Bus_EvtIoDeviceControl(
 			if (xusbNotify->SerialNo == 0)
 			{
 				TraceEvents(TRACE_LEVEL_ERROR,
-					TRACE_QUEUE,
-					"Invalid serial 0 submitted");
+				            TRACE_QUEUE,
+				            "Invalid serial 0 submitted");
 
 				status = STATUS_INVALID_PARAMETER;
 				break;
@@ -228,28 +228,28 @@ VOID Bus_EvtIoDeviceControl(
 		}
 
 		break;
-		
-#pragma endregion 
+
+#pragma endregion
 
 #pragma region IOCTL_DS4_SUBMIT_REPORT
-		
+
 	case IOCTL_DS4_SUBMIT_REPORT:
-				
+
 		TraceDbg(TRACE_QUEUE, "IOCTL_DS4_SUBMIT_REPORT");
 
 		status = WdfRequestRetrieveInputBuffer(
 			Request,
 			sizeof(DS4_SUBMIT_REPORT),
-			(PVOID*)&ds4Submit,
+			reinterpret_cast<PVOID*>(&ds4Submit),
 			&length
 		);
 
 		if (!NT_SUCCESS(status))
 		{
 			TraceEvents(TRACE_LEVEL_ERROR,
-				TRACE_QUEUE,
-				"WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
-				status);
+			            TRACE_QUEUE,
+			            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+			            status);
 			break;
 		}
 
@@ -259,8 +259,8 @@ VOID Bus_EvtIoDeviceControl(
 			if (ds4Submit->SerialNo == 0)
 			{
 				TraceEvents(TRACE_LEVEL_ERROR,
-					TRACE_QUEUE,
-					"Invalid serial 0 submitted");
+				            TRACE_QUEUE,
+				            "Invalid serial 0 submitted");
 
 				status = STATUS_INVALID_PARAMETER;
 				break;
@@ -273,8 +273,8 @@ VOID Bus_EvtIoDeviceControl(
 		}
 
 		break;
-		
-#pragma endregion 
+
+#pragma endregion
 
 #pragma region IOCTL_DS4_REQUEST_NOTIFICATION
 
@@ -286,25 +286,25 @@ VOID Bus_EvtIoDeviceControl(
 		if (OutputBufferLength < sizeof(DS4_REQUEST_NOTIFICATION))
 		{
 			TraceEvents(TRACE_LEVEL_ERROR,
-				TRACE_QUEUE,
-				"Output buffer %d too small, require at least %d",
-				(int)OutputBufferLength, (int)sizeof(DS4_REQUEST_NOTIFICATION));
+			            TRACE_QUEUE,
+			            "Output buffer %d too small, require at least %d",
+			            static_cast<int>(OutputBufferLength), static_cast<int>(sizeof(DS4_REQUEST_NOTIFICATION)));
 			break;
 		}
 
 		status = WdfRequestRetrieveInputBuffer(
 			Request,
 			sizeof(DS4_REQUEST_NOTIFICATION),
-			(PVOID*)&ds4Notify,
+			reinterpret_cast<PVOID*>(&ds4Notify),
 			&length
 		);
 
 		if (!NT_SUCCESS(status))
 		{
 			TraceEvents(TRACE_LEVEL_ERROR,
-				TRACE_QUEUE,
-				"WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
-				status);
+			            TRACE_QUEUE,
+			            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+			            status);
 			break;
 		}
 
@@ -314,8 +314,8 @@ VOID Bus_EvtIoDeviceControl(
 			if (ds4Notify->SerialNo == 0)
 			{
 				TraceEvents(TRACE_LEVEL_ERROR,
-					TRACE_QUEUE,
-					"Invalid serial 0 submitted");
+				            TRACE_QUEUE,
+				            "Invalid serial 0 submitted");
 
 				status = STATUS_INVALID_PARAMETER;
 				break;
@@ -332,15 +332,15 @@ VOID Bus_EvtIoDeviceControl(
 		}
 
 		break;
-		
-#pragma endregion 
+
+#pragma endregion
 
 #pragma region IOCTL_XUSB_GET_USER_INDEX
-		
+
 	case IOCTL_XUSB_GET_USER_INDEX:
 
 		TraceDbg(TRACE_QUEUE, "IOCTL_XUSB_GET_USER_INDEX");
-		
+
 		// Don't accept the request if the output buffer can't hold the results
 		if (OutputBufferLength < sizeof(XUSB_GET_USER_INDEX))
 		{
@@ -351,7 +351,7 @@ VOID Bus_EvtIoDeviceControl(
 		status = WdfRequestRetrieveInputBuffer(
 			Request,
 			sizeof(XUSB_GET_USER_INDEX),
-			(PVOID*)&pXusbGetUserIndex,
+			reinterpret_cast<PVOID*>(&pXusbGetUserIndex),
 			&length);
 
 		if (!NT_SUCCESS(status))
@@ -379,14 +379,14 @@ VOID Bus_EvtIoDeviceControl(
 		}
 
 		break;
-		
+
 #pragma endregion
 
 	default:
 
 		TraceEvents(TRACE_LEVEL_WARNING,
-			TRACE_QUEUE,
-			"Unknown I/O control code 0x%X", IoControlCode);
+		            TRACE_QUEUE,
+		            "Unknown I/O control code 0x%X", IoControlCode);
 
 		break; // default status is STATUS_INVALID_PARAMETER
 	}
