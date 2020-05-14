@@ -354,6 +354,34 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtDeviceContextCleanup(
 	//
 	WdfIoQueuePurgeSynchronously(ctx->Target->_PendingPlugInRequests);
 	WdfObjectDelete(ctx->Target->_PendingPlugInRequests);
+
+	//
+	// Wait for thread to finish, if active
+	// 
+	if (ctx->Target->_PluginRequestCompletionWorkerThreadHandle)
+	{
+		NTSTATUS status = KeWaitForSingleObject(
+			&ctx->Target->_PluginRequestCompletionWorkerThreadHandle,
+			Executive,
+			KernelMode,
+			FALSE,
+			nullptr
+		);
+
+		if (NT_SUCCESS(status))
+		{
+			ZwClose(ctx->Target->_PluginRequestCompletionWorkerThreadHandle);
+			ctx->Target->_PluginRequestCompletionWorkerThreadHandle = nullptr;
+		}
+		else
+		{
+			TraceEvents(TRACE_LEVEL_WARNING,
+				TRACE_BUSPDO,
+				"KeWaitForSingleObject failed with status %!STATUS!",
+				status
+			);
+		}
+	}
 	
 	//
 	// PDO device object getting disposed, free context object 
@@ -396,6 +424,31 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueuePlugin(WDFREQUEST Request)
 
 	if (!this->_PendingPlugInRequests)
 		return STATUS_INVALID_DEVICE_STATE;
+
+	if (this->_PluginRequestCompletionWorkerThreadHandle)
+	{
+		status = KeWaitForSingleObject(
+			&this->_PluginRequestCompletionWorkerThreadHandle,
+			Executive,
+			KernelMode,
+			FALSE,
+			nullptr
+		);
+
+		if (NT_SUCCESS(status))
+		{
+			ZwClose(this->_PluginRequestCompletionWorkerThreadHandle);
+			this->_PluginRequestCompletionWorkerThreadHandle = nullptr;
+		}
+		else
+		{
+			TraceEvents(TRACE_LEVEL_WARNING,
+			            TRACE_BUSPDO,
+			            "KeWaitForSingleObject failed with status %!STATUS!",
+			            status
+			);
+		}
+	}
 	
 	status = WdfRequestForwardToIoQueue(Request, this->_PendingPlugInRequests);
 
@@ -415,7 +468,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueuePlugin(WDFREQUEST Request)
 	InitializeObjectAttributes(&threadOb, NULL,
 	                           OBJ_KERNEL_HANDLE, NULL, NULL);
 
-	status = PsCreateSystemThread(&_PluginRequestCompletionWorkerThreadHandle,
+	status = PsCreateSystemThread(&this->_PluginRequestCompletionWorkerThreadHandle,
 	                              static_cast<ACCESS_MASK>(0L),
 	                              &threadOb,
 	                              nullptr,
@@ -598,6 +651,8 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(
 	}
 	while (FALSE);
 
+	ZwClose(ctx->_PluginRequestCompletionWorkerThreadHandle);
+	ctx->_PluginRequestCompletionWorkerThreadHandle = nullptr;
 	KeClearEvent(&ctx->_PdoBootNotificationEvent);
 	(void)PsTerminateSystemThread(0);
 }
