@@ -32,13 +32,10 @@
 #include <wdf.h>
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
-#include <ntintsafe.h>
 #include <initguid.h>
 #include "ViGEmBusDriver.h"
 #include <ViGEm/km/BusShared.h>
 #include "Queue.hpp"
-#include <usb.h>
-#include <usbbusif.h>
 
 
 
