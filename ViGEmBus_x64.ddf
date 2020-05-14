@@ -1,3 +1,4 @@
+; ViGEmBus cab file for attestation submission
 .OPTION EXPLICIT
 .Set CabinetFileCountThreshold=0
 .Set FolderFileCountThreshold=0
@@ -8,14 +9,11 @@
 .Set CompressionType=MSZIP
 .Set Cabinet=on
 .Set Compress=on
-.Set CabinetNameTemplate=ViGEmBus.cab
-.Set DestinationDir=ViGEmBus
-.\artifacts\ViGEmBus.inf
-.Set DestinationDir=ViGEmBus\x64
-.\artifacts\x64\ViGEmBus.sys
-.\artifacts\x64\ViGEmBus.pdb
-.\artifacts\x64\WdfCoinstaller01009.dll
-.Set DestinationDir=ViGEmBus\x86
-.\artifacts\x86\ViGEmBus.sys
-.\artifacts\x86\ViGEmBus.pdb
-.\artifacts\x86\WdfCoinstaller01009.dll
+; x64
+.Set CabinetNameTemplate=ViGEmBus_x64.cab
+.Set DestinationDir=ViGEmBus_x64
+LICENSE
+bin\x64\ViGEmBus.pdb
+bin\x64\ViGEmBus\ViGEmBus.inf
+bin\x64\ViGEmBus\ViGEmBus.sys
+bin\x64\ViGEmBus\WdfCoinstaller01009.dll

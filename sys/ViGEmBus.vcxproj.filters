@@ -31,9 +31,6 @@
     <Inf Include="ViGEmBus.inf">
       <Filter>Driver Files</Filter>
     </Inf>
-    <Inf Include="ViGEmBus_SingleArch.inf">
-      <Filter>Driver Files</Filter>
-    </Inf>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="busenum.h">

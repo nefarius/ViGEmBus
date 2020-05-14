@@ -14,12 +14,13 @@ before_build:
 build:
   project: $(APPVEYOR_BUILD_FOLDER)\$(APPVEYOR_PROJECT_NAME).sln
 after_build:
-#- cmd: makecab.exe /f ViGEmBus.ddf
+- cmd: makecab.exe /f ViGEmBus_%PLATFORM%.ddf
 artifacts:
 - path: 'bin**\$(APPVEYOR_PROJECT_NAME)\*.inf'
 - path: 'bin**\$(APPVEYOR_PROJECT_NAME)\*.sys'
 - path: 'bin**\$(APPVEYOR_PROJECT_NAME)\*.dll'
 - path: 'bin**\*.pdb'
+- path: 'disk1\*.cab'
 deploy:
 - provider: Environment
   name: BUILDBOT

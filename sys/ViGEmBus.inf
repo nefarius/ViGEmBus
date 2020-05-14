@@ -35,13 +35,8 @@ DriverVer= ;
 DefaultDestDir = 12
 ViGEmBus_Device_CoInstaller_CopyFiles = 11
 
-; ================= Class section =====================
-
-[SourceDisksNames.amd64]
-1 = %DiskName%,,,"\x64"
-
-[SourceDisksNames.x86]
-1 = %DiskName%,,,"\x86"
+[SourceDisksNames]
+1 = %DiskName%,,,
 
 [SourceDisksFiles]
 ViGEmBus.sys = 1,,

@@ -358,3 +358,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/disk1/ViGEmBus_x64.cab
+/setup.inf
+/setup.rpt
