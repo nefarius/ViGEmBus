@@ -30,7 +30,7 @@
 
 namespace ViGEm::Bus::Targets
 {
-	constexpr auto XUSB_POOL_TAG = 'EGiV';
+	constexpr auto XUSB_POOL_TAG = 'XUiV';
 
 	typedef struct _XUSB_INTERRUPT_IN_PACKET
 	{
