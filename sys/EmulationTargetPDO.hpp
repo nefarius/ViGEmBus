@@ -163,6 +163,8 @@ namespace ViGEm::Bus::Core
 		virtual void AbortPipe() = 0;
 
 		virtual NTSTATUS SubmitReportImpl(PVOID NewReport) = 0;
+
+		static VOID DumpAsHex(PCSTR Prefix, PVOID Buffer, ULONG BufferLength);
 		
 		//
 		// Unique serial number of the device on the bus

@@ -657,6 +657,42 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(
 	(void)PsTerminateSystemThread(0);
 }
 
+VOID ViGEm::Bus::Core::EmulationTargetPDO::DumpAsHex(PCSTR Prefix, PVOID Buffer, ULONG BufferLength)
+{
+#ifdef DBG
+
+	size_t dumpBufferLength = ((BufferLength * sizeof(CHAR)) * 2) + 1;
+	PSTR dumpBuffer = static_cast<PSTR>(ExAllocatePoolWithTag(
+		NonPagedPoolNx,
+		dumpBufferLength,
+		'1234'
+	));
+	if (dumpBuffer)
+	{
+
+		RtlZeroMemory(dumpBuffer, dumpBufferLength);
+
+		for (ULONG i = 0; i < BufferLength; i++)
+		{
+			sprintf(&dumpBuffer[i * 2], "%02X", static_cast<PUCHAR>(Buffer)[i]);
+		}
+
+		TraceDbg(TRACE_BUSPDO,
+			"%s - Buffer length: %04d, buffer content: %s\n",
+			Prefix,
+			BufferLength,
+			dumpBuffer
+		);
+
+		ExFreePoolWithTag(dumpBuffer, '1234');
+	}
+#else
+	UNREFERENCED_PARAMETER(Prefix);
+	UNREFERENCED_PARAMETER(Buffer);
+	UNREFERENCED_PARAMETER(BufferLength);
+#endif
+}
+
 void ViGEm::Bus::Core::EmulationTargetPDO::UsbAbortPipe()
 {
 	this->AbortPipe();
