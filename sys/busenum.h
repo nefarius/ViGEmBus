@@ -33,7 +33,6 @@
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
 #include <initguid.h>
-#include "ViGEmBusDriver.h"
 #include <ViGEm/km/BusShared.h>
 #include "Queue.hpp"
 
