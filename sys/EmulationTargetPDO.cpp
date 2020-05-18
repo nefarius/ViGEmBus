@@ -39,8 +39,6 @@ PCWSTR ViGEm::Bus::Core::EmulationTargetPDO::_deviceLocation = L"Virtual Gamepad
 NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentDevice, PWDFDEVICE_INIT DeviceInit)
 {
 	NTSTATUS status = STATUS_UNSUCCESSFUL;
-	WDF_DEVICE_PNP_CAPABILITIES pnpCaps;
-	WDF_DEVICE_POWER_CAPABILITIES powerCaps;
 	WDF_PNPPOWER_EVENT_CALLBACKS pnpPowerCallbacks;
 	WDF_OBJECT_ATTRIBUTES pdoAttributes;
 	WDF_IO_QUEUE_CONFIG defaultPdoQueueConfig;
@@ -276,35 +274,24 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 
 #pragma region PNP capabilities
 
-		WDF_DEVICE_PNP_CAPABILITIES_INIT(&pnpCaps);
+		//
+		// Other capabilities initialized in derived class
+		// 
 
-		pnpCaps.Removable = WdfTrue;
-		pnpCaps.EjectSupported = WdfTrue;
-		pnpCaps.SurpriseRemovalOK = WdfTrue;
+		this->_PnpCapabilities.Address = this->_SerialNo;
+		this->_PnpCapabilities.UINumber = this->_SerialNo;
 
-		pnpCaps.Address = this->_SerialNo;
-		pnpCaps.UINumber = this->_SerialNo;
-
-		WdfDeviceSetPnpCapabilities(this->_PdoDevice, &pnpCaps);
+		WdfDeviceSetPnpCapabilities(this->_PdoDevice, &this->_PnpCapabilities);
 
 #pragma endregion
 
 #pragma region Power capabilities
 
-		WDF_DEVICE_POWER_CAPABILITIES_INIT(&powerCaps);
+		//
+		// Capabilities initialized in derived class
+		// 
 
-		powerCaps.DeviceD1 = WdfTrue;
-		powerCaps.WakeFromD1 = WdfTrue;
-		powerCaps.DeviceWake = PowerDeviceD1;
-
-		powerCaps.DeviceState[PowerSystemWorking] = PowerDeviceD0;
-		powerCaps.DeviceState[PowerSystemSleeping1] = PowerDeviceD1;
-		powerCaps.DeviceState[PowerSystemSleeping2] = PowerDeviceD3;
-		powerCaps.DeviceState[PowerSystemSleeping3] = PowerDeviceD3;
-		powerCaps.DeviceState[PowerSystemHibernate] = PowerDeviceD3;
-		powerCaps.DeviceState[PowerSystemShutdown] = PowerDeviceD3;
-
-		WdfDeviceSetPowerCapabilities(this->_PdoDevice, &powerCaps);
+		WdfDeviceSetPowerCapabilities(this->_PdoDevice, &this->_PowerCapabilities);
 
 #pragma endregion
 	} while (FALSE);
@@ -726,6 +713,9 @@ _ProductId(ProductId)
 {
 	this->_OwnerProcessId = current_process_id();
 	KeInitializeEvent(&this->_PdoBootNotificationEvent, NotificationEvent, FALSE);
+
+	WDF_DEVICE_PNP_CAPABILITIES_INIT(&this->_PnpCapabilities);
+	WDF_DEVICE_POWER_CAPABILITIES_INIT(&this->_PowerCapabilities);
 }
 
 bool ViGEm::Bus::Core::EmulationTargetPDO::GetPdoBySerial(

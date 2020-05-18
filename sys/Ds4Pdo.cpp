@@ -39,8 +39,19 @@ ViGEm::Bus::Targets::EmulationTargetDS4::EmulationTargetDS4(ULONG Serial, LONG S
                                                             USHORT ProductId) : EmulationTargetPDO(
 	Serial, SessionId, VendorId, ProductId)
 {
-	_TargetType = DualShock4Wired;
-	_UsbConfigurationDescriptionSize = DS4_DESCRIPTOR_SIZE;
+	this->_TargetType = DualShock4Wired;
+	this->_UsbConfigurationDescriptionSize = DS4_DESCRIPTOR_SIZE;
+
+	//
+	// Set PNP Capabilities
+	// 
+	this->_PnpCapabilities.SurpriseRemovalOK = WdfTrue;
+
+	//
+	// Set Power Capabilities
+	// 
+	this->_PowerCapabilities.DeviceState[PowerSystemWorking] = PowerDeviceD0;
+	this->_PowerCapabilities.WakeFromD0 = WdfTrue;
 }
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit,

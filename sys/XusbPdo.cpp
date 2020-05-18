@@ -41,8 +41,30 @@ ViGEm::Bus::Targets::EmulationTargetXUSB::EmulationTargetXUSB(ULONG Serial, LONG
 	USHORT ProductId) : EmulationTargetPDO(
 		Serial, SessionId, VendorId, ProductId)
 {
-	_TargetType = Xbox360Wired;
-	_UsbConfigurationDescriptionSize = XUSB_DESCRIPTOR_SIZE;
+	this->_TargetType = Xbox360Wired;
+	this->_UsbConfigurationDescriptionSize = XUSB_DESCRIPTOR_SIZE;
+
+	//
+	// Set PNP Capabilities
+	// 
+	this->_PnpCapabilities.Removable = WdfTrue;
+	this->_PnpCapabilities.SurpriseRemovalOK = WdfTrue;
+	this->_PnpCapabilities.UniqueID = WdfTrue;
+
+	//
+	// Set Power Capabilities
+	//	
+	this->_PowerCapabilities.DeviceState[PowerSystemWorking] = PowerDeviceD0;
+	this->_PowerCapabilities.DeviceState[PowerSystemSleeping1] = PowerDeviceD2;
+	this->_PowerCapabilities.DeviceState[PowerSystemSleeping2] = PowerDeviceD2;
+	this->_PowerCapabilities.DeviceState[PowerSystemSleeping3] = PowerDeviceD2;
+	this->_PowerCapabilities.DeviceState[PowerSystemHibernate] = PowerDeviceD2;
+	this->_PowerCapabilities.DeviceState[PowerSystemShutdown] = PowerDeviceD3;
+	this->_PowerCapabilities.DeviceD1 = WdfTrue;
+	this->_PowerCapabilities.DeviceD2 = WdfTrue;
+	this->_PowerCapabilities.WakeFromD0 = WdfTrue;
+	this->_PowerCapabilities.WakeFromD1 = WdfTrue;
+	this->_PowerCapabilities.WakeFromD2 = WdfTrue;
 }
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit, PUNICODE_STRING DeviceId,

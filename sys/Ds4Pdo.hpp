@@ -59,7 +59,6 @@ namespace ViGEm::Bus::Targets
 	{
 	public:
 		EmulationTargetDS4(ULONG Serial, LONG SessionId, USHORT VendorId = 0x054C, USHORT ProductId = 0x05C4);
-		~EmulationTargetDS4() = default;
 
 		NTSTATUS PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit,
 		                          PUNICODE_STRING DeviceId,

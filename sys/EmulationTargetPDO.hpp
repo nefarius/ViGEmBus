@@ -165,6 +165,16 @@ namespace ViGEm::Bus::Core
 		virtual NTSTATUS SubmitReportImpl(PVOID NewReport) = 0;
 
 		static VOID DumpAsHex(PCSTR Prefix, PVOID Buffer, ULONG BufferLength);
+
+		//
+		// PNP Capabilities may differ from device to device
+		// 
+		WDF_DEVICE_PNP_CAPABILITIES _PnpCapabilities;
+
+		//
+		// Power Capabilities may differ from device to device
+		// 
+		WDF_DEVICE_POWER_CAPABILITIES _PowerCapabilities;
 		
 		//
 		// Unique serial number of the device on the bus
@@ -217,7 +227,7 @@ namespace ViGEm::Bus::Core
 		WDFDEVICE _PdoDevice{};
 		
 		//
-		// Configuration descriptor size
+		// Configuration descriptor size (populated by derived class)
 		// 
 		ULONG _UsbConfigurationDescriptionSize{};
 
