@@ -30,7 +30,6 @@
 #include "Ds4Pdo.tmh"
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
-#include <hidclass.h>
 
 
 PCWSTR ViGEm::Bus::Targets::EmulationTargetDS4::_deviceDescription = L"Virtual DualShock 4 Controller";
@@ -142,34 +141,6 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareDevice(PWDFDEVICE_IN
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareHardware()
 {
-	WDF_QUERY_INTERFACE_CONFIG ifaceCfg;
-	INTERFACE devinterfaceHid;
-
-	devinterfaceHid.Size = sizeof(INTERFACE);
-	devinterfaceHid.Version = 1;
-	devinterfaceHid.Context = static_cast<PVOID>(this->_PdoDevice);
-
-	devinterfaceHid.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
-	devinterfaceHid.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
-
-	// Expose GUID_DEVINTERFACE_HID so HIDUSB can initialize
-	WDF_QUERY_INTERFACE_CONFIG_INIT(
-		&ifaceCfg,
-		(PINTERFACE)&devinterfaceHid,
-		&GUID_DEVINTERFACE_HID,
-		NULL
-	);
-
-	NTSTATUS status = WdfDeviceAddQueryInterface(this->_PdoDevice, &ifaceCfg);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_DS4,
-			"WdfDeviceAddQueryInterface failed with status %!STATUS!",
-			status);
-		return status;
-	}
-
 	// Set default HID input report (everything zero`d)
 	UCHAR DefaultHidReport[DS4_REPORT_SIZE] =
 	{

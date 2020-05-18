@@ -29,9 +29,6 @@
 #include "XusbPdo.tmh"
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
-#include <wdmguid.h>
-
-
 #include "busenum.h"
 
 
@@ -154,87 +151,13 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareDevice(PWDFDEVICE_I
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareHardware()
 {
+	NTSTATUS status;
 	WDF_QUERY_INTERFACE_CONFIG ifaceCfg;
 
-	INTERFACE dummyIface;
-
-	dummyIface.Size = sizeof(INTERFACE);
-	dummyIface.Version = 1;
-	dummyIface.Context = static_cast<PVOID>(this->_PdoDevice);
-
-	dummyIface.InterfaceReference = WdfDeviceInterfaceReferenceNoOp;
-	dummyIface.InterfaceDereference = WdfDeviceInterfaceDereferenceNoOp;
-
-	/* XUSB.sys will query for the following three "dummy" interfaces
-	* BUT WONT USE IT so we just expose them to satisfy initialization. (TODO: Check if still valid!)
-	*/
-
-	// Dummy PNP_LOCATION
-
-	WDF_QUERY_INTERFACE_CONFIG_INIT(
-		&ifaceCfg,
-		static_cast<PINTERFACE>(&dummyIface),
-		&GUID_PNP_LOCATION_INTERFACE,
-		nullptr
-	);
-
-	NTSTATUS status = WdfDeviceAddQueryInterface(this->_PdoDevice, &ifaceCfg);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"Couldn't register PNP_LOCATION dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-			&GUID_PNP_LOCATION_INTERFACE,
-			status);
-
-		return status;
-	}
-
-	// Dummy D3COLD_SUPPORT
-
-	WDF_QUERY_INTERFACE_CONFIG_INIT(
-		&ifaceCfg,
-		static_cast<PINTERFACE>(&dummyIface),
-		&GUID_D3COLD_SUPPORT_INTERFACE,
-		nullptr
-	);
-
-	status = WdfDeviceAddQueryInterface(this->_PdoDevice, &ifaceCfg);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"Couldn't register D3COLD_SUPPORT dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-			&GUID_D3COLD_SUPPORT_INTERFACE,
-			status);
-
-		return status;
-	}
-
-	// Dummy REENUMERATE_SELF_INTERFACE_STANDARD
-
-	WDF_QUERY_INTERFACE_CONFIG_INIT(
-		&ifaceCfg,
-		static_cast<PINTERFACE>(&dummyIface),
-		&GUID_REENUMERATE_SELF_INTERFACE_STANDARD,
-		nullptr
-	);
-
-	status = WdfDeviceAddQueryInterface(this->_PdoDevice, &ifaceCfg);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_XUSB,
-			"Couldn't register REENUM_SELF_STD dummy interface %!GUID! (WdfDeviceAddQueryInterface failed with status %!STATUS!)",
-			&GUID_REENUMERATE_SELF_INTERFACE_STANDARD,
-			status);
-
-		return status;
-	}
-
+	// 
 	// Expose USB_BUS_INTERFACE_USBDI_GUID
+	// 
 
-	// This interface actually IS used
 	USB_BUS_INTERFACE_USBDI_V1 xusbInterface;
 
 	xusbInterface.Size = sizeof(USB_BUS_INTERFACE_USBDI_V1);
