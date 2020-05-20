@@ -95,6 +95,7 @@ This list is non-exhaustive, if you'd like to see your project included, contact
 - [RdpGamepad](https://github.com/microsoft/RdpGamepad)
 - [Touchmote](https://github.com/Ryochan7/Touchmote/tree/ryochan7)
 - [Mi-ViGEm](https://github.com/grayver/mi-vigem)
+- [BetterJoy](https://github.com/Davidobot/BetterJoy)
 
 ## License
 
