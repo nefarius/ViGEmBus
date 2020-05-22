@@ -65,7 +65,7 @@ Please respect that the GitHub issue tracker isn't a helpdesk. We offer a [Disco
 
 ## Installation
 
-To grab the latest signed binaries for use or redistribution [head over to releases](../../releases/latest) and download the latest setup. It will take care of everything.
+Pre-built production-signed binaries are provided by `Nefarius Software Solutions e.U.` and [available as an all-in-one setup](../../releases/latest).
 
 ## Sponsors
 
