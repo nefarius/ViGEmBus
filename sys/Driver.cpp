@@ -114,12 +114,53 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
     WDF_OBJECT_ATTRIBUTES       fdoAttributes;
     WDF_OBJECT_ATTRIBUTES       fileHandleAttributes;
     PFDO_DEVICE_DATA            pFDOData;
+    PWSTR                       pSymbolicNameList;
 
     UNREFERENCED_PARAMETER(Driver);
 
     PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+#pragma region Check for duplicated FDO
+
+    //
+    // Note: this could be avoided if converted to non-PNP driver
+    // and use of named device object. Food for thought for future.
+    // 
+	
+    status = IoGetDeviceInterfaces(
+        &GUID_DEVINTERFACE_BUSENUM_VIGEM, 
+        NULL,
+        0, // Important!
+        &pSymbolicNameList
+    );
+    if (NT_SUCCESS(status))
+    {
+	    const bool deviceAlreadyExists = (0 != *pSymbolicNameList);
+	    ExFreePool(pSymbolicNameList);
+
+	    if (deviceAlreadyExists)
+	    {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_DRIVER,
+                "Device with interface GUID {%!GUID!} already exists (%ws)",
+                &GUID_DEVINTERFACE_BUSENUM_VIGEM,
+                pSymbolicNameList
+            );
+
+            return STATUS_RESOURCE_IN_USE;
+	    }
+    }
+    else
+    {
+	    TraceEvents(TRACE_LEVEL_WARNING,
+	                TRACE_DRIVER,
+	                "IoGetDeviceInterfaces failed with status %!STATUS!",
+	                status);
+    }
+
+#pragma endregion
 
     WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
     // More than one process may talk to the bus at the same time
