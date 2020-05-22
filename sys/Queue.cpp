@@ -41,10 +41,6 @@
 #include "Ds4Pdo.hpp"
 
 
-#ifdef ALLOC_PRAGMA
-#pragma alloc_text (PAGE, Bus_EvtIoDefault)
-#endif
-
 using ViGEm::Bus::Core::PDO_IDENTIFICATION_DESCRIPTION;
 using ViGEm::Bus::Core::EmulationTargetPDO;
 using ViGEm::Bus::Targets::EmulationTargetXUSB;
@@ -405,24 +401,6 @@ VOID Bus_EvtIoDeviceControl(
 	}
 
 	TraceDbg(TRACE_QUEUE, "%!FUNC! Exit with status %!STATUS!", status);
-}
-
-//
-// Catches unsupported requests.
-// 
-VOID Bus_EvtIoDefault(
-	_In_ WDFQUEUE Queue,
-	_In_ WDFREQUEST Request
-)
-{
-	UNREFERENCED_PARAMETER(Queue);
-	UNREFERENCED_PARAMETER(Request);
-
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
-
-	WdfRequestComplete(Request, STATUS_INVALID_DEVICE_REQUEST);
-
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
 }
 
 EXTERN_C_END
