@@ -39,6 +39,10 @@ A few examples of the most common use cases for `ViGEm` are:
 
 The driver is built for Windows 7/8.1/10 (x86 and amd64).
 
+## License
+
+The `ViGEm` Bus Driver is licensed under the **BSD-3-Clause**, see [LICENSE](./LICENSE.md) for more information.
+
 ## How to build
 
 [Install Visual Studio 2019 and WDK for Windows 10, version 1903](https://docs.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk#wdk-for-windows-10-version-1903).
@@ -96,7 +100,3 @@ This list is non-exhaustive, if you'd like to see your project included, contact
 - [Touchmote](https://github.com/Ryochan7/Touchmote/tree/ryochan7)
 - [Mi-ViGEm](https://github.com/grayver/mi-vigem)
 - [BetterJoy](https://github.com/Davidobot/BetterJoy)
-
-## License
-
-The `ViGEm` Bus Driver is licensed under the MIT License, see [LICENSE](./LICENSE.md) for more information.
