@@ -186,7 +186,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\client\include\ViGEm\km\BusShared.h" />
-    <ClInclude Include="busenum.h" />
+    <ClInclude Include="Driver.h" />
     <ClInclude Include="CRTCPP.hpp" />
     <ClInclude Include="Ds4Pdo.hpp" />
     <ClInclude Include="EmulationTargetPDO.hpp" />

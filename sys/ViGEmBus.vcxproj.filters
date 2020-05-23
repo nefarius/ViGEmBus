@@ -30,9 +30,6 @@
     </Inf>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="busenum.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="trace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -55,6 +52,9 @@
       <Filter>Header Files\Targets</Filter>
     </ClInclude>
     <ClInclude Include="Queue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Driver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

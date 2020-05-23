@@ -38,7 +38,7 @@
 #include "XusbPdo.tmh"
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
-#include "busenum.h"
+#include "Driver.h"
 
 
 PCWSTR ViGEm::Bus::Targets::EmulationTargetXUSB::_deviceDescription = L"Virtual Xbox 360 Controller";
