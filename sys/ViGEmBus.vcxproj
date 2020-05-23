@@ -121,6 +121,7 @@
     <ClCompile>
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppEnabled>true</WppEnabled>
+      <WppKernelMode>true</WppKernelMode>
       <WppScanConfigurationData>trace.h</WppScanConfigurationData>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
