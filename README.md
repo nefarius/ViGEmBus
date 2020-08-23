@@ -139,6 +139,47 @@ vigem_target_free(pad);
 
 ---
 
+Alright, so we got the feeding side of things done, but what about the other direction? After all, the virtual device can receive some state changes as well (for the Xbox 360 device the LED ring can change and rumble/vibration requests can arrive) and this information is of interest for us. This is achieved by registering a notification callback like so:
+
+```cpp
+//
+// Define the callback function
+//
+VOID CALLBACK notification(
+    PVIGEM_CLIENT Client,
+    PVIGEM_TARGET Target,
+    UCHAR LargeMotor,
+    UCHAR SmallMotor,
+    UCHAR LedNumber,
+    LPVOID UserData
+)
+{
+    static int count = 1;
+
+    std::cout.width(3);
+    std::cout << count++ << " ";
+    std::cout.width(3);
+    std::cout << (int)LargeMotor << " ";
+    std::cout.width(3);
+    std::cout << (int)SmallMotor << std::endl;
+}
+
+const auto ret = vigem_target_x360_register_notification(client, x360, &notification, nullptr);
+
+//
+// Error handling
+//
+if (!VIGEM_SUCCESS(ret))
+{
+    std::cerr << "Registering for notification failed with error code: 0x" << std::hex << retval << std::endl;
+    return -1;
+}
+```
+
+The function `notification` will now get invoked every time a rumble request was sent to the virtual controller and can get handled accordingly.
+
+---
+
 Once ViGEm interaction is no longer required (e.g. the application is about to end) the acquired resources need to be freed properly:
 
 ```cpp
