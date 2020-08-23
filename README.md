@@ -71,7 +71,7 @@ const auto client = vigem_alloc();
 
 if (client == nullptr)
 {
-    std::cerr << L"Uh, not enough memory to do that?!" << std::endl;
+    std::cerr << "Uh, not enough memory to do that?!" << std::endl;
     return -1;
 }
 ```
@@ -83,7 +83,7 @@ const auto retval = vigem_connect(client);
 
 if (!VIGEM_SUCCESS(retval))
 {
-    std::cerr << L"ViGEm Bus connection failed with error code: 0x" << std::hex << retval << std::endl;
+    std::cerr << "ViGEm Bus connection failed with error code: 0x" << std::hex << retval << std::endl;
     return -1;
 }
 ```
@@ -110,7 +110,7 @@ const auto pir = vigem_target_add(client, pad);
 //
 if (!VIGEM_SUCCESS(pir))
 {
-    std::cerr << L"Target plugin failed with error code: 0x" << std::hex << retval << std::endl;
+    std::cerr << "Target plugin failed with error code: 0x" << std::hex << retval << std::endl;
     return -1;
 }
 
