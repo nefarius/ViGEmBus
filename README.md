@@ -139,7 +139,7 @@ vigem_target_free(pad);
 
 ---
 
-Alright, so we got the feeding side of things done, but what about the other direction? After all, the virtual device can receive some state changes as well (for the Xbox 360 device the LED ring can change and rumble/vibration requests can arrive) and this information is of interest for us. This is achieved by registering a notification callback like so:
+Alright, so we got the feeding side of things done, but what about the other direction? After all, the virtual device can receive some state changes as well (for the Xbox 360 device the LED ring can change and rumble/vibration requests can arrive) and this information is of interest for us. This is achieved by defining a notification callback like so:
 
 ```cpp
 //
