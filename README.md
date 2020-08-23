@@ -164,7 +164,7 @@ VOID CALLBACK notification(
     std::cout << (int)SmallMotor << std::endl;
 }
 
-const auto ret = vigem_target_x360_register_notification(client, x360, &notification, nullptr);
+const auto ret = vigem_target_x360_register_notification(client, pad, &notification, nullptr);
 
 //
 // Error handling
