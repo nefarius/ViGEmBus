@@ -163,20 +163,24 @@ VOID CALLBACK notification(
     std::cout.width(3);
     std::cout << (int)SmallMotor << std::endl;
 }
+```
 
-const auto ret = vigem_target_x360_register_notification(client, pad, &notification, nullptr);
+Register it:
+
+```cpp
+const auto retval = vigem_target_x360_register_notification(client, pad, &notification, nullptr);
 
 //
 // Error handling
 //
-if (!VIGEM_SUCCESS(ret))
+if (!VIGEM_SUCCESS(retval))
 {
     std::cerr << "Registering for notification failed with error code: 0x" << std::hex << retval << std::endl;
     return -1;
 }
 ```
 
-The function `notification` will now get invoked every time a rumble request was sent to the virtual controller and can get handled accordingly.
+The function `notification` will now get invoked every time a rumble request was sent to the virtual controller and can get handled accordingly. This is a blocking call and the invocation will take place in the order the underlying requests arrived.
 
 ---
 
