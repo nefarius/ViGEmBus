@@ -5,10 +5,6 @@ VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ViGEmClient", "src\ViGEmClient.vcxproj", "{7DB06674-1F4F-464B-8E1C-172E9587F9DC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{8169FFB3-60F9-4A0C-B172-8E26B982B45F}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tester", "app\Tester\Tester.vcxproj", "{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_DLL|x64 = Debug_DLL|x64
@@ -49,36 +45,9 @@ Global
 		{7DB06674-1F4F-464B-8E1C-172E9587F9DC}.Release|x64.Build.0 = Release_LIB|x64
 		{7DB06674-1F4F-464B-8E1C-172E9587F9DC}.Release|x86.ActiveCfg = Release_LIB|Win32
 		{7DB06674-1F4F-464B-8E1C-172E9587F9DC}.Release|x86.Build.0 = Release_LIB|Win32
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Debug_DLL|x64.ActiveCfg = Debug|x64
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Debug_DLL|x64.Build.0 = Debug|x64
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Debug_DLL|x86.ActiveCfg = Debug|Win32
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Debug_DLL|x86.Build.0 = Debug|Win32
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Debug_LIB|x64.ActiveCfg = Debug|x64
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Debug_LIB|x64.Build.0 = Debug|x64
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Debug_LIB|x86.ActiveCfg = Debug|Win32
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Debug_LIB|x86.Build.0 = Debug|Win32
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Debug|x64.ActiveCfg = Debug|x64
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Debug|x64.Build.0 = Debug|x64
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Debug|x86.ActiveCfg = Debug|Win32
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Debug|x86.Build.0 = Debug|Win32
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Release_DLL|x64.ActiveCfg = Release|x64
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Release_DLL|x64.Build.0 = Release|x64
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Release_DLL|x86.ActiveCfg = Release|Win32
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Release_DLL|x86.Build.0 = Release|Win32
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Release_LIB|x64.ActiveCfg = Release|x64
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Release_LIB|x64.Build.0 = Release|x64
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Release_LIB|x86.ActiveCfg = Release|Win32
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Release_LIB|x86.Build.0 = Release|Win32
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Release|x64.ActiveCfg = Release|x64
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Release|x64.Build.0 = Release|x64
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Release|x86.ActiveCfg = Release|Win32
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{2F4ED0AB-0B51-4506-91AA-1984C5D44B85} = {8169FFB3-60F9-4A0C-B172-8E26B982B45F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D5CD61FD-80BB-4E0E-840C-BAF66ABB1CF0}
