@@ -1,3 +1,0 @@
-[submodule "client"]
-	path = client
-	url = https://github.com/ViGEm/ViGEmClient.git
