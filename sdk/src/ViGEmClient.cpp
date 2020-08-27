@@ -53,7 +53,13 @@ SOFTWARE.
 // 
 #include "Internal.h"
 
+//
+// Uncomment to compile in crash dump handler
+// 
+//#define VIGEM_USE_CRASH_HANDLER
 
+
+#ifdef VIGEM_USE_CRASH_HANDLER
 typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(
     HANDLE hProcess,
     DWORD dwPid,
@@ -65,6 +71,7 @@ typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(
     );
 
 LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExceptionInfo);
+#endif
 
 
 //
@@ -158,7 +165,7 @@ PVIGEM_TARGET FORCEINLINE VIGEM_TARGET_ALLOC_INIT(
     return target;
 }
 
-
+#ifdef VIGEM_USE_CRASH_HANDLER
 LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExceptionInfo)
 {
     const auto mhLib = LoadLibrary(L"dbghelp.dll");
@@ -201,10 +208,13 @@ LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExcep
 
     return EXCEPTION_CONTINUE_SEARCH;
 }
+#endif
 
 PVIGEM_CLIENT vigem_alloc()
 {
+#ifdef VIGEM_USE_CRASH_HANDLER
     SetUnhandledExceptionFilter(vigem_internal_exception_handler);
+#endif
 
     const auto driver = static_cast<PVIGEM_CLIENT>(malloc(sizeof(VIGEM_CLIENT)));
 
