@@ -70,6 +70,12 @@ namespace ViGEm::Bus::Core
 			OUT EmulationTargetPDO** Object
 		);
 
+		static bool GetPdoBySerial(
+			IN WDFDEVICE ParentDevice,
+			IN ULONG SerialNo,
+			OUT EmulationTargetPDO** Object
+		);
+
 		virtual NTSTATUS PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit,
 		                                  PUNICODE_STRING DeviceId,
 		                                  PUNICODE_STRING DeviceDescription) = 0;
@@ -123,12 +129,6 @@ namespace ViGEm::Bus::Core
 		static unsigned long current_process_id();
 
 		static EVT_WDF_DEVICE_CONTEXT_CLEANUP EvtDeviceContextCleanup;
-
-		static bool GetPdoBySerial(
-			IN WDFDEVICE ParentDevice,
-			IN ULONG SerialNo,
-			OUT EmulationTargetPDO** Object
-		);
 
 		HANDLE _WaitDeviceReadyCompletionWorkerThreadHandle{};
 		

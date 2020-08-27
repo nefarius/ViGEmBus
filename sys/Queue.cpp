@@ -68,6 +68,7 @@ VOID Bus_EvtIoDeviceControl(
 	PDS4_SUBMIT_REPORT ds4Submit = nullptr;
 	PDS4_REQUEST_NOTIFICATION ds4Notify = nullptr;
 	PVIGEM_CHECK_VERSION pCheckVersion = nullptr;
+	PVIGEM_WAIT_DEVICE_READY pWaitDeviceReady = nullptr;
 	PXUSB_GET_USER_INDEX pXusbGetUserIndex = nullptr;
 	EmulationTargetPDO* pdo;
 
@@ -103,6 +104,47 @@ VOID Bus_EvtIoDeviceControl(
 		            "Requested version: 0x%04X, compiled version: 0x%04X",
 		            pCheckVersion->Version, VIGEM_COMMON_VERSION);
 
+		break;
+
+#pragma endregion
+
+#pragma region IOCTL_VIGEM_WAIT_DEVICE_READY
+
+	case IOCTL_VIGEM_WAIT_DEVICE_READY:
+
+		TraceDbg(TRACE_QUEUE, "IOCTL_VIGEM_WAIT_DEVICE_READY");
+
+		status = WdfRequestRetrieveInputBuffer(
+			Request,
+			sizeof(VIGEM_WAIT_DEVICE_READY),
+			reinterpret_cast<PVOID*>(&pWaitDeviceReady),
+			&length
+		);
+
+		if (!NT_SUCCESS(status) || length != sizeof(VIGEM_WAIT_DEVICE_READY))
+		{
+			status = STATUS_INVALID_PARAMETER;
+			break;
+		}
+
+		// This request only supports a single PDO at a time
+		if (pWaitDeviceReady->SerialNo == 0)
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_QUEUE,
+				"Invalid serial 0 submitted");
+
+			status = STATUS_INVALID_PARAMETER;
+			break;
+		}
+
+		if (!EmulationTargetPDO::GetPdoBySerial(Device, xusbSubmit->SerialNo, &pdo))
+			status = STATUS_DEVICE_DOES_NOT_EXIST;
+		else
+			status = pdo->EnqueueWaitDeviceReady(Request);
+
+		status = NT_SUCCESS(status) ? STATUS_PENDING : status;
+		
 		break;
 
 #pragma endregion
