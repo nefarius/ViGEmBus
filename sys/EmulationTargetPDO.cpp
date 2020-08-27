@@ -321,16 +321,16 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtDeviceContextCleanup(
 	//
 	// This queues parent is the FDO so explicitly free memory
 	//
-	WdfIoQueuePurgeSynchronously(ctx->Target->_PendingPlugInRequests);
-	WdfObjectDelete(ctx->Target->_PendingPlugInRequests);
+	WdfIoQueuePurgeSynchronously(ctx->Target->_WaitDeviceReadyRequests);
+	WdfObjectDelete(ctx->Target->_WaitDeviceReadyRequests);
 
 	//
 	// Wait for thread to finish, if active
 	// 
-	if (ctx->Target->_PluginRequestCompletionWorkerThreadHandle)
+	if (ctx->Target->_WaitDeviceReadyCompletionWorkerThreadHandle)
 	{
 		NTSTATUS status = KeWaitForSingleObject(
-			&ctx->Target->_PluginRequestCompletionWorkerThreadHandle,
+			&ctx->Target->_WaitDeviceReadyCompletionWorkerThreadHandle,
 			Executive,
 			KernelMode,
 			FALSE,
@@ -339,8 +339,8 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtDeviceContextCleanup(
 
 		if (NT_SUCCESS(status))
 		{
-			ZwClose(ctx->Target->_PluginRequestCompletionWorkerThreadHandle);
-			ctx->Target->_PluginRequestCompletionWorkerThreadHandle = nullptr;
+			ZwClose(ctx->Target->_WaitDeviceReadyCompletionWorkerThreadHandle);
+			ctx->Target->_WaitDeviceReadyCompletionWorkerThreadHandle = nullptr;
 		}
 		else
 		{
@@ -384,20 +384,20 @@ VIGEM_TARGET_TYPE ViGEm::Bus::Core::EmulationTargetPDO::GetType() const
 	return this->_TargetType;
 }
 
-NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueuePlugin(WDFREQUEST Request)
+NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueueWaitDeviceReady(WDFREQUEST Request)
 {
 	NTSTATUS status;
 
 	if (!this->IsOwnerProcess())
 		return STATUS_ACCESS_DENIED;
 
-	if (!this->_PendingPlugInRequests)
+	if (!this->_WaitDeviceReadyRequests)
 		return STATUS_INVALID_DEVICE_STATE;
 
-	if (this->_PluginRequestCompletionWorkerThreadHandle)
+	if (this->_WaitDeviceReadyCompletionWorkerThreadHandle)
 	{
 		status = KeWaitForSingleObject(
-			&this->_PluginRequestCompletionWorkerThreadHandle,
+			&this->_WaitDeviceReadyCompletionWorkerThreadHandle,
 			Executive,
 			KernelMode,
 			FALSE,
@@ -406,8 +406,8 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueuePlugin(WDFREQUEST Request)
 
 		if (NT_SUCCESS(status))
 		{
-			ZwClose(this->_PluginRequestCompletionWorkerThreadHandle);
-			this->_PluginRequestCompletionWorkerThreadHandle = nullptr;
+			ZwClose(this->_WaitDeviceReadyCompletionWorkerThreadHandle);
+			this->_WaitDeviceReadyCompletionWorkerThreadHandle = nullptr;
 		}
 		else
 		{
@@ -419,7 +419,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueuePlugin(WDFREQUEST Request)
 		}
 	}
 	
-	status = WdfRequestForwardToIoQueue(Request, this->_PendingPlugInRequests);
+	status = WdfRequestForwardToIoQueue(Request, this->_WaitDeviceReadyRequests);
 
 	if (!NT_SUCCESS(status))
 	{
@@ -437,12 +437,12 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueuePlugin(WDFREQUEST Request)
 	InitializeObjectAttributes(&threadOb, NULL,
 	                           OBJ_KERNEL_HANDLE, NULL, NULL);
 
-	status = PsCreateSystemThread(&this->_PluginRequestCompletionWorkerThreadHandle,
+	status = PsCreateSystemThread(&this->_WaitDeviceReadyCompletionWorkerThreadHandle,
 	                              static_cast<ACCESS_MASK>(0L),
 	                              &threadOb,
 	                              nullptr,
 	                              nullptr,
-	                              PluginRequestCompletionWorkerRoutine,
+	                              WaitDeviceReadyCompletionWorkerRoutine,
 	                              this
 	);
 
@@ -474,7 +474,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoPrepare(WDFDEVICE ParentDevice
 		ParentDevice,
 		&plugInQueueConfig,
 		WDF_NO_OBJECT_ATTRIBUTES,
-		&this->_PendingPlugInRequests
+		&this->_WaitDeviceReadyRequests
 	);
 	if (!NT_SUCCESS(status))
 	{
@@ -555,7 +555,7 @@ VOID USB_BUSIFFN ViGEm::Bus::Core::EmulationTargetPDO::UsbInterfaceGetUSBDIVersi
 
 #pragma endregion
 
-VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(IN PVOID StartContext)
+VOID ViGEm::Bus::Core::EmulationTargetPDO::WaitDeviceReadyCompletionWorkerRoutine(IN PVOID StartContext)
 {
 	const auto ctx = static_cast<EmulationTargetPDO*>(StartContext);
 
@@ -581,7 +581,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(
 		//
 		// Fetch pending request (there has to be one at this point)
 		// 
-		if (!NT_SUCCESS(WdfIoQueueRetrieveNextRequest(ctx->_PendingPlugInRequests, &pluginRequest)))
+		if (!NT_SUCCESS(WdfIoQueueRetrieveNextRequest(ctx->_WaitDeviceReadyRequests, &pluginRequest)))
 		{
 			TraceEvents(TRACE_LEVEL_WARNING,
 			            TRACE_BUSPDO,
@@ -620,8 +620,8 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(
 	}
 	while (FALSE);
 
-	ZwClose(ctx->_PluginRequestCompletionWorkerThreadHandle);
-	ctx->_PluginRequestCompletionWorkerThreadHandle = nullptr;
+	ZwClose(ctx->_WaitDeviceReadyCompletionWorkerThreadHandle);
+	ctx->_WaitDeviceReadyCompletionWorkerThreadHandle = nullptr;
 	KeClearEvent(&ctx->_PdoBootNotificationEvent);
 	(void)PsTerminateSystemThread(0);
 }

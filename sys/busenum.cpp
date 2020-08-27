@@ -219,7 +219,7 @@ EXTERN_C NTSTATUS Bus_PlugInDevice(
 		goto pluginEnd;
 	}
 
-	status = description.Target->EnqueuePlugin(Request);
+	status = description.Target->EnqueueWaitDeviceReady(Request);
 
 	status = NT_SUCCESS(status) ? STATUS_PENDING : status;
 

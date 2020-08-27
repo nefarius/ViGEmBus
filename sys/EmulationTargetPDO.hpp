@@ -115,7 +115,7 @@ namespace ViGEm::Bus::Core
 
 		VIGEM_TARGET_TYPE GetType() const;
 
-		NTSTATUS EnqueuePlugin(WDFREQUEST Request);
+		NTSTATUS EnqueueWaitDeviceReady(WDFREQUEST Request);
 
 		NTSTATUS PdoPrepare(WDFDEVICE ParentDevice);
 	
@@ -130,7 +130,7 @@ namespace ViGEm::Bus::Core
 			OUT EmulationTargetPDO** Object
 		);
 
-		HANDLE _PluginRequestCompletionWorkerThreadHandle{};
+		HANDLE _WaitDeviceReadyCompletionWorkerThreadHandle{};
 		
 	protected:
 		static const ULONG _maxHardwareIdLength = 0xFF;
@@ -163,7 +163,7 @@ namespace ViGEm::Bus::Core
 
 		static EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL EvtIoInternalDeviceControl;
 
-		static VOID PluginRequestCompletionWorkerRoutine(IN PVOID StartContext);
+		static VOID WaitDeviceReadyCompletionWorkerRoutine(IN PVOID StartContext);
 		
 		virtual VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) = 0;
 
@@ -218,7 +218,7 @@ namespace ViGEm::Bus::Core
 		//
 		// Queue for blocking plugin requests
 		// 
-		WDFQUEUE _PendingPlugInRequests{};
+		WDFQUEUE _WaitDeviceReadyRequests{};
 		
 		//
 		// Queue for incoming data interrupt transfer
