@@ -219,10 +219,6 @@ EXTERN_C NTSTATUS Bus_PlugInDevice(
 		goto pluginEnd;
 	}
 
-	status = description.Target->EnqueueWaitDeviceReady(Request);
-
-	status = NT_SUCCESS(status) ? STATUS_PENDING : status;
-
 pluginEnd:
 
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSENUM, "%!FUNC! Exit with status %!STATUS!", status);
