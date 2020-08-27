@@ -104,6 +104,6 @@ KmdfLibraryVersion = $KMDFVERSION$
 [Strings]
 SPSVCINST_ASSOCSERVICE= 0x00000002
 ManufacturerName="Nefarius Software Solutions e.U."
-DiskName = "ViGEmBus Installation Disk"
-ViGEmBus.DeviceDesc = "Virtual Gamepad Emulation Bus"
-ViGEmBus.SVCDESC = "Virtual Gamepad Emulation Service"
+DiskName = "Nefarius ViGEmBus Installation Disk"
+ViGEmBus.DeviceDesc = "Nefarius Virtual Gamepad Emulation Bus"
+ViGEmBus.SVCDESC = "Nefarius Virtual Gamepad Emulation Service"
