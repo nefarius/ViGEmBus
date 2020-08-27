@@ -1,0 +1,70 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/ViGEmBus/v15
+/build/bin/Release
+/build/obj/Release
+/lib
+/packages
+/sys/x64/Release
+/x64/Release
+/x64/Release (dynamic)
+/x64/Release (static)
+/.tmp
+/lib/Release (static)
+/Release
+/sys/Release
+/Release (static)
+/build/bin/Debug
+/build/obj/Debug
+/bin
+/sys/x64
+/x64
+*.user
+/.vs/config
+/sys/RCa21300
+/sys/RCb21300
+/build/*.dotsettings
+/artifacts
+/.vs/ViGEmBus/DesignTimeBuild
+/build/obj
+/.vs/ViGEmClient
+/src/Release (static)
+/src/x64/Debug (static)
+/src/x64/Release (dynamic)
+/src/x64/Release (static)
+*.TMP
+/src/Debug_LIB
+/src/x64/Debug_LIB
+/x64/Debug_LIB
+/Debug_LIB
+*.aps
+/Release_LIB
+/src/Release_LIB
+/src/x64
+/src/Debug_DLL
+/src/Release_DLL
+/app/Tester/Debug
+/Debug
+/app/Tester/x64/Debug
+/app/Tester/x64/Release/Tester.tlog
+/app/Tester/x64/Release/Tester.log
+/app/Tester/x64/Release/Tester.obj
+/app/Tester/x64/Release/vc141.pdb
+/app/Tester/x64/Release/vcpkg.applocal.log
+/app/Tester/Release/Tester.tlog/CL.command.1.tlog
+/app/Tester/Release/Tester.tlog/CL.read.1.tlog
+/app/Tester/Release/Tester.tlog/CL.write.1.tlog
+/app/Tester/Release/Tester.tlog/link.command.1.tlog
+/app/Tester/Release/Tester.tlog/link.read.1.tlog
+/app/Tester/Release/Tester.tlog/link.write.1.tlog
+/app/Tester/Release/Tester.tlog/Tester.lastbuildstate
+/app/Tester/Release/Tester.tlog/Tester.write.1u.tlog
+/app/Tester/Release/Tester.Build.CppClean.log
+/app/Tester/Release/Tester.log
+/app/Tester/Release/Tester.obj
+/app/Tester/Release/vc141.pdb
+/app/Tester/Release/vcpkg.applocal.log
+/app/Tester/x64/Release/Tester.Build.CppClean.log
+/app/Tester/x64/Release
