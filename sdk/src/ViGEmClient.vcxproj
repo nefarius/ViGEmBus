@@ -299,10 +299,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="$(SolutionDir)\include\ViGEm\Client.h" />
-    <ClInclude Include="$(SolutionDir)\include\ViGEm\Common.h" />
-    <ClInclude Include="$(SolutionDir)\include\ViGEm\Util.h" />
-    <ClInclude Include="$(SolutionDir)\include\ViGEm\km\BusShared.h" />
+    <ClInclude Include="..\include\ViGEm\Client.h" />
+    <ClInclude Include="..\include\ViGEm\Common.h" />
+    <ClInclude Include="..\include\ViGEm\Util.h" />
+    <ClInclude Include="..\include\ViGEm\km\BusShared.h" />
     <ClInclude Include="Internal.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

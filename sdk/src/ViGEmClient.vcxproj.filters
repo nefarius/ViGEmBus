@@ -21,23 +21,23 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(SolutionDir)\include\ViGEm\Util.h">
-      <Filter>Header Files\ViGEm</Filter>
-    </ClInclude>
-    <ClInclude Include="$(SolutionDir)\include\ViGEm\Common.h">
-      <Filter>Header Files\ViGEm</Filter>
-    </ClInclude>
-    <ClInclude Include="$(SolutionDir)\include\ViGEm\Client.h">
-      <Filter>Header Files\ViGEm</Filter>
-    </ClInclude>
     <ClInclude Include="Internal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)\include\ViGEm\km\BusShared.h">
+    <ClInclude Include="..\include\ViGEm\km\BusShared.h">
       <Filter>Header Files\ViGEm\km</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ViGEm\Client.h">
+      <Filter>Header Files\ViGEm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ViGEm\Common.h">
+      <Filter>Header Files\ViGEm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ViGEm\Util.h">
+      <Filter>Header Files\ViGEm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
