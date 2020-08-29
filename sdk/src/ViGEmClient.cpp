@@ -395,56 +395,100 @@ void vigem_target_free(PVIGEM_TARGET target)
 
 VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 {
-    if (!vigem)
-        return VIGEM_ERROR_BUS_INVALID_HANDLE;
-
-    if (!target)
-        return VIGEM_ERROR_INVALID_TARGET;
-
-    if (vigem->hBusDevice == INVALID_HANDLE_VALUE)
-        return VIGEM_ERROR_BUS_NOT_FOUND;
-
-    if (target->State == VIGEM_TARGET_NEW)
-        return VIGEM_ERROR_TARGET_UNINITIALIZED;
-
-    if (target->State == VIGEM_TARGET_CONNECTED)
-        return VIGEM_ERROR_ALREADY_CONNECTED;
-
+    VIGEM_ERROR error = VIGEM_ERROR_NO_FREE_SLOT;
     DWORD transferred = 0;
     VIGEM_PLUGIN_TARGET plugin;
-    OVERLAPPED lOverlapped = { 0 };
-    lOverlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+    VIGEM_WAIT_DEVICE_READY devReady;
+    OVERLAPPED olPlugIn = { 0 };
+    olPlugIn.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+    OVERLAPPED olWait = { 0 };
+    olWait.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
-    for (target->SerialNo = 1; target->SerialNo <= VIGEM_TARGETS_MAX; target->SerialNo++)
-    {
-        VIGEM_PLUGIN_TARGET_INIT(&plugin, target->SerialNo, target->Type);
-
-        plugin.VendorId = target->VendorId;
-        plugin.ProductId = target->ProductId;
-
-        DeviceIoControl(
-            vigem->hBusDevice,
-            IOCTL_VIGEM_PLUGIN_TARGET,
-            &plugin,
-            plugin.Size,
-            nullptr,
-            0,
-            &transferred,
-            &lOverlapped
-        );
-
-        if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transferred, TRUE) != 0)
+    do {
+        if (!vigem)
         {
-            target->State = VIGEM_TARGET_CONNECTED;
-            CloseHandle(lOverlapped.hEvent);
-
-            return VIGEM_ERROR_NONE;
+            error = VIGEM_ERROR_BUS_INVALID_HANDLE;
+        	break;
         }
-    }
 
-    CloseHandle(lOverlapped.hEvent);
+        if (!target)
+        {
+            error = VIGEM_ERROR_INVALID_TARGET;
+        	break;
+        }
 
-    return VIGEM_ERROR_NO_FREE_SLOT;
+        if (vigem->hBusDevice == INVALID_HANDLE_VALUE)
+        {
+            error = VIGEM_ERROR_BUS_NOT_FOUND;
+        	break;
+        }
+
+        if (target->State == VIGEM_TARGET_NEW)
+        {
+            error = VIGEM_ERROR_TARGET_UNINITIALIZED;
+        	break;
+        }
+
+        if (target->State == VIGEM_TARGET_CONNECTED)
+        {
+            error = VIGEM_ERROR_ALREADY_CONNECTED;
+        	break;
+        }       
+
+    	//
+    	// TODO: this is mad stupid, redesign
+    	// 
+        for (target->SerialNo = 1; target->SerialNo <= VIGEM_TARGETS_MAX; target->SerialNo++)
+        {
+	        VIGEM_PLUGIN_TARGET_INIT(&plugin, target->SerialNo, target->Type);
+
+	        plugin.VendorId = target->VendorId;
+	        plugin.ProductId = target->ProductId;
+
+	        DeviceIoControl(
+		        vigem->hBusDevice,
+		        IOCTL_VIGEM_PLUGIN_TARGET,
+		        &plugin,
+		        plugin.Size,
+		        nullptr,
+		        0,
+		        &transferred,
+		        &olPlugIn
+	        );
+
+	        if (GetOverlappedResult(vigem->hBusDevice, &olPlugIn, &transferred, TRUE) != 0)
+	        {
+		        VIGEM_WAIT_DEVICE_READY_INIT(&devReady, plugin.SerialNo);
+
+		        DeviceIoControl(
+			        vigem->hBusDevice,
+			        IOCTL_VIGEM_WAIT_DEVICE_READY,
+			        &devReady,
+			        devReady.Size,
+			        nullptr,
+			        0,
+			        &transferred,
+			        &olWait
+		        );
+
+		        if (GetOverlappedResult(vigem->hBusDevice, &olWait, &transferred, TRUE) != 0)
+		        {
+			        target->State = VIGEM_TARGET_CONNECTED;
+
+			        error = VIGEM_ERROR_NONE;
+			        break;
+		        }
+	        }
+        }
+    } while (false);
+
+    if (olPlugIn.hEvent)
+	    CloseHandle(olPlugIn.hEvent);
+
+    if (olWait.hEvent)
+	    CloseHandle(olWait.hEvent);
+
+    return error;
 }
 
 VIGEM_ERROR vigem_target_add_async(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PFN_VIGEM_TARGET_ADD_RESULT result)
