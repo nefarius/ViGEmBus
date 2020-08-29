@@ -175,7 +175,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareHardware()
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 {
-	NTSTATUS            status;
+	NTSTATUS status;
 
 	// Initialize periodic timer
 	WDF_TIMER_CONFIG timerConfig;
@@ -201,15 +201,17 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_DS4,
-			"WdfTimerCreate failed with status %!STATUS!",
-			status);
+		            TRACE_DS4,
+		            "WdfTimerCreate failed with status %!STATUS!",
+		            status);
 		return status;
 	}
 
 	// Load/generate MAC address
 
+	// 
 	// TODO: tidy up this region
+	// 
 
 	WDFKEY keyParams, keyTargets, keyDS, keySerial;
 	UNICODE_STRING keyName, valueName;
@@ -223,9 +225,9 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_DS4,
-			"WdfDriverOpenParametersRegistryKey failed with status %!STATUS!",
-			status);
+		            TRACE_DS4,
+		            "WdfDriverOpenParametersRegistryKey failed with status %!STATUS!",
+		            status);
 		return status;
 	}
 
@@ -236,16 +238,16 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 		&keyName,
 		KEY_ALL_ACCESS,
 		REG_OPTION_NON_VOLATILE,
-		NULL,
+		nullptr,
 		WDF_NO_OBJECT_ATTRIBUTES,
 		&keyTargets
 	);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_DS4,
-			"WdfRegistryCreateKey failed with status %!STATUS!",
-			status);
+		            TRACE_DS4,
+		            "WdfRegistryCreateKey failed with status %!STATUS!",
+		            status);
 		return status;
 	}
 
@@ -256,16 +258,16 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 		&keyName,
 		KEY_ALL_ACCESS,
 		REG_OPTION_NON_VOLATILE,
-		NULL,
+		nullptr,
 		WDF_NO_OBJECT_ATTRIBUTES,
 		&keyDS
 	);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_DS4,
-			"WdfRegistryCreateKey failed with status %!STATUS!",
-			status);
+		            TRACE_DS4,
+		            "WdfRegistryCreateKey failed with status %!STATUS!",
+		            status);
 		return status;
 	}
 
@@ -277,16 +279,16 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 		&serialPath,
 		KEY_ALL_ACCESS,
 		REG_OPTION_NON_VOLATILE,
-		NULL,
+		nullptr,
 		WDF_NO_OBJECT_ATTRIBUTES,
 		&keySerial
 	);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_DS4,
-			"WdfRegistryCreateKey failed with status %!STATUS!",
-			status);
+		            TRACE_DS4,
+		            "WdfRegistryCreateKey failed with status %!STATUS!",
+		            status);
 		return status;
 	}
 
@@ -297,19 +299,19 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 		&valueName,
 		sizeof(MAC_ADDRESS),
 		&this->_TargetMacAddress,
-		NULL,
-		NULL
+		nullptr,
+		nullptr
 	);
 
 	TraceEvents(TRACE_LEVEL_INFORMATION,
-		TRACE_DS4,
-		"MAC-Address: %02X:%02X:%02X:%02X:%02X:%02X\n",
-		this->_TargetMacAddress.Vendor0,
-		this->_TargetMacAddress.Vendor1,
-		this->_TargetMacAddress.Vendor2,
-		this->_TargetMacAddress.Nic0,
-		this->_TargetMacAddress.Nic1,
-		this->_TargetMacAddress.Nic2);
+	            TRACE_DS4,
+	            "MAC-Address: %02X:%02X:%02X:%02X:%02X:%02X\n",
+	            this->_TargetMacAddress.Vendor0,
+	            this->_TargetMacAddress.Vendor1,
+	            this->_TargetMacAddress.Vendor2,
+	            this->_TargetMacAddress.Nic0,
+	            this->_TargetMacAddress.Nic1,
+	            this->_TargetMacAddress.Nic2);
 
 	if (status == STATUS_OBJECT_NAME_NOT_FOUND)
 	{
@@ -325,18 +327,18 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 		if (!NT_SUCCESS(status))
 		{
 			TraceEvents(TRACE_LEVEL_ERROR,
-				TRACE_DS4,
-				"WdfRegistryAssignValue failed with status %!STATUS!",
-				status);
+			            TRACE_DS4,
+			            "WdfRegistryAssignValue failed with status %!STATUS!",
+			            status);
 			return status;
 		}
 	}
 	else if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_DS4,
-			"WdfRegistryQueryValue failed with status %!STATUS!",
-			status);
+		            TRACE_DS4,
+		            "WdfRegistryQueryValue failed with status %!STATUS!",
+		            status);
 		return status;
 	}
 
