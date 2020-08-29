@@ -102,8 +102,6 @@ EVT_WDF_FILE_CLOSE Bus_FileClose;
 
 EVT_WDF_CHILD_LIST_CREATE_DEVICE Bus_EvtDeviceListCreatePdo;
 
-EVT_WDF_CHILD_LIST_IDENTIFICATION_DESCRIPTION_COMPARE Bus_EvtChildListIdentificationDescriptionCompare;
-
 EVT_WDF_OBJECT_CONTEXT_CLEANUP Bus_EvtDriverContextCleanup;
 
 #pragma endregion

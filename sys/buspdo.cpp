@@ -53,25 +53,3 @@ EXTERN_C NTSTATUS Bus_EvtDeviceListCreatePdo(
 
     return pDesc->Target->PdoCreateDevice(WdfChildListGetDevice(DeviceList), ChildInit);
 }
-
-//
-// Compares two children on the bus based on their serial numbers.
-// 
-EXTERN_C BOOLEAN Bus_EvtChildListIdentificationDescriptionCompare(
-    WDFCHILDLIST DeviceList,
-    PWDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER FirstIdentificationDescription,
-    PWDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER SecondIdentificationDescription)
-{
-	ViGEm::Bus::Core::PPDO_IDENTIFICATION_DESCRIPTION lhs, rhs;
-
-    UNREFERENCED_PARAMETER(DeviceList);
-
-    lhs = CONTAINING_RECORD(FirstIdentificationDescription,
-        ViGEm::Bus::Core::PDO_IDENTIFICATION_DESCRIPTION,
-        Header);
-    rhs = CONTAINING_RECORD(SecondIdentificationDescription,
-        ViGEm::Bus::Core::PDO_IDENTIFICATION_DESCRIPTION,
-        Header);
-
-    return (lhs->SerialNo == rhs->SerialNo) ? TRUE : FALSE;
-}
