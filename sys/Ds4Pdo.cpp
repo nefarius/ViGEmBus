@@ -428,41 +428,41 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::SelectConfiguration(PURB Urb)
 	if (Urb->UrbHeader.Length < DS4_CONFIGURATION_SIZE)
 	{
 		TraceEvents(TRACE_LEVEL_WARNING,
-			TRACE_USBPDO,
-			">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor");
+		            TRACE_USBPDO,
+		            ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Invalid ConfigurationDescriptor");
 		return STATUS_INVALID_PARAMETER;
 	}
 
 	PUSBD_INTERFACE_INFORMATION pInfo = &Urb->UrbSelectConfiguration.Interface;
 
 	TraceEvents(TRACE_LEVEL_VERBOSE,
-		TRACE_DS4,
-		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
-		(int)pInfo->Length,
-		(int)pInfo->InterfaceNumber,
-		(int)pInfo->AlternateSetting,
-		pInfo->NumberOfPipes);
+	            TRACE_DS4,
+	            ">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
+	            static_cast<int>(pInfo->Length),
+	            static_cast<int>(pInfo->InterfaceNumber),
+	            static_cast<int>(pInfo->AlternateSetting),
+	            pInfo->NumberOfPipes);
 
 	pInfo->Class = 0x03; // HID
 	pInfo->SubClass = 0x00;
 	pInfo->Protocol = 0x00;
 
-	pInfo->InterfaceHandle = (USBD_INTERFACE_HANDLE)0xFFFF0000;
+	pInfo->InterfaceHandle = reinterpret_cast<USBD_INTERFACE_HANDLE>(0xFFFF0000);
 
 	pInfo->Pipes[0].MaximumTransferSize = 0x00400000;
 	pInfo->Pipes[0].MaximumPacketSize = 0x40;
 	pInfo->Pipes[0].EndpointAddress = 0x84;
 	pInfo->Pipes[0].Interval = 0x05;
-	pInfo->Pipes[0].PipeType = (USBD_PIPE_TYPE)0x03;
-	pInfo->Pipes[0].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0084;
+	pInfo->Pipes[0].PipeType = static_cast<USBD_PIPE_TYPE>(0x03);
+	pInfo->Pipes[0].PipeHandle = reinterpret_cast<USBD_PIPE_HANDLE>(0xFFFF0084);
 	pInfo->Pipes[0].PipeFlags = 0x00;
 
 	pInfo->Pipes[1].MaximumTransferSize = 0x00400000;
 	pInfo->Pipes[1].MaximumPacketSize = 0x40;
 	pInfo->Pipes[1].EndpointAddress = 0x03;
 	pInfo->Pipes[1].Interval = 0x05;
-	pInfo->Pipes[1].PipeType = (USBD_PIPE_TYPE)0x03;
-	pInfo->Pipes[1].PipeHandle = (USBD_PIPE_HANDLE)0xFFFF0003;
+	pInfo->Pipes[1].PipeType = static_cast<USBD_PIPE_TYPE>(0x03);
+	pInfo->Pipes[1].PipeHandle = reinterpret_cast<USBD_PIPE_HANDLE>(0xFFFF0003);
 	pInfo->Pipes[1].PipeFlags = 0x00;
 
 	return STATUS_SUCCESS;
