@@ -138,12 +138,13 @@ VOID Bus_EvtIoDeviceControl(
 			break;
 		}
 
-		if (!EmulationTargetPDO::GetPdoBySerial(Device, xusbSubmit->SerialNo, &pdo))
-			status = STATUS_DEVICE_DOES_NOT_EXIST;
-		else
-			status = pdo->EnqueueWaitDeviceReady(Request);
+		status = EmulationTargetPDO::EnqueueWaitDeviceReady(
+			Device,
+			pWaitDeviceReady->SerialNo,
+			Request
+		);
 
-		status = NT_SUCCESS(status) ? STATUS_PENDING : status;
+		status = NT_SUCCESS(status) ? STATUS_PENDING : STATUS_DEVICE_DOES_NOT_EXIST;
 		
 		break;
 
