@@ -436,7 +436,7 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
         }       
 
     	//
-    	// TODO: this is mad stupid, redesign
+    	// TODO: this is mad stupid, redesign, so that the bus fills the assigned slot
     	// 
         for (target->SerialNo = 1; target->SerialNo <= VIGEM_TARGETS_MAX; target->SerialNo++)
         {
@@ -478,6 +478,12 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 			        error = VIGEM_ERROR_NONE;
 			        break;
 		        }
+	        	
+		        //
+		        // Don't leave device connected if the wait call failed
+		        // 
+		        error = vigem_target_remove(vigem, target);
+		        break;
 	        }
         }
     } while (false);
