@@ -939,6 +939,11 @@ VIGEM_ERROR vigem_target_ds4_update(
     return VIGEM_ERROR_NONE;
 }
 
+VIGEM_ERROR vigem_target_ds4_update_ex(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PUCHAR report)
+{
+    return VIGEM_API VIGEM_ERROR();
+}
+
 ULONG vigem_target_get_index(PVIGEM_TARGET target)
 {
     return target->SerialNo;

@@ -424,5 +424,39 @@ VOID FORCEINLINE DS4_SUBMIT_REPORT_INIT(
     DS4_REPORT_INIT(&Report->Report);
 }
 
-#pragma endregion
+typedef struct _DS4_SUBMIT_REPORT_EX
+{
+    //
+     // sizeof(struct _DS4_SUBMIT_REPORT_EX)
+     // 
+    _In_ ULONG Size;
 
+    //
+    // Serial number of target device.
+    // 
+    _In_ ULONG SerialNo;
+
+    //
+    // Full size HID report excluding fixed Report ID.
+    // 
+    _In_ UCHAR Report[63];
+
+} DS4_SUBMIT_REPORT_EX, * PDS4_SUBMIT_REPORT_EX;
+
+#include <poppack.h>
+
+//
+// Initializes a DualShock 4 report.
+// 
+VOID FORCEINLINE DS4_SUBMIT_REPORT_EX_INIT(
+    _Out_ PDS4_SUBMIT_REPORT_EX Report,
+    _In_ ULONG SerialNo
+)
+{
+    RtlZeroMemory(Report, sizeof(DS4_SUBMIT_REPORT_EX));
+
+    Report->Size = sizeof(DS4_SUBMIT_REPORT_EX);
+    Report->SerialNo = SerialNo;
+}
+
+#pragma endregion

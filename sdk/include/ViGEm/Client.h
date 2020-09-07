@@ -375,6 +375,20 @@ extern "C" {
     VIGEM_API VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, DS4_REPORT report);
 
     /**
+     * Sends a full size state report to the provided target device.
+     *
+     * @author	Benjamin "Nefarius" Höglinger-Stelzer
+     * @date	07.09.2020
+     *
+     * @param 	vigem 	The driver connection object.
+     * @param 	target	The target device object.
+     * @param 	report	The report buffer.
+     *
+     * @returns	A VIGEM_ERROR.
+     */
+    VIGEM_API VIGEM_ERROR vigem_target_ds4_update_ex(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PUCHAR report);
+
+    /**
      * Returns the internal index (serial number) the bus driver assigned to the provided
      *               target device object. Note that this value is specific to the inner workings of
      *               the bus driver, it does not reflect related values like player index or device
