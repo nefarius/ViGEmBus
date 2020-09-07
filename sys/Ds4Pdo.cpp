@@ -1088,8 +1088,13 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbControlTransfer(PURB Urb)
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::SubmitReportImpl(PVOID NewReport)
 {
-	NTSTATUS    status;
-	WDFREQUEST  usbRequest;
+	NTSTATUS				status;
+	WDFREQUEST				usbRequest;
+	
+	/*
+	 * The logic here is unusual to keep backwards compatibility with the 
+	 * original API that didn't allow submitting the full report.
+	 */
 
 	status = WdfIoQueueRetrieveNextRequest(this->_PendingUsbInRequests, &usbRequest);
 
@@ -1100,19 +1105,52 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::SubmitReportImpl(PVOID NewRepo
 	PIRP pendingIrp = WdfRequestWdmGetIrp(usbRequest);
 
 	// Get USB request block
-	PURB urb = static_cast<PURB>(URB_FROM_IRP(pendingIrp));
+	const auto urb = static_cast<PURB>(URB_FROM_IRP(pendingIrp));
 
 	// Get transfer buffer
-	auto Buffer = static_cast<PUCHAR>(urb->UrbBulkOrInterruptTransfer.TransferBuffer);
+	const auto buffer = static_cast<PUCHAR>(urb->UrbBulkOrInterruptTransfer.TransferBuffer);
 
+	// Set correct buffer size
 	urb->UrbBulkOrInterruptTransfer.TransferBufferLength = DS4_REPORT_SIZE;
 
-	/* Copy report to cache and transfer buffer
-	 * Skip first byte as it contains the never changing report id */
-	RtlCopyBytes(this->_Report + 1, &(static_cast<PDS4_SUBMIT_REPORT>(NewReport))->Report, sizeof(DS4_REPORT));
+	// Cast to expected struct
+	const auto pSubmit = static_cast<PDS4_SUBMIT_REPORT>(NewReport);
 
-	if (Buffer)
-		RtlCopyBytes(Buffer, this->_Report, DS4_REPORT_SIZE);
+	/*
+	 * Copy report to cache and transfer buffer
+	 * Skip first byte as it contains the never changing report ID
+	 */
+
+	//
+	// "Old" API which only allows to update partial report
+	// 
+	if (pSubmit->Size == sizeof(DS4_SUBMIT_REPORT))
+	{
+		TraceDbg(TRACE_DS4, "Received DS4_SUBMIT_REPORT update");
+		
+		RtlCopyBytes(
+			&this->_Report[1],
+			&(static_cast<PDS4_SUBMIT_REPORT>(NewReport))->Report,
+			sizeof((static_cast<PDS4_SUBMIT_REPORT>(NewReport))->Report)
+		);
+	}
+
+	//
+	// "Extended" API allowing complete report update
+	// 
+	if (pSubmit->Size == sizeof(DS4_SUBMIT_REPORT_EX))
+	{
+		TraceDbg(TRACE_DS4, "Received DS4_SUBMIT_REPORT_EX update");
+		
+		RtlCopyBytes(
+			&this->_Report[1],
+			&(static_cast<PDS4_SUBMIT_REPORT_EX>(NewReport))->Report,
+			sizeof((static_cast<PDS4_SUBMIT_REPORT_EX>(NewReport))->Report)
+		);
+	}
+	
+	if (buffer)
+		RtlCopyBytes(buffer, this->_Report, DS4_REPORT_SIZE);
 
 	// Complete pending request
 	WdfRequestComplete(usbRequest, status);

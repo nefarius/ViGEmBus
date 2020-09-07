@@ -300,24 +300,53 @@ VOID Bus_EvtIoDeviceControl(
 			break;
 		}
 
-		if ((sizeof(DS4_SUBMIT_REPORT) == ds4Submit->Size) && (length == InputBufferLength))
+		//
+		// Check if buffer is within expected bounds
+		// 
+		if (length < sizeof(DS4_SUBMIT_REPORT) || length > sizeof(DS4_SUBMIT_REPORT_EX))
 		{
-			// This request only supports a single PDO at a time
-			if (ds4Submit->SerialNo == 0)
-			{
-				TraceEvents(TRACE_LEVEL_ERROR,
-				            TRACE_QUEUE,
-				            "Invalid serial 0 submitted");
+			TraceDbg(
+				TRACE_QUEUE,
+				"Unexpected buffer size: %d",
+				static_cast<ULONG>(length)
+			);
 
-				status = STATUS_INVALID_PARAMETER;
-				break;
-			}
-
-			if (!EmulationTargetPDO::GetPdoByTypeAndSerial(Device, DualShock4Wired, ds4Submit->SerialNo, &pdo))
-				status = STATUS_DEVICE_DOES_NOT_EXIST;
-			else
-				status = pdo->SubmitReport(ds4Submit);
+			status = STATUS_INVALID_BUFFER_SIZE;
+			break;
 		}
+
+		//
+		// Check if this makes sense before passing it on
+		// 
+		if (length != ds4Submit->Size)
+		{
+			TraceDbg(
+				TRACE_QUEUE,
+				"Invalid buffer size: %d",
+				ds4Submit->Size
+			);
+
+			status = STATUS_INVALID_BUFFER_SIZE;
+			break;
+		}
+
+		// 
+		// This request only supports a single PDO at a time
+		// 
+		if (ds4Submit->SerialNo == 0)
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+			            TRACE_QUEUE,
+			            "Invalid serial 0 submitted");
+
+			status = STATUS_INVALID_PARAMETER;
+			break;
+		}
+
+		if (!EmulationTargetPDO::GetPdoByTypeAndSerial(Device, DualShock4Wired, ds4Submit->SerialNo, &pdo))
+			status = STATUS_DEVICE_DOES_NOT_EXIST;
+		else
+			status = pdo->SubmitReport(ds4Submit);
 
 		break;
 

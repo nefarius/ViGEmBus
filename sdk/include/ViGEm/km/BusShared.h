@@ -424,6 +424,8 @@ VOID FORCEINLINE DS4_SUBMIT_REPORT_INIT(
     DS4_REPORT_INIT(&Report->Report);
 }
 
+#include <pshpack1.h>
+
 typedef struct _DS4_SUBMIT_REPORT_EX
 {
     //
