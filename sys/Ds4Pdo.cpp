@@ -1197,38 +1197,39 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
 	_In_ WDFTIMER Timer
 )
 {
-	auto ctx = reinterpret_cast<EmulationTargetDS4*>(Core::EmulationTargetPdoGetContext(WdfTimerGetParentObject(Timer))->Target);
+	const auto ctx = reinterpret_cast<EmulationTargetDS4*>(Core::EmulationTargetPdoGetContext(
+		WdfTimerGetParentObject(Timer))->Target);
 
-	WDFREQUEST              usbRequest;
-	PIRP                    pendingIrp;
-	PIO_STACK_LOCATION      irpStack;
+	WDFREQUEST usbRequest;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_DS4, "%!FUNC! Entry");
+	TraceDbg(TRACE_DS4, "%!FUNC! Entry");
 
 	// Get pending USB request
-	NTSTATUS status = WdfIoQueueRetrieveNextRequest(ctx->_PendingUsbInRequests, &usbRequest);
+	const auto status = WdfIoQueueRetrieveNextRequest(ctx->_PendingUsbInRequests, &usbRequest);
 
 	if (NT_SUCCESS(status))
 	{
 		// Get pending IRP
-		pendingIrp = WdfRequestWdmGetIrp(usbRequest);
-		irpStack = IoGetCurrentIrpStackLocation(pendingIrp);
+		const auto pendingIrp = WdfRequestWdmGetIrp(usbRequest);
+
+		const auto irpStack = IoGetCurrentIrpStackLocation(pendingIrp);
 
 		// Get USB request block
-		PURB urb = (PURB)irpStack->Parameters.Others.Argument1;
+		const auto urb = static_cast<PURB>(irpStack->Parameters.Others.Argument1);
 
 		// Get transfer buffer
-		PUCHAR Buffer = (PUCHAR)urb->UrbBulkOrInterruptTransfer.TransferBuffer;
+		const auto buffer = static_cast<PUCHAR>(urb->UrbBulkOrInterruptTransfer.TransferBuffer);
+
 		// Set buffer length to report size
 		urb->UrbBulkOrInterruptTransfer.TransferBufferLength = DS4_REPORT_SIZE;
 
 		// Copy cached report to transfer buffer 
-		if (Buffer)
-			RtlCopyBytes(Buffer, ctx->_Report, DS4_REPORT_SIZE);
+		if (buffer)
+			RtlCopyBytes(buffer, ctx->_Report, DS4_REPORT_SIZE);
 
 		// Complete pending request
 		WdfRequestComplete(usbRequest, status);
 	}
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS4, "%!FUNC! Exit with status %!STATUS!", status);
+	TraceDbg(TRACE_DS4, "%!FUNC! Exit with status %!STATUS!", status);
 }
