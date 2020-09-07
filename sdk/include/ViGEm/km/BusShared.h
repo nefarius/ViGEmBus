@@ -426,6 +426,9 @@ VOID FORCEINLINE DS4_SUBMIT_REPORT_INIT(
 
 #include <pshpack1.h>
 
+//
+// DualShock 4 extended report request
+// 
 typedef struct _DS4_SUBMIT_REPORT_EX
 {
     //
@@ -448,7 +451,7 @@ typedef struct _DS4_SUBMIT_REPORT_EX
 #include <poppack.h>
 
 //
-// Initializes a DualShock 4 report.
+// Initializes a DualShock 4 extended report.
 // 
 VOID FORCEINLINE DS4_SUBMIT_REPORT_EX_INIT(
     _Out_ PDS4_SUBMIT_REPORT_EX Report,
