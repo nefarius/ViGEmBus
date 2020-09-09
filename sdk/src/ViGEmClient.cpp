@@ -438,6 +438,7 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 
         if (GetLastError() != ERROR_OBJECT_ALREADY_EXISTS)
         {
+            target->SerialNo = 0;
             break;
         }
     }
@@ -505,6 +506,7 @@ VIGEM_ERROR vigem_target_add_async(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PF
 
             if (GetLastError() != ERROR_OBJECT_ALREADY_EXISTS)
             {
+                _Target->SerialNo = 0;
                 break;
             }
         }
@@ -688,6 +690,12 @@ VIGEM_ERROR vigem_target_x360_register_notification(
     if (vigem->hBusDevice == INVALID_HANDLE_VALUE)
         return VIGEM_ERROR_BUS_NOT_FOUND;
 
+    if (target->State == VIGEM_TARGET_NEW)
+        return VIGEM_ERROR_TARGET_UNINITIALIZED;
+
+    if (target->State != VIGEM_TARGET_CONNECTED)
+        return VIGEM_ERROR_TARGET_NOT_PLUGGED_IN;
+
     if (target->SerialNo == 0 || notification == nullptr)
         return VIGEM_ERROR_INVALID_TARGET;
 
@@ -735,6 +743,12 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
 
     if (vigem->hBusDevice == INVALID_HANDLE_VALUE)
         return VIGEM_ERROR_BUS_NOT_FOUND;
+
+    if (target->State == VIGEM_TARGET_NEW)
+        return VIGEM_ERROR_TARGET_UNINITIALIZED;
+
+    if (target->State != VIGEM_TARGET_CONNECTED)
+        return VIGEM_ERROR_TARGET_NOT_PLUGGED_IN;
 
     if (target->SerialNo == 0 || notification == nullptr)
         return VIGEM_ERROR_INVALID_TARGET;
@@ -831,6 +845,12 @@ VIGEM_ERROR vigem_target_x360_update(
     if (vigem->hBusDevice == INVALID_HANDLE_VALUE)
         return VIGEM_ERROR_BUS_NOT_FOUND;
 
+    if (target->State == VIGEM_TARGET_NEW)
+        return VIGEM_ERROR_TARGET_UNINITIALIZED;
+
+    if (target->State != VIGEM_TARGET_CONNECTED)
+        return VIGEM_ERROR_TARGET_NOT_PLUGGED_IN;
+
     if (target->SerialNo == 0)
         return VIGEM_ERROR_INVALID_TARGET;
 
@@ -882,6 +902,12 @@ VIGEM_ERROR vigem_target_ds4_update(
 
     if (vigem->hBusDevice == INVALID_HANDLE_VALUE)
         return VIGEM_ERROR_BUS_NOT_FOUND;
+
+    if (target->State == VIGEM_TARGET_NEW)
+        return VIGEM_ERROR_TARGET_UNINITIALIZED;
+
+    if (target->State != VIGEM_TARGET_CONNECTED)
+        return VIGEM_ERROR_TARGET_NOT_PLUGGED_IN;
 
     if (target->SerialNo == 0)
         return VIGEM_ERROR_INVALID_TARGET;
@@ -949,6 +975,12 @@ VIGEM_ERROR vigem_target_x360_get_user_index(
 
     if (vigem->hBusDevice == INVALID_HANDLE_VALUE)
         return VIGEM_ERROR_BUS_NOT_FOUND;
+
+    if (target->State == VIGEM_TARGET_NEW)
+        return VIGEM_ERROR_TARGET_UNINITIALIZED;
+
+    if (target->State != VIGEM_TARGET_CONNECTED)
+        return VIGEM_ERROR_TARGET_NOT_PLUGGED_IN;
 
     if (target->SerialNo == 0 || target->Type != Xbox360Wired)
         return VIGEM_ERROR_INVALID_TARGET;
