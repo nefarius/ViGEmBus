@@ -34,8 +34,29 @@
     <Feature Id="ProductFeature" Title="Nefarius Virtual Gamepad Emulation Bus Driver" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
+
+    <CustomAction Id="DevconInstall"
+                  Directory="INSTALLFOLDER"
+                  ExeCommand="[INSTALLFOLDER]devcon.exe install .\ViGEmBus.inf Nefarius\ViGEmBus\Gen1"
+                  Execute="deferred" 
+                  Impersonate="no" />
+
+    <CustomAction Id="DevconRemove"
+                  Directory="INSTALLFOLDER"
+                  ExeCommand="[INSTALLFOLDER]devcon.exe remove &quot;Nefarius\ViGEmBus\Gen1&quot;"
+                  Execute="deferred" 
+                  Impersonate="no" />
+
+    <InstallExecuteSequence>
+      <Custom Action="DevconInstall" Before="InstallFinalize" />
+    </InstallExecuteSequence>
+
+    <InstallExecuteSequence>
+      <Custom Action='DevconRemove' After='InstallInitialize'>REMOVE="ALL"</Custom>
+    </InstallExecuteSequence>
   </Product>
 
+  <!-- build program files directory -->
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="$(var.PlatformProgramFilesFolder)">
@@ -44,12 +65,14 @@
     </Directory>
   </Fragment>
 
+  <!-- include necessary files -->
   <Fragment>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="ProductComponent" Guid="9DB08B36-09FC-48F5-8BDA-2EE24687B5DF" Win64="$(var.Win64)">
         <File Name="ViGEmBus.sys" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.sys" />
         <File Name="ViGEmBus.inf" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.inf" />
         <File Name="ViGEmBus.cat" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.cat" />
+        <File Name="devcon.exe" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\devcon.exe" />
       </Component>
     </ComponentGroup>
   </Fragment>
