@@ -8,13 +8,16 @@
   <?define Win64 = "yes" ?>
   <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
   <?define ArchDir = "x64" ?>
+  <?define WixQuietExec="WixQuietExec64"?>
   <?else ?>
   <?define bitness = "(32 bit)" ?>
   <?define Win64 = "no" ?>
   <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
   <?define ArchDir = "x86" ?>
+  <?define WixQuietExec="WixQuietExec"?>
   <?endif ?>
 
+  <!-- basic product properties -->
   <Product Id="*" Name="Nefarius Virtual Gamepad Emulation Bus Driver" Language="1033" Version="1.0.0.0"
            Manufacturer="Nefarius Software Solutions e.U."
            UpgradeCode="b935b0e2-a67f-4f2f-88de-2457dbd70c6e">
@@ -29,30 +32,47 @@
     <Property Id="ARPURLINFOABOUT" Value="https://github.com/ViGEm/ViGEmBus" />
     <Property Id="ARPNOMODIFY" Value="1" />
 
+    <!-- always perform major upgrade and remove previous versions -->
+    <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
+    <Upgrade Id="b935b0e2-a67f-4f2f-88de-2457dbd70c6e">
+      <UpgradeVersion
+        Minimum="1.0.0.0" Maximum="99.0.0.0"
+        Property="PREVIOUSVERSIONSINSTALLED"
+        IncludeMinimum="yes" IncludeMaximum="no" />
+    </Upgrade>
+
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 
     <Feature Id="ProductFeature" Title="Nefarius Virtual Gamepad Emulation Bus Driver" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
-    <CustomAction Id="DevconInstall"
-                  Directory="INSTALLFOLDER"
-                  ExeCommand="[INSTALLFOLDER]devcon.exe install .\ViGEmBus.inf Nefarius\ViGEmBus\Gen1"
-                  Execute="deferred" 
-                  Impersonate="no" />
+    <!-- build installation command -->
+    <CustomAction Id="DevconInstallPropertyAssign"
+                  Property="DevconInstallQuiet"
+                  Value="&quot;[INSTALLFOLDER]devcon.exe&quot; install &quot;[INSTALLFOLDER]ViGEmBus.inf&quot; Nefarius\ViGEmBus\Gen1"
+                  Execute="immediate" />
 
-    <CustomAction Id="DevconRemove"
-                  Directory="INSTALLFOLDER"
-                  ExeCommand="[INSTALLFOLDER]devcon.exe remove &quot;Nefarius\ViGEmBus\Gen1&quot;"
-                  Execute="deferred" 
-                  Impersonate="no" />
+    <!-- execute installation with suppressed UI -->
+    <CustomAction Id="DevconInstallQuiet" BinaryKey="WixCA" DllEntry="$(var.WixQuietExec)"
+                  Execute="deferred" Return="check" Impersonate="no" />
 
+    <!-- build removal command -->
+    <CustomAction Id="DevconRemovePropertyAssign"
+                  Property="DevconRemoveQuiet"
+                  Value="&quot;[INSTALLFOLDER]devcon.exe&quot; remove &quot;Nefarius\ViGEmBus\Gen1&quot;"
+                  Execute="immediate" />
+
+    <!-- execute removal with suppressed UI -->
+    <CustomAction Id="DevconRemoveQuiet" BinaryKey="WixCA" DllEntry="$(var.WixQuietExec)"
+                  Execute="deferred" Return="ignore" Impersonate="no" />
+
+    <!-- custom installation and removal actions -->
     <InstallExecuteSequence>
-      <Custom Action="DevconInstall" Before="InstallFinalize" />
-    </InstallExecuteSequence>
-
-    <InstallExecuteSequence>
-      <Custom Action='DevconRemove' After='InstallInitialize'>REMOVE="ALL"</Custom>
+      <Custom Action="DevconInstallPropertyAssign" Before="DevconInstallQuiet">NOT Installed AND NOT REMOVE</Custom>
+      <Custom Action="DevconRemovePropertyAssign" Before="DevconRemoveQuiet">REMOVE="ALL"</Custom>
+      <Custom Action="DevconInstallQuiet" Before="InstallFinalize">NOT Installed AND NOT REMOVE</Custom>
+      <Custom Action='DevconRemoveQuiet' After='InstallInitialize'>REMOVE="ALL"</Custom>
     </InstallExecuteSequence>
   </Product>
 
@@ -72,7 +92,9 @@
         <File Name="ViGEmBus.sys" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.sys" />
         <File Name="ViGEmBus.inf" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.inf" />
         <File Name="ViGEmBus.cat" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.cat" />
+        <File Name="WdfCoinstaller01009.dll" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\WdfCoinstaller01009.dll" />
         <File Name="devcon.exe" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\devcon.exe" />
+        <File Name="LICENSE" Source="$(var.SolutionDir)\LICENSE" />
       </Component>
     </ComponentGroup>
   </Fragment>
