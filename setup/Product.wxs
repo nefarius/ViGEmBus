@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <!-- https://stackoverflow.com/a/18630847 -->
+  <?if $(var.Platform) = x64 ?>
+  <?define bitness = "(64 bit)" ?>
+  <?define Win64 = "yes" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?define ArchDir = "x64" ?>
+  <?else ?>
+  <?define bitness = "(32 bit)" ?>
+  <?define Win64 = "no" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+  <?define ArchDir = "x86" ?>
+  <?endif ?>
+
+  <Product Id="*" Name="Nefarius Virtual Gamepad Emulation Bus Driver" Language="1033" Version="1.0.0.0"
+           Manufacturer="Nefarius Software Solutions e.U."
+           UpgradeCode="b935b0e2-a67f-4f2f-88de-2457dbd70c6e">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <!-- use single MSI file only -->
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- set setup icon and uninstall options -->
+    <Icon Id="ViGEm.ico" SourceFile="ViGEm.ico" />
+    <Property Id="ARPPRODUCTICON" Value="ViGEm.ico" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/ViGEm/ViGEmBus" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <Feature Id="ProductFeature" Title="Nefarius Virtual Gamepad Emulation Bus Driver" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="$(var.PlatformProgramFilesFolder)">
+        <Directory Id="INSTALLFOLDER" Name="Nefarius Virtual Gamepad Emulation Bus Driver" />
+      </Directory>
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="ProductComponent" Guid="9DB08B36-09FC-48F5-8BDA-2EE24687B5DF" Win64="$(var.Win64)">
+        <File Name="ViGEmBus.sys" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.sys" />
+        <File Name="ViGEmBus.inf" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.inf" />
+        <File Name="ViGEmBus.cat" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.cat" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>
