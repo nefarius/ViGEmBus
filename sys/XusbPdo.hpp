@@ -121,39 +121,41 @@ namespace ViGEm::Bus::Targets
 		static const int XUSB_BLOB_06_OFFSET = 0x23;
 		static const int XUSB_BLOB_07_OFFSET = 0x26;
 
+		static const char XUSB_LEDNUM_INVALID = static_cast<char>(-1);
+
 		//
 		// Rumble buffer
 		//
-		UCHAR _Rumble[XUSB_RUMBLE_SIZE];
+		UCHAR _Rumble[XUSB_RUMBLE_SIZE]{};
 
 		//
 		// LED number (represents XInput slot index)
 		//
-		CHAR _LedNumber;
+		CHAR _LedNumber = XUSB_LEDNUM_INVALID;
 
 		//
 		// Report packet
 		//
-		XUSB_INTERRUPT_IN_PACKET _Packet;
+		XUSB_INTERRUPT_IN_PACKET _Packet{};
 
 		//
 		// Queue for incoming control interrupt transfer
 		//
-		WDFQUEUE _HoldingUsbInRequests;
+		WDFQUEUE _HoldingUsbInRequests = WDF_NO_HANDLE;
 
 		//
 		// Required for XInputGetCapabilities to work
 		// 
-		BOOLEAN _ReportedCapabilities;
+		BOOLEAN _ReportedCapabilities = FALSE;
 
 		//
 		// Required for XInputGetCapabilities to work
 		// 
-		ULONG _InterruptInitStage;
+		ULONG _InterruptInitStage = 0;
 
 		//
 		// Storage of binary blobs (packets) for PDO initialization
 		// 
-		WDFMEMORY _InterruptBlobStorage;
+		WDFMEMORY _InterruptBlobStorage = WDF_NO_HANDLE;
 	};
 }

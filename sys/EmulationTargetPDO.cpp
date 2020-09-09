@@ -45,7 +45,7 @@
 
 PCWSTR ViGEm::Bus::Core::EmulationTargetPDO::_deviceLocation = L"Virtual Gamepad Emulation Bus";
 
-NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentDevice, PWDFDEVICE_INIT DeviceInit)
+NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(_In_ WDFDEVICE ParentDevice, _In_ PWDFDEVICE_INIT DeviceInit)
 {
 	NTSTATUS status = STATUS_UNSUCCESSFUL;
 	WDF_PNPPOWER_EVENT_CALLBACKS pnpPowerCallbacks;
@@ -559,7 +559,9 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(
 {
 	const auto ctx = static_cast<EmulationTargetPDO*>(StartContext);
 
-	WDFREQUEST pluginRequest;
+	WDFREQUEST pluginRequest = nullptr;
+	WDFIOTARGET ioTarget = nullptr;
+	WDFDEVICE device = nullptr;
 	LARGE_INTEGER timeout;
 	timeout.QuadPart = WDF_REL_TIMEOUT_IN_SEC(1);
 
@@ -590,12 +592,29 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(
 			break;
 		}
 
+		//
+		// Get device, If failed then rollback operation
+		//
+		device = WdfFileObjectGetDevice(WdfRequestGetFileObject(pluginRequest));
+		if (device == nullptr)
+			device = WdfIoQueueGetDevice(WdfRequestGetIoQueue(pluginRequest));
+
+		if (device == nullptr)
+		{
+			TraceEvents(TRACE_LEVEL_WARNING,
+				TRACE_BUSPDO,
+				"WdfxxxxGetDevice failed to fetch device from request 0x%p",
+				pluginRequest);
+		}
+
 		if (status == STATUS_TIMEOUT)
 		{
 			TraceEvents(TRACE_LEVEL_WARNING,
-			            TRACE_BUSPDO,
-			            "Plugin request timed out, completing with error"
+						TRACE_BUSPDO,
+						"Plugin request timed out, completing with error"
 			);
+
+			status = STATUS_DEVICE_HARDWARE_ERROR;
 
 			//
 			// We haven't hit a path where the event gets signaled, report error
@@ -607,8 +626,8 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(
 		if (NT_SUCCESS(status))
 		{
 			TraceEvents(TRACE_LEVEL_INFORMATION,
-			            TRACE_BUSPDO,
-			            "Plugin request completed successfully"
+						TRACE_BUSPDO,
+						"Plugin request completed successfully"
 			);
 
 			//
@@ -616,6 +635,62 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(
 			// 
 			WdfRequestComplete(pluginRequest, STATUS_SUCCESS);
 			break;
+		}
+		else if (device != nullptr)
+		{
+			status = WdfIoTargetCreate(device, WDF_NO_OBJECT_ATTRIBUTES, &ioTarget);
+			if (!NT_SUCCESS(status))
+			{
+				TraceEvents(TRACE_LEVEL_WARNING,
+					TRACE_BUSPDO,
+					"WdfIoTargetCreate failed with status %!STATUS!",
+					status
+				);
+
+				break;
+			}
+
+			WDF_IO_TARGET_OPEN_PARAMS params;
+			WDF_IO_TARGET_OPEN_PARAMS_INIT_EXISTING_DEVICE(
+				&params, WdfDeviceWdmGetDeviceObject(device));
+
+			status = WdfIoTargetOpen(ioTarget, &params);
+			if (!NT_SUCCESS(status))
+			{
+				TraceEvents(TRACE_LEVEL_WARNING,
+					TRACE_BUSPDO,
+					"WdfIoTargetOpen failed with status %!STATUS!",
+					status
+				);
+
+				break;
+			}
+
+			VIGEM_UNPLUG_TARGET unplug;
+			VIGEM_UNPLUG_TARGET_INIT(&unplug, ctx->_SerialNo);
+
+			WDF_MEMORY_DESCRIPTOR inputDesc;
+			WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputDesc, &unplug, sizeof(unplug));
+
+			ULONG_PTR bytesReturned = 0;
+			status = WdfIoTargetSendIoctlSynchronously(
+				ioTarget,
+				WDF_NO_HANDLE,
+				IOCTL_VIGEM_UNPLUG_TARGET,
+				&inputDesc,
+				nullptr,
+				nullptr,
+				&bytesReturned);
+			if (!NT_SUCCESS(status))
+			{
+				TraceEvents(TRACE_LEVEL_WARNING,
+					TRACE_BUSPDO,
+					"WdfIoTargetSendIoctlSynchronously(IOCTL_VIGEM_UNPLUG_TARGET) failed with status %!STATUS!",
+					status
+				);
+
+				break;
+			}
 		}
 	}
 	while (FALSE);

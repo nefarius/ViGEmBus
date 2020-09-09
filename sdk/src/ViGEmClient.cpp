@@ -162,6 +162,11 @@ PVIGEM_TARGET FORCEINLINE VIGEM_TARGET_ALLOC_INIT(
 LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExceptionInfo)
 {
     const auto mhLib = LoadLibrary(L"dbghelp.dll");
+    if (mhLib == nullptr)
+    {
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
+
     const auto pDump = reinterpret_cast<MINIDUMPWRITEDUMP>(GetProcAddress(mhLib, "MiniDumpWriteDump"));
 
     const auto hFile = CreateFile(
@@ -430,6 +435,11 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 
             return VIGEM_ERROR_NONE;
         }
+
+        if (GetLastError() != ERROR_OBJECT_ALREADY_EXISTS)
+        {
+            break;
+        }
     }
 
     CloseHandle(lOverlapped.hEvent);
@@ -491,6 +501,11 @@ VIGEM_ERROR vigem_target_add_async(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PF
                     _Result(_Client, _Target, VIGEM_ERROR_NONE);
 
                 return;
+            }
+
+            if (GetLastError() != ERROR_OBJECT_ALREADY_EXISTS)
+            {
+                break;
             }
         }
 

@@ -178,7 +178,7 @@ typedef struct _DS4_REPORT
 // Sets the current state of the D-PAD on a DualShock 4 report.
 // 
 VOID FORCEINLINE DS4_SET_DPAD(
-    _Out_ PDS4_REPORT Report,
+    _Inout_ PDS4_REPORT Report,
     _In_ DS4_DPAD_DIRECTIONS Dpad
 )
 {

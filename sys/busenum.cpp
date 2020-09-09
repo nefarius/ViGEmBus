@@ -209,7 +209,7 @@ EXTERN_C NTSTATUS Bus_PlugInDevice(
 	// 
 	if (status == STATUS_OBJECT_NAME_EXISTS)
 	{
-		status = STATUS_INVALID_PARAMETER;
+		status = STATUS_OBJECTID_EXISTS;
 
 		TraceEvents(TRACE_LEVEL_ERROR,
 			TRACE_BUSENUM,
@@ -283,24 +283,27 @@ EXTERN_C NTSTATUS Bus_UnPlugDevice(
 	*Transferred = length;
 	unplugAll = (unPlug->SerialNo == 0);
 
-	fileObject = WdfRequestGetFileObject(Request);
-	if (fileObject == NULL)
+	if (!IsInternal)
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_BUSENUM,
-			"WdfRequestGetFileObject failed to fetch WDFFILEOBJECT from request 0x%p",
-			Request);
-		return STATUS_INVALID_PARAMETER;
-	}
+		fileObject = WdfRequestGetFileObject(Request);
+		if (fileObject == NULL)
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_BUSENUM,
+				"WdfRequestGetFileObject failed to fetch WDFFILEOBJECT from request 0x%p",
+				Request);
+			return STATUS_INVALID_PARAMETER;
+		}
 
-	pFileData = FileObjectGetData(fileObject);
-	if (pFileData == NULL)
-	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-			TRACE_BUSENUM,
-			"FileObjectGetData failed to get context data for 0x%p",
-			fileObject);
-		return STATUS_INVALID_PARAMETER;
+		pFileData = FileObjectGetData(fileObject);
+		if (pFileData == NULL)
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_BUSENUM,
+				"FileObjectGetData failed to get context data for 0x%p",
+				fileObject);
+			return STATUS_INVALID_PARAMETER;
+		}
 	}
 
 	TraceEvents(TRACE_LEVEL_VERBOSE,
@@ -351,11 +354,14 @@ EXTERN_C NTSTATUS Bus_UnPlugDevice(
 			continue;
 		}
 
-		TraceEvents(TRACE_LEVEL_VERBOSE,
-			TRACE_BUSENUM,
-			"description.SessionId = %d, pFileData->SessionId = %d",
-			description.SessionId,
-			pFileData->SessionId);
+		if (!IsInternal)
+		{
+			TraceEvents(TRACE_LEVEL_VERBOSE,
+				TRACE_BUSENUM,
+				"description.SessionId = %d, pFileData->SessionId = %d",
+				description.SessionId,
+				pFileData->SessionId);
+		}
 
 		// Only unplug owned children
 		if (IsInternal || description.SessionId == pFileData->SessionId)

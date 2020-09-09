@@ -114,7 +114,7 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
     WDF_OBJECT_ATTRIBUTES       fdoAttributes;
     WDF_OBJECT_ATTRIBUTES       fileHandleAttributes;
     PFDO_DEVICE_DATA            pFDOData;
-    PWSTR                       pSymbolicNameList;
+    PWSTR                       pSymbolicNameList = nullptr;
 
     UNREFERENCED_PARAMETER(Driver);
 
@@ -137,8 +137,7 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
     );
     if (NT_SUCCESS(status))
     {
-	    const bool deviceAlreadyExists = (0 != *pSymbolicNameList);
-	    ExFreePool(pSymbolicNameList);
+	    const bool deviceAlreadyExists = (pSymbolicNameList && 0 != *pSymbolicNameList);
 
 	    if (deviceAlreadyExists)
 	    {
@@ -149,8 +148,12 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
                 pSymbolicNameList
             );
 
+            ExFreePool(pSymbolicNameList);
+            
             return STATUS_RESOURCE_IN_USE;
-	    }
+        }
+
+        ExFreePool(pSymbolicNameList);
     }
     else
     {

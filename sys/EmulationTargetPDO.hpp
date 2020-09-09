@@ -43,6 +43,7 @@
 #include <usbbusif.h>
 
 #include <ViGEm/Common.h>
+#include <ViGEm/km/BusShared.h>
 #include <initguid.h>
 
 //

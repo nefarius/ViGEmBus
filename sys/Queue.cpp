@@ -113,7 +113,7 @@ VOID Bus_EvtIoDeviceControl(
 
 		TraceDbg(TRACE_QUEUE, "IOCTL_VIGEM_PLUGIN_TARGET");
 
-		status = Bus_PlugInDevice(Device, Request, FALSE, &length);
+		status = Bus_PlugInDevice(Device, Request, (WdfRequestGetRequestorMode(Request) == KernelMode) ? TRUE : FALSE, &length);
 
 		break;
 
@@ -125,7 +125,7 @@ VOID Bus_EvtIoDeviceControl(
 
 		TraceDbg(TRACE_QUEUE, "IOCTL_VIGEM_UNPLUG_TARGET");
 
-		status = Bus_UnPlugDevice(Device, Request, FALSE, &length);
+		status = Bus_UnPlugDevice(Device, Request, (WdfRequestGetRequestorMode(Request) == KernelMode) ? TRUE : FALSE, &length);
 
 		break;
 
@@ -348,7 +348,10 @@ VOID Bus_EvtIoDeviceControl(
 		// Don't accept the request if the output buffer can't hold the results
 		if (OutputBufferLength < sizeof(XUSB_GET_USER_INDEX))
 		{
-			KdPrint((DRIVERNAME "IOCTL_XUSB_GET_USER_INDEX: output buffer too small: %ul\n", OutputBufferLength));
+			TraceEvents(TRACE_LEVEL_ERROR,
+			            TRACE_QUEUE,
+			            "Output buffer %d too small, require at least %d",
+			            static_cast<int>(OutputBufferLength), static_cast<int>(sizeof(XUSB_GET_USER_INDEX)));
 			break;
 		}
 
@@ -360,7 +363,10 @@ VOID Bus_EvtIoDeviceControl(
 
 		if (!NT_SUCCESS(status))
 		{
-			KdPrint((DRIVERNAME "WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
+			TraceEvents(TRACE_LEVEL_ERROR,
+			            TRACE_QUEUE,
+			            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
+			            status);
 			break;
 		}
 
@@ -369,6 +375,10 @@ VOID Bus_EvtIoDeviceControl(
 			// This request only supports a single PDO at a time
 			if (pXusbGetUserIndex->SerialNo == 0)
 			{
+				TraceEvents(TRACE_LEVEL_ERROR,
+				            TRACE_QUEUE,
+				            "Invalid serial 0 submitted");
+
 				status = STATUS_INVALID_PARAMETER;
 				break;
 			}
