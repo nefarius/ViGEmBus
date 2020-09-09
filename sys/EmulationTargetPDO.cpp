@@ -620,7 +620,6 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::PluginRequestCompletionWorkerRoutine(
 			// We haven't hit a path where the event gets signaled, report error
 			// 
 			WdfRequestComplete(pluginRequest, STATUS_DEVICE_HARDWARE_ERROR);
-			break;
 		}
 
 		if (NT_SUCCESS(status))
