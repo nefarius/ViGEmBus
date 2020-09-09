@@ -4,13 +4,11 @@
 
   <!-- https://stackoverflow.com/a/18630847 -->
   <?if $(var.Platform) = x64 ?>
-  <?define bitness = "(64 bit)" ?>
   <?define Win64 = "yes" ?>
   <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
   <?define ArchDir = "x64" ?>
   <?define WixQuietExec="WixQuietExec64"?>
   <?else ?>
-  <?define bitness = "(32 bit)" ?>
   <?define Win64 = "no" ?>
   <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
   <?define ArchDir = "x86" ?>
