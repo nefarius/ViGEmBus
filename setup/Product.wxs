@@ -15,8 +15,11 @@
   <?define WixQuietExec="WixQuietExec"?>
   <?endif ?>
 
+  <!-- use driver file version for installer -->
+  <?define VERSION = "!(bind.FileVersion.ViGEmBus.sys)" ?>
+
   <!-- basic product properties -->
-  <Product Id="*" Name="Nefarius Virtual Gamepad Emulation Bus Driver" Language="1033" Version="1.0.0.0"
+  <Product Id="*" Name="Nefarius Virtual Gamepad Emulation Bus Driver" Language="1033" Version="$(var.VERSION)"
            Manufacturer="Nefarius Software Solutions e.U."
            UpgradeCode="b935b0e2-a67f-4f2f-88de-2457dbd70c6e">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
