@@ -8,7 +8,7 @@ configuration:
 install:
 - cmd: git submodule -q update --init
 before_build:
-- ps: Invoke-WebRequest "https://downloads.vigem.org/other/nefarius/vpatch/vpatch.exe" -OutFile vpatch.exe
+- ps: Invoke-WebRequest "https://github.com/nefarius/vpatch/releases/latest/download/vpatch.exe" -OutFile vpatch.exe
 - cmd: vpatch.exe --stamp-version "%APPVEYOR_BUILD_VERSION%" --target-file ".\src\%APPVEYOR_PROJECT_NAME%.vcxproj" --vcxproj.inf-time-stamp
 - cmd: vpatch.exe --stamp-version "%APPVEYOR_BUILD_VERSION%" --target-file ".\src\%APPVEYOR_PROJECT_NAME%.rc" --resource.file-version --resource.product-version
 build:
