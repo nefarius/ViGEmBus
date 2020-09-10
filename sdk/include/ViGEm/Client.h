@@ -380,13 +380,15 @@ extern "C" {
      * @author	Benjamin "Nefarius" Höglinger-Stelzer
      * @date	07.09.2020
      *
-     * @param 	vigem 	The driver connection object.
-     * @param 	target	The target device object.
-     * @param 	report	The report buffer.
+     * @param 	vigem			The driver connection object.
+     * @param 	target			The target device object.
+     * @param 	report			The report buffer.
+     * @param 	reportLength	Length of the report buffer.
      *
      * @returns	A VIGEM_ERROR.
      */
-    VIGEM_API VIGEM_ERROR vigem_target_ds4_update_ex(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PUCHAR report);
+    VIGEM_API VIGEM_ERROR vigem_target_ds4_update_ex(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PUCHAR report,
+                                                     ULONG reportLength);
 
     /**
      * Returns the internal index (serial number) the bus driver assigned to the provided
