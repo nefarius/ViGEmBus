@@ -445,6 +445,19 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 	        plugin.VendorId = target->VendorId;
 	        plugin.ProductId = target->ProductId;
 
+        	/*
+        	 * Request plugin of device. This is an inherently asynchronous operation,
+        	 * which is addressed differently through the history of the driver design.
+        	 * Pre-v1.17 this request was kept pending until the child was deemed operational
+        	 * which unfortunately causes synchronization issues on some systems.
+        	 * Starting with v1.17 "waiting" for full power-up is done with an additional 
+        	 * IOCTL that is sent immediately after and kept pending until the driver
+        	 * reports that the device can receive report updates. The following section
+        	 * and error handling is designed to achieve transparent backwards compatibility
+        	 * to not break applications using the pre-v1.17 client SDK. This is not a 100%
+        	 * perfect and can cause other functions to fail if called too soon but
+        	 * hopefully the applications will just ignore these errors and retry ;)
+        	 */
 	        DeviceIoControl(
 		        vigem->hBusDevice,
 		        IOCTL_VIGEM_PLUGIN_TARGET,
@@ -456,8 +469,20 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 		        &olPlugIn
 	        );
 
+        	//
+        	// This should return fairly immediately >=v1.17
+        	// 
 	        if (GetOverlappedResult(vigem->hBusDevice, &olPlugIn, &transferred, TRUE) != 0)
 	        {
+	        	/*
+	        	 * This function is announced to be blocking/synchronous, a concept that 
+	        	 * doesn't reflect the way the bus driver/PNP manager bring child devices
+	        	 * to life. Therefore, we send another IOCTL which will be kept pending 
+	        	 * until the bus driver has been notified that the child device has
+	        	 * reached a state that is deemed operational. This request is only 
+	        	 * supported on drivers v1.17 or higher, so gracefully cause errors
+	        	 * of this call as a potential success and keep the device plugged in.
+	        	 */
 		        VIGEM_WAIT_DEVICE_READY_INIT(&devReady, plugin.SerialNo);
 
 		        DeviceIoControl(
@@ -479,6 +504,17 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 			        break;
 		        }
 	        	
+		        //
+		        // Backwards compatibility with version pre-1.17, where this IOCTL doesn't exist
+		        // 
+		        if (GetLastError() == ERROR_INVALID_PARAMETER)
+		        {
+			        target->State = VIGEM_TARGET_CONNECTED;
+
+			        error = VIGEM_ERROR_NONE;
+			        break;
+		        }
+
 		        //
 		        // Don't leave device connected if the wait call failed
 		        // 
