@@ -819,8 +819,21 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 			Buffer[0], Buffer[1], Buffer[2]);
 
 		// extract LED byte to get controller slot
-		if (Buffer[0] == 0x01 && Buffer[1] == 0x03 && Buffer[2] >= 0x02)
+		if (Buffer[0] == 0x01 && Buffer[1] == 0x03)
 		{
+			if (Buffer[2] < 0x02)
+			{
+				status = STATUS_INSUFFICIENT_RESOURCES;
+
+				TraceEvents(TRACE_LEVEL_WARNING,
+					TRACE_USBPDO,
+					"!! Extract LED byte failed (Not free slot) with status %!STATUS!",
+					status);
+
+				return status;
+			}
+
+			// Buffer[2] >= 0x02
 			if (Buffer[2] == 0x02)this->_LedNumber = 0;
 			if (Buffer[2] == 0x03)this->_LedNumber = 1;
 			if (Buffer[2] == 0x04)this->_LedNumber = 2;
