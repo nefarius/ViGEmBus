@@ -1,4 +1,4 @@
-version: 1.16.{build}.0
+version: 1.17.{build}.0
 image: Visual Studio 2019
 platform:
 - x86
