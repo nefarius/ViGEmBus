@@ -21,6 +21,7 @@ artifacts:
 - path: 'bin**\$(APPVEYOR_PROJECT_NAME)\*.dll'
 - path: 'bin**\*.pdb'
 - path: 'disk1\*.cab'
+- path: 'bin**\*.msi'
 deploy:
 - provider: Environment
   name: BUILDBOT
