@@ -15,6 +15,13 @@
   <?define WixQuietExec="WixQuietExec"?>
   <?endif ?>
 
+  <!-- change build flow of running under CI -->
+  <?ifdef env.APPVEYOR?>
+  <?define IsCI = "yes" ?>
+  <?else ?>
+  <?define IsCI = "no" ?>
+  <?endif ?>
+
   <!-- use driver file version for installer -->
   <?define VERSION = "!(bind.FileVersion.ViGEmBus.sys)" ?>
 
@@ -37,7 +44,7 @@
     <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
     <Upgrade Id="b935b0e2-a67f-4f2f-88de-2457dbd70c6e">
       <UpgradeVersion
-        Minimum="1.0.0.0" Maximum="99.0.0.0"
+        Minimum="1.0.0.0" Maximum="$(var.VERSION)"
         Property="PREVIOUSVERSIONSINSTALLED"
         IncludeMinimum="yes" IncludeMaximum="no" />
     </Upgrade>
@@ -90,12 +97,23 @@
   <Fragment>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="ProductComponent" Guid="9DB08B36-09FC-48F5-8BDA-2EE24687B5DF" Win64="$(var.Win64)">
-        <File Name="ViGEmBus.sys" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.sys" />
-        <File Name="ViGEmBus.inf" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.inf" />
-        <File Name="ViGEmBus.cat" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.cat" />
-        <File Name="WdfCoinstaller01009.dll" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\WdfCoinstaller01009.dll" />
-        <File Name="devcon.exe" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\devcon.exe" />
-        <File Name="LICENSE" Source="$(var.SolutionDir)\LICENSE" />
+        <?if $(var.IsCI) = "no" ?>
+          <!-- local build -->
+          <File Name="ViGEmBus.sys" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.sys" />
+          <File Name="ViGEmBus.inf" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.inf" />
+          <File Name="ViGEmBus.cat" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.cat" />
+          <File Name="WdfCoinstaller01009.dll" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\WdfCoinstaller01009.dll" />
+          <File Name="devcon.exe" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\devcon.exe" />
+          <File Name="LICENSE" Source="$(var.SolutionDir)\LICENSE" />
+        <?else ?>
+          <!-- CI build -->
+          <File Name="ViGEmBus.sys" Source="$(var.SolutionDir)\bin\$(var.ArchDir)\ViGEmBus\ViGEmBus.sys" />
+          <File Name="ViGEmBus.inf" Source="$(var.SolutionDir)\bin\$(var.ArchDir)\ViGEmBus\ViGEmBus.inf" />
+          <File Name="ViGEmBus.cat" Source="$(var.SolutionDir)\bin\$(var.ArchDir)\ViGEmBus\ViGEmBus.cat" />
+          <File Name="WdfCoinstaller01009.dll" Source="$(var.SolutionDir)\bin\$(var.ArchDir)\ViGEmBus\WdfCoinstaller01009.dll" />
+          <File Name="devcon.exe" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\devcon.exe" />
+          <File Name="LICENSE" Source="$(var.SolutionDir)\LICENSE" />
+        <?endif ?>
       </Component>
     </ComponentGroup>
   </Fragment>

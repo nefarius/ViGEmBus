@@ -111,7 +111,9 @@ Global
 		{C722B85E-FC7D-475F-A518-C8E13ECDB201}.Release_LIB|x86.ActiveCfg = Release|x86
 		{C722B85E-FC7D-475F-A518-C8E13ECDB201}.Release_LIB|x86.Build.0 = Release|x86
 		{C722B85E-FC7D-475F-A518-C8E13ECDB201}.Release|x64.ActiveCfg = Release|x64
+		{C722B85E-FC7D-475F-A518-C8E13ECDB201}.Release|x64.Build.0 = Release|x64
 		{C722B85E-FC7D-475F-A518-C8E13ECDB201}.Release|x86.ActiveCfg = Release|x86
+		{C722B85E-FC7D-475F-A518-C8E13ECDB201}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
