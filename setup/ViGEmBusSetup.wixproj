@@ -6,7 +6,7 @@
     <ProductVersion>3.10</ProductVersion>
     <ProjectGuid>c722b85e-fc7d-475f-a518-c8e13ecdb201</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>ViGEmBusSetup</OutputName>
+    <OutputName>ViGEmBusSetup_$(Platform)</OutputName>
     <OutputType>Package</OutputType>
     <!-- https://stackoverflow.com/a/18630847 -->
   </PropertyGroup>
