@@ -15,7 +15,7 @@
   <?define WixQuietExec="WixQuietExec"?>
   <?endif ?>
 
-  <!-- change build flow of running under CI -->
+  <!-- change build flow if running under CI -->
   <?ifdef env.APPVEYOR?>
   <?define IsCI = "yes" ?>
   <?else ?>
