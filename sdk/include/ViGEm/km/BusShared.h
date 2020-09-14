@@ -444,7 +444,7 @@ typedef struct _DS4_SUBMIT_REPORT_EX
     //
     // Full size HID report excluding fixed Report ID.
     // 
-    _In_ UCHAR Report[63];
+    _In_ DS4_REPORT_EX Report;
 
 } DS4_SUBMIT_REPORT_EX, * PDS4_SUBMIT_REPORT_EX;
 

@@ -200,3 +200,57 @@ VOID FORCEINLINE DS4_REPORT_INIT(
     DS4_SET_DPAD(Report, DS4_BUTTON_DPAD_NONE);
 }
 
+#include <pshpack1.h> // pack structs tightly
+//
+// DualShock 4 HID Touchpad structure
+//
+typedef struct _DS4_TOUCH
+{
+    BYTE bPacketCounter;    // timestamp / packet counter associated with touch event
+    BYTE bIsUpTrackingNum1; // 0 means down; active low
+                            // unique to each finger down, so for a lift and repress the value is incremented
+    BYTE bTouchData1[3];    // Two 12 bits values (for X and Y) 
+                            // middle byte holds last 4 bits of X and the starting 4 bits of Y
+    BYTE bIsUpTrackingNum2; // second touch data immediately follows data of first touch 
+    BYTE bTouchData2[3];    // resolution is 1920x943
+} DS4_TOUCH, * PDS4_TOUCH;
+
+//
+// DualShock 4 v1 complete HID Input report
+//
+typedef struct _DS4_REPORT_EX
+{
+	union
+	{
+		struct
+		{
+			BYTE bThumbLX;
+			BYTE bThumbLY;
+			BYTE bThumbRX;
+			BYTE bThumbRY;
+			USHORT wButtons;
+			BYTE bSpecial;
+			BYTE bTriggerL;
+			BYTE bTriggerR;
+			USHORT wTimestamp;
+			BYTE bBatteryLvl;
+			SHORT wGyroX;
+			SHORT wGyroY;
+			SHORT wGyroZ;
+			SHORT wAccelX;
+			SHORT wAccelY;
+			SHORT wAccelZ;
+			BYTE _bUnknown1[5];
+			BYTE bBatteryLvlSpecial;
+			// really should have a enum to show everything that this can represent (USB charging, battery level; EXT, headset, microphone connected)
+			BYTE _bUnknown2[2];
+			BYTE bTouchPacketsN; // 0x00 to 0x03 (USB max)
+			DS4_TOUCH sCurrentTouch;
+			DS4_TOUCH sPreviousTouch[2];
+		} Report;
+
+		UCHAR ReportBuffer[63];
+	};
+} DS4_REPORT_EX, *PDS4_REPORT_EX;
+
+#include <poppack.h>

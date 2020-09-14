@@ -975,52 +975,52 @@ VIGEM_ERROR vigem_target_ds4_update(
     return VIGEM_ERROR_NONE;
 }
 
-VIGEM_ERROR vigem_target_ds4_update_ex(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PUCHAR report, ULONG reportLength)
+VIGEM_ERROR vigem_target_ds4_update_ex(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, DS4_REPORT_EX report)
 {
-    if (!vigem)
-        return VIGEM_ERROR_BUS_INVALID_HANDLE;
+	if (!vigem)
+		return VIGEM_ERROR_BUS_INVALID_HANDLE;
 
-    if (!target)
-        return VIGEM_ERROR_INVALID_TARGET;
+	if (!target)
+		return VIGEM_ERROR_INVALID_TARGET;
 
-    if (vigem->hBusDevice == INVALID_HANDLE_VALUE)
-        return VIGEM_ERROR_BUS_NOT_FOUND;
+	if (vigem->hBusDevice == INVALID_HANDLE_VALUE)
+		return VIGEM_ERROR_BUS_NOT_FOUND;
 
-    if (target->SerialNo == 0)
-        return VIGEM_ERROR_INVALID_TARGET;
+	if (target->SerialNo == 0)
+		return VIGEM_ERROR_INVALID_TARGET;
 
-    DWORD transferred = 0;
-    OVERLAPPED lOverlapped = { 0 };
-    lOverlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+	DWORD transferred = 0;
+	OVERLAPPED lOverlapped = {0};
+	lOverlapped.hEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
-    DS4_SUBMIT_REPORT_EX dsr;
-    DS4_SUBMIT_REPORT_EX_INIT(&dsr, target->SerialNo);
+	DS4_SUBMIT_REPORT_EX dsr;
+	DS4_SUBMIT_REPORT_EX_INIT(&dsr, target->SerialNo);
 
-    memcpy_s(dsr.Report, sizeof(dsr.Report), report, reportLength);
+	dsr.Report = report;
 
-    DeviceIoControl(
-        vigem->hBusDevice,
-        IOCTL_DS4_SUBMIT_REPORT, // Same IOCTL, just different size
-        &dsr,
-        dsr.Size,
-        nullptr,
-        0,
-        &transferred,
-        &lOverlapped
-    );
+	DeviceIoControl(
+		vigem->hBusDevice,
+		IOCTL_DS4_SUBMIT_REPORT, // Same IOCTL, just different size
+		&dsr,
+		dsr.Size,
+		nullptr,
+		0,
+		&transferred,
+		&lOverlapped
+	);
 
-    if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transferred, TRUE) == 0)
-    {
-        if (GetLastError() == ERROR_ACCESS_DENIED)
-        {
-            CloseHandle(lOverlapped.hEvent);
-            return VIGEM_ERROR_INVALID_TARGET;
-        }
-    }
+	if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transferred, TRUE) == 0)
+	{
+		if (GetLastError() == ERROR_ACCESS_DENIED)
+		{
+			CloseHandle(lOverlapped.hEvent);
+			return VIGEM_ERROR_INVALID_TARGET;
+		}
+	}
 
-    CloseHandle(lOverlapped.hEvent);
+	CloseHandle(lOverlapped.hEvent);
 
-    return VIGEM_ERROR_NONE;
+	return VIGEM_ERROR_NONE;
 }
 
 ULONG vigem_target_get_index(PVIGEM_TARGET target)
