@@ -1017,6 +1017,13 @@ VIGEM_ERROR vigem_target_ds4_update_ex(PVIGEM_CLIENT vigem, PVIGEM_TARGET target
 			return VIGEM_ERROR_INVALID_TARGET;
 		}
 
+		/*
+		 * NOTE: this will not happen on v1.16 due to NTSTATUS accidentally been set
+		 * as STATUS_SUCCESS when the submitted buffer size wasn't the expected one.
+		 * For backwards compatibility this function will silently fail (not cause
+		 * report updates) when run with the v1.16 driver. This API was introduced 
+		 * with v1.17 so it won't affect existing applications built before.
+		 */
 		if (GetLastError() == ERROR_INVALID_PARAMETER)
 		{
 			CloseHandle(lOverlapped.hEvent);
