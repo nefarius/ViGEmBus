@@ -1016,6 +1016,12 @@ VIGEM_ERROR vigem_target_ds4_update_ex(PVIGEM_CLIENT vigem, PVIGEM_TARGET target
 			CloseHandle(lOverlapped.hEvent);
 			return VIGEM_ERROR_INVALID_TARGET;
 		}
+
+		if (GetLastError() == ERROR_INVALID_PARAMETER)
+		{
+			CloseHandle(lOverlapped.hEvent);
+			return VIGEM_ERROR_NOT_SUPPORTED;
+		}
 	}
 
 	CloseHandle(lOverlapped.hEvent);
