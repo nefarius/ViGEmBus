@@ -51,6 +51,18 @@
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 
+    <!-- https://stackoverflow.com/a/31991006 -->
+    <Property Id="WIN10FOUND">
+      <DirectorySearch Id="searchSystem" Path="[SystemFolder]" Depth="0">
+        <FileSearch Id="searchFile" Name="advapi32.dll" MinVersion="6.3.10000.0"/>
+      </DirectorySearch>
+    </Property>
+
+    <!-- https://stackoverflow.com/a/23061358 -->
+    <Condition Message="This application can only be installed on Windows 10.">
+      <![CDATA[WIN10FOUND]]>
+    </Condition>
+
     <Feature Id="ProductFeature" Title="Nefarius Virtual Gamepad Emulation Bus Driver" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
