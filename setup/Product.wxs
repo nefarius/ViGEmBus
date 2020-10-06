@@ -63,8 +63,20 @@
       <![CDATA[WIN10FOUND]]>
     </Condition>
 
+    <!-- write version value to registry -->
+    <DirectoryRef Id="TARGETDIR">
+      <Component Id="RegistryEntries" Guid="85C87E47-E2C7-4684-A3FB-6F7853A86B41">
+        <RegistryKey Root="HKLM"
+                     Key="SOFTWARE\Nefarius Software Solutions e.U.\ViGEm Bus Driver"
+                     Action="createAndRemoveOnUninstall">
+          <RegistryValue Type="string" Name="Version" Value="$(var.VERSION)" KeyPath="yes"/>
+        </RegistryKey>
+      </Component>
+    </DirectoryRef>
+
     <Feature Id="ProductFeature" Title="Nefarius Virtual Gamepad Emulation Bus Driver" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="RegistryEntries" />
     </Feature>
 
     <!-- build installation command -->
@@ -116,7 +128,7 @@
           <File Name="ViGEmBus.cat" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.cat" />
           <File Name="WdfCoinstaller01009.dll" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\WdfCoinstaller01009.dll" />
           <File Name="devcon.exe" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\devcon.exe" />
-        <File Name="devcon-LICENSE" Source="$(var.SolutionDir)\drivers\devcon-LICENSE" />
+          <File Name="devcon-LICENSE" Source="$(var.SolutionDir)\drivers\devcon-LICENSE" />
           <File Name="LICENSE" Source="$(var.SolutionDir)\LICENSE" />
         <?else ?>
           <!-- CI build -->
