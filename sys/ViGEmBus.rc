@@ -35,7 +35,7 @@ BEGIN
 		VALUE "FileDescription",  "Virtual Gamepad Emulation Framework Bus Driver"
 		VALUE "FileVersion",      "1.16.200.0"
 		VALUE "InternalName",     "Virtual Gamepad Emulation Framework Bus Driver"
-		VALUE "LegalCopyright",   "(C) 2016-2019 Nefarius Software Solutions e.U."
+		VALUE "LegalCopyright",   "(C) 2016-2020 Nefarius Software Solutions e.U."
 		VALUE "OriginalFilename", "ViGEmBus.sys"
 		VALUE "ProductName",      "Virtual Gamepad Emulation Framework Bus Driver"
 		VALUE "ProductVersion",	  "1.16.200.0"
