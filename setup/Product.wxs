@@ -38,7 +38,7 @@
     <Icon Id="ViGEm.ico" SourceFile="ViGEm.ico" />
     <Property Id="ARPPRODUCTICON" Value="ViGEm.ico" />
     <Property Id="ARPURLINFOABOUT" Value="https://github.com/ViGEm/ViGEmBus" />
-    <Property Id="ARPNOMODIFY" Value="1" />
+    <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" /> 
 
     <!-- always perform major upgrade and remove previous versions -->
     <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
@@ -49,6 +49,7 @@
         IncludeMinimum="yes" IncludeMaximum="no" />
     </Upgrade>
 
+    <!-- don't allow downgrades -->
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 
     <!-- https://stackoverflow.com/a/31991006 -->
@@ -67,13 +68,13 @@
     <DirectoryRef Id="TARGETDIR">
       <Component Id="RegistryEntries" Guid="85C87E47-E2C7-4684-A3FB-6F7853A86B41">
         <RegistryKey Root="HKLM"
-                     Key="SOFTWARE\Nefarius Software Solutions e.U.\ViGEm Bus Driver"
-                     Action="createAndRemoveOnUninstall">
+                     Key="SOFTWARE\Nefarius Software Solutions e.U.\ViGEm Bus Driver">
           <RegistryValue Type="string" Name="Version" Value="$(var.VERSION)" KeyPath="yes"/>
         </RegistryKey>
       </Component>
     </DirectoryRef>
 
+    <!-- main feature are the driver files and some version registry values -->
     <Feature Id="ProductFeature" Title="Nefarius Virtual Gamepad Emulation Bus Driver" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
       <ComponentRef Id="RegistryEntries" />
@@ -106,13 +107,23 @@
       <Custom Action="DevconInstallQuiet" Before="InstallFinalize">NOT Installed AND NOT REMOVE</Custom>
       <Custom Action='DevconRemoveQuiet' After='InstallInitialize'>REMOVE="ALL"</Custom>
     </InstallExecuteSequence>
+
+    <!-- use LICENSE as EULA, not technically an EULA but for now it has to do -->
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)LICENSE.rtf" />
+
+    <!-- use minimalistic UI with EULA approval -->
+    <UIRef Id="WixUI_Minimal" />
+
   </Product>
 
   <!-- build program files directory -->
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="$(var.PlatformProgramFilesFolder)">
-        <Directory Id="INSTALLFOLDER" Name="Nefarius Virtual Gamepad Emulation Bus Driver" />
+        <!-- the "e.U." is butchered so omitted -->
+        <Directory Id="NSS" Name="Nefarius Software Solutions">
+          <Directory Id="INSTALLFOLDER" Name="Virtual Gamepad Emulation Bus Driver" />
+        </Directory>
       </Directory>
     </Directory>
   </Fragment>
