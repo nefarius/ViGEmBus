@@ -28,7 +28,7 @@
   <!-- basic product properties -->
   <Product Id="*" Name="Nefarius Virtual Gamepad Emulation Bus Driver" Language="1033" Version="$(var.VERSION)"
            Manufacturer="Nefarius Software Solutions e.U."
-           UpgradeCode="b935b0e2-a67f-4f2f-88de-2457dbd70c6e">
+           UpgradeCode="0A4A02DE-0BE3-4BF4-91F0-1EA47AD26881">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
     <!-- use single MSI file only -->
@@ -42,7 +42,7 @@
 
     <!-- always perform major upgrade and remove previous versions -->
     <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
-    <Upgrade Id="b935b0e2-a67f-4f2f-88de-2457dbd70c6e">
+    <Upgrade Id="0A4A02DE-0BE3-4BF4-91F0-1EA47AD26881">
       <UpgradeVersion
         Minimum="1.0.0.0" Maximum="$(var.VERSION)"
         Property="PREVIOUSVERSIONSINSTALLED"
