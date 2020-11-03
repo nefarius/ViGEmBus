@@ -40,6 +40,8 @@
 #include "XusbPdo.hpp"
 #include "Ds4Pdo.hpp"
 
+#include "Debugging.hpp"
+
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (PAGE, Bus_PlugInDevice)
 #pragma alloc_text (PAGE, Bus_UnPlugDevice)

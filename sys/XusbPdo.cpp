@@ -40,6 +40,8 @@
 #include <ntstrsafe.h>
 #include "Driver.h"
 
+#include "Debugging.hpp"
+
 
 PCWSTR ViGEm::Bus::Targets::EmulationTargetXUSB::_deviceDescription = L"Virtual Xbox 360 Controller";
 

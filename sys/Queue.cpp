@@ -40,6 +40,7 @@
 #include "XusbPdo.hpp"
 #include "Ds4Pdo.hpp"
 
+#include "Debugging.hpp"
 
 using ViGEm::Bus::Core::PDO_IDENTIFICATION_DESCRIPTION;
 using ViGEm::Bus::Core::EmulationTargetPDO;

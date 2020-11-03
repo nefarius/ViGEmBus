@@ -42,6 +42,8 @@
 #include <usbioctl.h>
 #include <usbiodef.h>
 
+#include "Debugging.hpp"
+
 
 PCWSTR ViGEm::Bus::Core::EmulationTargetPDO::_deviceLocation = L"Virtual Gamepad Emulation Bus";
 
@@ -796,7 +798,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueueWaitDeviceReady(WDFDEVICE 
 
 	WDF_CHILD_LIST_ITERATOR_INIT(
 		&iterator,
-		WdfRetrievePendingChildren // might not be online yet
+		WdfRetrieveAddedChildren // might not be online yet
 	);
 	WdfChildListBeginIteration(
 		list,
@@ -818,6 +820,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueueWaitDeviceReady(WDFDEVICE 
 		sizeof(description)
 	);
 
+	// ReSharper disable once CppAssignedValueIsNeverUsed
 	description.SerialNo = SerialNo;
 
 	status = WdfChildListRetrieveNextDevice(

@@ -40,6 +40,8 @@
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
 
+#include "Debugging.hpp"
+
 
 PCWSTR ViGEm::Bus::Targets::EmulationTargetDS4::_deviceDescription = L"Virtual DualShock 4 Controller";
 
