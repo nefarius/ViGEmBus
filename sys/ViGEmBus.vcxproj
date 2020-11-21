@@ -120,7 +120,7 @@
       <TimeStamp>$(AppVeyorBuildVersion)</TimeStamp>
     </Inf>
     <Link>
-      <AdditionalDependencies>$(DDK_LIB_PATH)ntstrsafe.lib;$(DDK_LIB_PATH)wdmsec.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\DMF\$(Configuration)\$(Platform)\lib\DmfK\DmfK.lib;$(DDK_LIB_PATH)ntstrsafe.lib;$(DDK_LIB_PATH)wdmsec.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <WppRecorderEnabled>true</WppRecorderEnabled>
@@ -128,6 +128,7 @@
       <WppKernelMode>true</WppKernelMode>
       <WppScanConfigurationData>trace.h</WppScanConfigurationData>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>..\..\DMF\DMF\Modules.Library;..\..\DMF\DMF\Framework;$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -135,7 +136,7 @@
       <TimeStamp>$(AppVeyorBuildVersion)</TimeStamp>
     </Inf>
     <Link>
-      <AdditionalDependencies>$(DDK_LIB_PATH)ntstrsafe.lib;$(DDK_LIB_PATH)wdmsec.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\DMF\$(Configuration)\$(Platform)\lib\DmfK\DmfK.lib;$(DDK_LIB_PATH)ntstrsafe.lib;$(DDK_LIB_PATH)wdmsec.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -146,6 +147,7 @@
       <WppEnabled>true</WppEnabled>
       <WppScanConfigurationData>trace.h</WppScanConfigurationData>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>..\..\DMF\DMF\Modules.Library;..\..\DMF\DMF\Framework;$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -153,7 +155,7 @@
       <TimeStamp>$(AppVeyorBuildVersion)</TimeStamp>
     </Inf>
     <Link>
-      <AdditionalDependencies>$(DDK_LIB_PATH)ntstrsafe.lib;$(DDK_LIB_PATH)wdmsec.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\DMF\$(Configuration)\$(Platform)\lib\DmfK\DmfK.lib;$(DDK_LIB_PATH)ntstrsafe.lib;$(DDK_LIB_PATH)wdmsec.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <ClCompile>
@@ -161,6 +163,7 @@
       <WppEnabled>true</WppEnabled>
       <WppScanConfigurationData>trace.h</WppScanConfigurationData>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>..\..\DMF\DMF\Modules.Library;..\..\DMF\DMF\Framework;$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -168,7 +171,7 @@
       <TimeStamp>$(AppVeyorBuildVersion)</TimeStamp>
     </Inf>
     <Link>
-      <AdditionalDependencies>$(DDK_LIB_PATH)ntstrsafe.lib;$(DDK_LIB_PATH)wdmsec.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\DMF\$(Configuration)\$(Platform)\lib\DmfK\DmfK.lib;$(DDK_LIB_PATH)ntstrsafe.lib;$(DDK_LIB_PATH)wdmsec.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <ClCompile>
@@ -180,6 +183,7 @@
       <WppEnabled>true</WppEnabled>
       <WppScanConfigurationData>trace.h</WppScanConfigurationData>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>..\..\DMF\DMF\Modules.Library;..\..\DMF\DMF\Framework;$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

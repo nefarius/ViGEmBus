@@ -35,14 +35,16 @@
 
 #pragma once
 
-#include "trace.h"
+#include <initguid.h>
+//#pragma warning(disable:5040)
+//#include <DmfModules.Library.h>
+//#pragma warning(default:5040)
 #include <ntddk.h>
 #include <wdf.h>
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
-#include <initguid.h>
+
 #include <ViGEm/km/BusShared.h>
-#include "Queue.hpp"
 
 
 

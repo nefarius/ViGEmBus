@@ -34,7 +34,8 @@
 
 
 #include "Driver.h"
-#include "driver.tmh"
+#include "trace.h"
+#include "Driver.tmh"
 #include <wdmguid.h>
 
 #ifdef ALLOC_PRAGMA
@@ -45,7 +46,7 @@
 #pragma alloc_text (PAGE, Bus_EvtDriverContextCleanup)
 #endif
 
-
+#include "Queue.hpp"
 #include "EmulationTargetPDO.hpp"
 #include "XusbPdo.hpp"
 #include "Ds4Pdo.hpp"

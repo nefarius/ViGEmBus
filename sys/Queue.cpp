@@ -34,7 +34,8 @@
 
 
 #include "Driver.h"
-#include "queue.tmh"
+#include "trace.h"
+#include "Queue.tmh"
 
 #include "EmulationTargetPDO.hpp"
 #include "XusbPdo.hpp"

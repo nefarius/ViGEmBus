@@ -34,6 +34,7 @@
 
 
 #include "Driver.h"
+#include "trace.h"
 #include "busenum.tmh"
 
 #include "EmulationTargetPDO.hpp"
