@@ -40,6 +40,7 @@
 #include <ntstrsafe.h>
 #include "Driver.h"
 
+#include <ViGEm/km/BusShared.h>
 #include "Debugging.hpp"
 
 

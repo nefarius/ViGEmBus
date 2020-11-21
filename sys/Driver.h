@@ -44,9 +44,6 @@
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
 
-#include <ViGEm/km/BusShared.h>
-
-
 
 #pragma region Macros
 
