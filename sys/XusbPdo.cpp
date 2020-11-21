@@ -32,13 +32,12 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+#include "Driver.h"
 #include "XusbPdo.hpp"
 #include "trace.h"
 #include "XusbPdo.tmh"
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
-#include "Driver.h"
 
 #include <ViGEm/km/BusShared.h>
 #include "Debugging.hpp"
