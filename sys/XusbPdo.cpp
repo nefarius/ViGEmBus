@@ -39,6 +39,9 @@
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
 
+#include <initguid.h>
+#include <usbbusif.h>
+
 #include <ViGEm/km/BusShared.h>
 #include "Debugging.hpp"
 

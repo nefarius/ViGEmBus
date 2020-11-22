@@ -35,7 +35,9 @@
 
 #pragma once
 
-#include <initguid.h>
+#pragma warning(disable:5040)
+#include <DmfModules.Library.h>
+#pragma warning(default:5040)
 #include <ntddk.h>
 #include <wdf.h>
 #define NTSTRSAFE_LIB
