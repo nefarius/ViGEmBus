@@ -1056,6 +1056,29 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 				status);
 		}
 	}
+	else
+	{
+		PVOID clientBuffer, contextBuffer;
+
+		if (NT_SUCCESS(DMF_BufferQueue_Fetch(
+			this->_UsbInterruptOutBufferQueue,
+			&clientBuffer,
+			&contextBuffer
+		)))
+		{
+			RtlCopyMemory(
+				clientBuffer,
+				&this->_OutputReport,
+				DS4_OUTPUT_BUFFER_LENGTH
+			);
+
+			*static_cast<size_t*>(contextBuffer) = DS4_OUTPUT_BUFFER_LENGTH;
+
+			TraceDbg(TRACE_USBPDO, "Queued %Iu bytes", DS4_OUTPUT_BUFFER_LENGTH);
+			
+			DMF_BufferQueue_Enqueue(this->_UsbInterruptOutBufferQueue, clientBuffer);
+		}
+	}
 	
 	return status;
 }
@@ -1193,6 +1216,10 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::GenerateRandomMacAddress(PMAC_ADDR
 	Address->Nic0 = RtlRandomEx(&seed) % 0xFF;
 	Address->Nic1 = RtlRandomEx(&seed) % 0xFF;
 	Address->Nic2 = RtlRandomEx(&seed) % 0xFF;
+}
+
+void ViGEm::Bus::Targets::EmulationTargetDS4::ProcessPendingNotification(WDFQUEUE Queue)
+{
 }
 
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(

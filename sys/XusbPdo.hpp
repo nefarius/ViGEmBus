@@ -96,7 +96,9 @@ namespace ViGEm::Bus::Targets
 		NTSTATUS SubmitReportImpl(PVOID NewReport) override;
 
 		NTSTATUS GetUserIndex(PULONG UserIndex) const;
-		
+
+	protected:
+		void ProcessPendingNotification(WDFQUEUE Queue) override;
 	private:
 		static PCWSTR _deviceDescription;
 

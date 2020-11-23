@@ -814,6 +814,8 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 		pTransfer->TransferFlags,
 		pTransfer->TransferBufferLength);
 
+#pragma region Cache values
+
 	if (pTransfer->TransferBufferLength == XUSB_LEDSET_SIZE) // Led
 	{
 		auto Buffer = static_cast<PUCHAR>(pTransfer->TransferBuffer);
@@ -835,12 +837,12 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 				TRACE_USBPDO,
 				"-- LED Number: %d",
 				this->_LedNumber);
-
-			//
-			// Notify client library that PDO is ready
-			// 
-			KeSetEvent(&this->_PdoBootNotificationEvent, 0, FALSE);
 		}
+
+		//
+		// Notify client library that PDO is ready
+		// 
+		KeSetEvent(&this->_PdoBootNotificationEvent, 0, FALSE);
 	}
 
 	// Extract rumble (vibration) information
@@ -863,12 +865,17 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 		RtlCopyBytes(this->_Rumble, Buffer, pTransfer->TransferBufferLength);
 	}
 
+#pragma endregion
+
 	// Notify user-mode process that new data is available
-	status = WdfIoQueueRetrieveNextRequest(this->_PendingNotificationRequests, &notifyRequest);
+	status = WdfIoQueueRetrieveNextRequest(
+		this->_PendingNotificationRequests,
+		&notifyRequest
+	);
 
 	if (NT_SUCCESS(status))
 	{
-		PXUSB_REQUEST_NOTIFICATION notify = NULL;
+		PXUSB_REQUEST_NOTIFICATION notify = nullptr;
 
 		status = WdfRequestRetrieveOutputBuffer(
 			notifyRequest,
@@ -891,17 +898,33 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 		else
 		{
 			TraceEvents(TRACE_LEVEL_ERROR,
-				TRACE_USBPDO,
-				"WdfRequestRetrieveOutputBuffer failed with status %!STATUS!",
-				status);
+			            TRACE_USBPDO,
+			            "WdfRequestRetrieveOutputBuffer failed with status %!STATUS!",
+			            status);
 		}
 	}
 	else
 	{
-		TraceEvents(TRACE_LEVEL_WARNING,
-			TRACE_USBPDO,
-			"!! WdfIoQueueRetrieveNextRequest failed with status %!STATUS!",
-			status);
+		PVOID clientBuffer, contextBuffer;
+
+		if (NT_SUCCESS(DMF_BufferQueue_Fetch(
+			this->_UsbInterruptOutBufferQueue,
+			&clientBuffer,
+			&contextBuffer
+		)) && pTransfer->TransferBufferLength <= MAX_OUT_BUFFER_QUEUE_SIZE)
+		{
+			RtlCopyMemory(
+				clientBuffer,
+				pTransfer->TransferBuffer,
+				pTransfer->TransferBufferLength
+			);
+
+			*static_cast<size_t*>(contextBuffer) = pTransfer->TransferBufferLength;
+
+			TraceDbg(TRACE_USBPDO, "Queued %Iu bytes", pTransfer->TransferBufferLength);
+			
+			DMF_BufferQueue_Enqueue(this->_UsbInterruptOutBufferQueue, clientBuffer);
+		}
 	}
 
 	return status;
@@ -1022,4 +1045,41 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::GetUserIndex(PULONG UserIndex
 	// If the index is negative at this stage, we've exceeded XUSER_MAX_COUNT
 	// and need to fail this request with a distinct status.
 	return STATUS_INVALID_DEVICE_OBJECT_PARAMETER;
+}
+
+void ViGEm::Bus::Targets::EmulationTargetXUSB::ProcessPendingNotification(WDFQUEUE Queue)
+{
+	NTSTATUS status;
+	WDFREQUEST request;
+	PVOID clientBuffer, contextBuffer;
+
+	//
+	// No buffer available to answer the request with, leave queued
+	// 
+	if (DMF_BufferQueue_Count(this->_UsbInterruptOutBufferQueue) == 0)
+	{
+		return;
+	}
+	
+	while (NT_SUCCESS(WdfIoQueueRetrieveNextRequest(Queue, &request)))
+	{
+		status = DMF_BufferQueue_Dequeue(
+			this->_UsbInterruptOutBufferQueue, 
+			&clientBuffer, 
+			&contextBuffer
+		);
+
+		//
+		// Shouldn't happen, but if so, error out
+		// 
+		if(!NT_SUCCESS(status))
+		{
+			WdfRequestComplete(request, status);
+			continue;
+		}
+
+		//
+		// TODO: finish implementation
+		// 
+	}
 }

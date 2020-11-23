@@ -105,7 +105,10 @@ namespace ViGEm::Bus::Targets
 		static VOID ReverseByteArray(PUCHAR Array, INT Length);
 
 		static VOID GenerateRandomMacAddress(PMAC_ADDRESS Address);
-		
+
+	protected:
+		void ProcessPendingNotification(WDFQUEUE Queue) override;
+	private:
 		static PCWSTR _deviceDescription;
 
 		static const int HID_REQUEST_GET_REPORT = 0x01;

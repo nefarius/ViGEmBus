@@ -35,6 +35,9 @@
 
 #pragma once
 
+#pragma warning(disable:5040)
+#include <DmfModules.Library.h>
+#pragma warning(default:5040)
 #include <ntddk.h>
 #include <wdf.h>
 #include <ntintsafe.h>
@@ -43,7 +46,6 @@
 #include <usbbusif.h>
 
 #include <ViGEm/Common.h>
-#include <initguid.h>
 
 //
 // Some insane macro-magic =3
@@ -144,6 +146,10 @@ namespace ViGEm::Bus::Core
 
 		static const int MAX_INSTANCE_ID_LEN = 80;
 
+		static const size_t MAX_OUT_BUFFER_QUEUE_COUNT = 64;
+		
+		static const size_t MAX_OUT_BUFFER_QUEUE_SIZE = 128;
+
 		static PCWSTR _deviceLocation;
 
 		static BOOLEAN USB_BUSIFFN UsbInterfaceIsDeviceHighSpeed(IN PVOID BusContext);
@@ -170,8 +176,12 @@ namespace ViGEm::Bus::Core
 
 		static EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL EvtIoInternalDeviceControl;
 
+		static EVT_WDF_IO_QUEUE_STATE EvtWdfIoPendingNotificationQueueState;
+
 		static VOID WaitDeviceReadyCompletionWorkerRoutine(IN PVOID StartContext);
 
+		static VOID DumpAsHex(PCSTR Prefix, PVOID Buffer, ULONG BufferLength);
+		
 		virtual VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) = 0;
 
 		virtual NTSTATUS SelectConfiguration(PURB Urb) = 0;
@@ -180,7 +190,7 @@ namespace ViGEm::Bus::Core
 
 		virtual NTSTATUS SubmitReportImpl(PVOID NewReport) = 0;
 
-		static VOID DumpAsHex(PCSTR Prefix, PVOID Buffer, ULONG BufferLength);
+		virtual VOID ProcessPendingNotification(WDFQUEUE Queue) = 0;
 
 		//
 		// PNP Capabilities may differ from device to device
@@ -251,6 +261,11 @@ namespace ViGEm::Bus::Core
 		// Signals the bus that PDO is ready to receive data
 		// 
 		KEVENT _PdoBootNotificationEvent;
+
+		//
+		// Queue for interrupt out requests delivered to user-land
+		// 
+		DMFMODULE _UsbInterruptOutBufferQueue{};
 	};
 
 	typedef struct _PDO_IDENTIFICATION_DESCRIPTION

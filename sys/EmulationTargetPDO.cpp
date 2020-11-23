@@ -255,6 +255,20 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 			break;
 		}
 
+		status = WdfIoQueueReadyNotify(
+			this->_PendingNotificationRequests,
+			EvtWdfIoPendingNotificationQueueState,
+			this
+		);
+		if (!NT_SUCCESS(status))
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_BUSPDO,
+				"WdfIoQueueReadyNotify (PendingNotificationRequests) failed with status %!STATUS!",
+				status);
+			break;
+		}
+
 #pragma endregion
 
 #pragma region Default I/O queue setup
@@ -465,6 +479,8 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoPrepare(WDFDEVICE ParentDevice
 	NTSTATUS status;
 	WDF_OBJECT_ATTRIBUTES attributes;
 	WDF_IO_QUEUE_CONFIG plugInQueueConfig;
+	DMF_MODULE_ATTRIBUTES moduleAttributes;
+	DMF_CONFIG_BufferQueue dmfBufferCfg;
 	
 	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
 	attributes.ParentObject = ParentDevice;
@@ -484,6 +500,41 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoPrepare(WDFDEVICE ParentDevice
 			TRACE_BUSPDO,
 			"WdfIoQueueCreate (PendingPlugInRequests) failed with status %!STATUS!",
 			status);
+	}
+
+	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+	attributes.ParentObject = ParentDevice;
+
+	DMF_CONFIG_BufferQueue_AND_ATTRIBUTES_INIT(
+		&dmfBufferCfg,
+		&moduleAttributes
+	);
+
+	// Don't auto-grow; start dropping packets on overrun
+	dmfBufferCfg.SourceSettings.EnableLookAside = FALSE;
+	// Maximum number of buffers to be filled and kept queued
+	dmfBufferCfg.SourceSettings.BufferCount = MAX_OUT_BUFFER_QUEUE_COUNT;
+	// Maximum byte count per buffer
+	dmfBufferCfg.SourceSettings.BufferSize = MAX_OUT_BUFFER_QUEUE_SIZE;
+	// Field to store real buffer content length
+	dmfBufferCfg.SourceSettings.BufferContextSize = sizeof(size_t);
+	// "Expensive" memory ;)
+	dmfBufferCfg.SourceSettings.PoolType = NonPagedPoolNx;
+
+	status = DMF_BufferQueue_Create(
+		ParentDevice,
+		&moduleAttributes,
+		&attributes,
+		&this->_UsbInterruptOutBufferQueue
+	);
+
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR,
+		            TRACE_BUSPDO,
+		            "DMF_BufferQueue_Create failed with status %!STATUS!",
+		            status
+		);
 	}
 
 	return status;
@@ -1116,4 +1167,14 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 	}
 
 	TraceDbg(TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
+}
+
+void ViGEm::Bus::Core::EmulationTargetPDO::EvtWdfIoPendingNotificationQueueState(
+  WDFQUEUE Queue,
+  WDFCONTEXT Context
+)
+{
+	const auto pThis = static_cast<EmulationTargetPDO*>(Context);
+	
+	pThis->ProcessPendingNotification(Queue);
 }
