@@ -1052,34 +1052,74 @@ void ViGEm::Bus::Targets::EmulationTargetXUSB::ProcessPendingNotification(WDFQUE
 	NTSTATUS status;
 	WDFREQUEST request;
 	PVOID clientBuffer, contextBuffer;
+	size_t bufferLength;
+	PXUSB_REQUEST_NOTIFICATION notify = nullptr;
 
 	//
-	// No buffer available to answer the request with, leave queued
+	// Loop through and drain all queued requests until buffer is empty
 	// 
-	if (DMF_BufferQueue_Count(this->_UsbInterruptOutBufferQueue) == 0)
-	{
-		return;
-	}
-	
 	while (NT_SUCCESS(WdfIoQueueRetrieveNextRequest(Queue, &request)))
 	{
 		status = DMF_BufferQueue_Dequeue(
-			this->_UsbInterruptOutBufferQueue, 
-			&clientBuffer, 
+			this->_UsbInterruptOutBufferQueue,
+			&clientBuffer,
 			&contextBuffer
 		);
 
 		//
 		// Shouldn't happen, but if so, error out
 		// 
-		if(!NT_SUCCESS(status))
+		if (!NT_SUCCESS(status))
 		{
+			//
+			// Don't requeue request as we maya be out of order now
+			// 
 			WdfRequestComplete(request, status);
 			continue;
 		}
 
 		//
-		// TODO: finish implementation
+		// Actual buffer length
 		// 
+		bufferLength = *static_cast<size_t*>(contextBuffer);
+
+		//
+		// Validate packet
+		// 
+		if (bufferLength != XUSB_RUMBLE_SIZE)
+		{
+			DMF_BufferQueue_Reuse(this->_UsbInterruptOutBufferQueue, clientBuffer);
+			WdfRequestComplete(request, STATUS_INVALID_BUFFER_SIZE);
+			break; // await callback getting fired again
+		}
+
+		if (NT_SUCCESS(WdfRequestRetrieveOutputBuffer(
+			request,
+			sizeof(XUSB_REQUEST_NOTIFICATION),
+			reinterpret_cast<PVOID*>(&notify),
+			nullptr
+		)))
+		{
+			// 
+			// Assign values to output buffer
+			// 
+			notify->Size = sizeof(XUSB_REQUEST_NOTIFICATION);
+			notify->SerialNo = this->_SerialNo;
+			notify->LedNumber = this->_LedNumber;
+			notify->LargeMotor = static_cast<PUCHAR>(clientBuffer)[3];
+			notify->SmallMotor = static_cast<PUCHAR>(clientBuffer)[4];
+
+			WdfRequestCompleteWithInformation(request, status, notify->Size);
+		}
+
+		DMF_BufferQueue_Reuse(this->_UsbInterruptOutBufferQueue, clientBuffer);
+
+		//
+		// If no more buffer to process, exit loop and await next callback
+		// 
+		if (DMF_BufferQueue_Count(this->_UsbInterruptOutBufferQueue) == 0)
+		{
+			break;
+		}
 	}
 }

@@ -1175,6 +1175,14 @@ void ViGEm::Bus::Core::EmulationTargetPDO::EvtWdfIoPendingNotificationQueueState
 )
 {
 	const auto pThis = static_cast<EmulationTargetPDO*>(Context);
+
+	//
+	// No buffer available to answer the request with, leave queued
+	// 
+	if (DMF_BufferQueue_Count(pThis->_UsbInterruptOutBufferQueue) == 0)
+	{
+		return;
+	}
 	
 	pThis->ProcessPendingNotification(Queue);
 }
