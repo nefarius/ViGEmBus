@@ -1220,6 +1220,61 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::GenerateRandomMacAddress(PMAC_ADDR
 
 void ViGEm::Bus::Targets::EmulationTargetDS4::ProcessPendingNotification(WDFQUEUE Queue)
 {
+	NTSTATUS status;
+	WDFREQUEST request;
+	PVOID clientBuffer, contextBuffer;
+	PDS4_REQUEST_NOTIFICATION notify = nullptr;
+
+	//
+	// Loop through and drain all queued requests until buffer is empty
+	// 
+	while (NT_SUCCESS(WdfIoQueueRetrieveNextRequest(Queue, &request)))
+	{
+		status = DMF_BufferQueue_Dequeue(
+			this->_UsbInterruptOutBufferQueue,
+			&clientBuffer,
+			&contextBuffer
+		);
+
+		//
+		// Shouldn't happen, but if so, error out
+		// 
+		if (!NT_SUCCESS(status))
+		{
+			//
+			// Don't requeue request as we maya be out of order now
+			// 
+			WdfRequestComplete(request, status);
+			continue;
+		}
+
+		if (NT_SUCCESS(WdfRequestRetrieveOutputBuffer(
+			request,
+			sizeof(DS4_REQUEST_NOTIFICATION),
+			reinterpret_cast<PVOID*>(&notify),
+			nullptr
+		)))
+		{
+			// 
+			// Assign values to output buffer
+			// 
+			notify->Size = sizeof(DS4_REQUEST_NOTIFICATION);
+			notify->SerialNo = this->_SerialNo;
+			notify->Report = *static_cast<PDS4_OUTPUT_REPORT>(clientBuffer);
+
+			WdfRequestCompleteWithInformation(request, status, notify->Size);
+		}
+
+		DMF_BufferQueue_Reuse(this->_UsbInterruptOutBufferQueue, clientBuffer);
+
+		//
+		// If no more buffer to process, exit loop and await next callback
+		// 
+		if (DMF_BufferQueue_Count(this->_UsbInterruptOutBufferQueue) == 0)
+		{
+			break;
+		}
+	}
 }
 
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
