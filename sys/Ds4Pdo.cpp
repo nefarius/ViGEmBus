@@ -1046,6 +1046,11 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 			notify->SerialNo = this->_SerialNo;
 			notify->Report = this->_OutputReport;
 
+			DumpAsHex("!! XUSB_REQUEST_NOTIFICATION", 
+				notify, 
+				sizeof(DS4_REQUEST_NOTIFICATION)
+			);
+			
 			WdfRequestCompleteWithInformation(notifyRequest, status, notify->Size);
 		}
 		else
@@ -1225,6 +1230,8 @@ void ViGEm::Bus::Targets::EmulationTargetDS4::ProcessPendingNotification(WDFQUEU
 	PVOID clientBuffer, contextBuffer;
 	PDS4_REQUEST_NOTIFICATION notify = nullptr;
 
+	TraceDbg(TRACE_USBPDO, "%!FUNC! Entry");
+	
 	//
 	// Loop through and drain all queued requests until buffer is empty
 	// 
@@ -1262,6 +1269,11 @@ void ViGEm::Bus::Targets::EmulationTargetDS4::ProcessPendingNotification(WDFQUEU
 			notify->SerialNo = this->_SerialNo;
 			notify->Report = *static_cast<PDS4_OUTPUT_REPORT>(clientBuffer);
 
+			DumpAsHex("!! XUSB_REQUEST_NOTIFICATION", 
+				notify, 
+				sizeof(DS4_REQUEST_NOTIFICATION)
+			);
+			
 			WdfRequestCompleteWithInformation(request, status, notify->Size);
 		}
 
@@ -1275,6 +1287,8 @@ void ViGEm::Bus::Targets::EmulationTargetDS4::ProcessPendingNotification(WDFQUEU
 			break;
 		}
 	}
+
+	TraceDbg(TRACE_USBPDO, "%!FUNC! Exit");
 }
 
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(

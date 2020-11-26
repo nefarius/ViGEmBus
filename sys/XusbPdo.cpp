@@ -893,6 +893,11 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 			notify->LargeMotor = this->_Rumble[3];
 			notify->SmallMotor = this->_Rumble[4];
 
+			DumpAsHex("!! XUSB_REQUEST_NOTIFICATION", 
+				notify, 
+				sizeof(XUSB_REQUEST_NOTIFICATION)
+			);
+			
 			WdfRequestCompleteWithInformation(notifyRequest, status, notify->Size);
 		}
 		else
@@ -1055,6 +1060,8 @@ void ViGEm::Bus::Targets::EmulationTargetXUSB::ProcessPendingNotification(WDFQUE
 	size_t bufferLength;
 	PXUSB_REQUEST_NOTIFICATION notify = nullptr;
 
+	TraceDbg(TRACE_BUSENUM, "%!FUNC! Entry");
+	
 	//
 	// Loop through and drain all queued requests until buffer is empty
 	// 
@@ -1109,6 +1116,11 @@ void ViGEm::Bus::Targets::EmulationTargetXUSB::ProcessPendingNotification(WDFQUE
 			notify->LargeMotor = static_cast<PUCHAR>(clientBuffer)[3];
 			notify->SmallMotor = static_cast<PUCHAR>(clientBuffer)[4];
 
+			DumpAsHex("!! XUSB_REQUEST_NOTIFICATION", 
+				notify, 
+				sizeof(XUSB_REQUEST_NOTIFICATION)
+			);
+			
 			WdfRequestCompleteWithInformation(request, status, notify->Size);
 		}
 
@@ -1122,4 +1134,6 @@ void ViGEm::Bus::Targets::EmulationTargetXUSB::ProcessPendingNotification(WDFQUE
 			break;
 		}
 	}
+
+	TraceDbg(TRACE_BUSENUM, "%!FUNC! Exit");
 }
