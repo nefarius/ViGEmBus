@@ -67,7 +67,5 @@ typedef struct _VIGEM_TARGET_T
     FARPROC Notification;
     LPVOID NotificationUserData;
 
-	bool closingNotificationThreads;
 	HANDLE cancelNotificationThreadEvent;
-	std::unique_ptr<std::vector<std::thread>> notificationThreadList;
 } VIGEM_TARGET;
