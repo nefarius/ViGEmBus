@@ -1001,7 +1001,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbGetStringDescriptorType(PUR
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request)
 {
-	NTSTATUS     status;
+	NTSTATUS     status = STATUS_SUCCESS;
 	WDFREQUEST   notifyRequest;
 	
 	// Data coming FROM us TO higher driver
@@ -1025,16 +1025,15 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 		static_cast<PUCHAR>(pTransfer->TransferBuffer) + DS4_OUTPUT_BUFFER_OFFSET,
 		DS4_OUTPUT_BUFFER_LENGTH);
 
-	// Notify user-mode process that new data is available
-	status = WdfIoQueueRetrieveNextRequest(this->_PendingNotificationRequests, &notifyRequest);
-
-	if (NT_SUCCESS(status))
+	if (NT_SUCCESS(WdfIoQueueRetrieveNextRequest(
+		this->_PendingNotificationRequests,
+		&notifyRequest)))
 	{
-		PDS4_REQUEST_NOTIFICATION notify = NULL;
+		PDS4_REQUEST_NOTIFICATION notify = nullptr;
 
 		status = WdfRequestRetrieveOutputBuffer(
-			notifyRequest, 
-			sizeof(DS4_REQUEST_NOTIFICATION), 
+			notifyRequest,
+			sizeof(DS4_REQUEST_NOTIFICATION),
 			reinterpret_cast<PVOID*>(&notify),
 			nullptr
 		);
@@ -1046,19 +1045,19 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 			notify->SerialNo = this->_SerialNo;
 			notify->Report = this->_OutputReport;
 
-			DumpAsHex("!! XUSB_REQUEST_NOTIFICATION", 
-				notify, 
-				sizeof(DS4_REQUEST_NOTIFICATION)
+			DumpAsHex("!! XUSB_REQUEST_NOTIFICATION",
+			          notify,
+			          sizeof(DS4_REQUEST_NOTIFICATION)
 			);
-			
+
 			WdfRequestCompleteWithInformation(notifyRequest, status, notify->Size);
 		}
 		else
 		{
 			TraceEvents(TRACE_LEVEL_ERROR,
-				TRACE_USBPDO,
-				"WdfRequestRetrieveOutputBuffer failed with status %!STATUS!",
-				status);
+			            TRACE_USBPDO,
+			            "WdfRequestRetrieveOutputBuffer failed with status %!STATUS!",
+			            status);
 		}
 	}
 	else
@@ -1080,7 +1079,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 			*static_cast<size_t*>(contextBuffer) = DS4_OUTPUT_BUFFER_LENGTH;
 
 			TraceDbg(TRACE_USBPDO, "Queued %Iu bytes", DS4_OUTPUT_BUFFER_LENGTH);
-			
+
 			DMF_BufferQueue_Enqueue(this->_UsbInterruptOutBufferQueue, clientBuffer);
 		}
 	}

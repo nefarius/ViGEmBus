@@ -702,7 +702,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbGetStringDescriptorType(PU
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request)
 {
-	NTSTATUS     status;
+	NTSTATUS     status = STATUS_SUCCESS;
 	WDFREQUEST   notifyRequest;
 
 	// Data coming FROM us TO higher driver
@@ -867,13 +867,10 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 
 #pragma endregion
 
-	// Notify user-mode process that new data is available
-	status = WdfIoQueueRetrieveNextRequest(
+	if (NT_SUCCESS(WdfIoQueueRetrieveNextRequest(
 		this->_PendingNotificationRequests,
 		&notifyRequest
-	);
-
-	if (NT_SUCCESS(status))
+	)))
 	{
 		PXUSB_REQUEST_NOTIFICATION notify = nullptr;
 
@@ -893,11 +890,11 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 			notify->LargeMotor = this->_Rumble[3];
 			notify->SmallMotor = this->_Rumble[4];
 
-			DumpAsHex("!! XUSB_REQUEST_NOTIFICATION", 
-				notify, 
-				sizeof(XUSB_REQUEST_NOTIFICATION)
+			DumpAsHex("!! XUSB_REQUEST_NOTIFICATION",
+			          notify,
+			          sizeof(XUSB_REQUEST_NOTIFICATION)
 			);
-			
+
 			WdfRequestCompleteWithInformation(notifyRequest, status, notify->Size);
 		}
 		else
@@ -927,7 +924,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 			*static_cast<size_t*>(contextBuffer) = pTransfer->TransferBufferLength;
 
 			TraceDbg(TRACE_USBPDO, "Queued %Iu bytes", pTransfer->TransferBufferLength);
-			
+
 			DMF_BufferQueue_Enqueue(this->_UsbInterruptOutBufferQueue, clientBuffer);
 		}
 	}
