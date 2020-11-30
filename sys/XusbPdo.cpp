@@ -1090,7 +1090,7 @@ void ViGEm::Bus::Targets::EmulationTargetXUSB::ProcessPendingNotification(WDFQUE
 		//
 		// Validate packet
 		// 
-		if (bufferLength != XUSB_RUMBLE_SIZE)
+		if (bufferLength != XUSB_RUMBLE_SIZE && bufferLength != XUSB_LEDSET_SIZE)
 		{
 			DMF_BufferQueue_Reuse(this->_UsbInterruptOutBufferQueue, clientBuffer);
 			WdfRequestComplete(request, STATUS_INVALID_BUFFER_SIZE);
@@ -1103,15 +1103,21 @@ void ViGEm::Bus::Targets::EmulationTargetXUSB::ProcessPendingNotification(WDFQUE
 			reinterpret_cast<PVOID*>(&notify),
 			nullptr
 		)))
-		{
-			// 
-			// Assign values to output buffer
-			// 
+		{			
 			notify->Size = sizeof(XUSB_REQUEST_NOTIFICATION);
 			notify->SerialNo = this->_SerialNo;
-			notify->LedNumber = this->_LedNumber;
-			notify->LargeMotor = static_cast<PUCHAR>(clientBuffer)[3];
-			notify->SmallMotor = static_cast<PUCHAR>(clientBuffer)[4];
+			notify->LedNumber = this->_LedNumber; // Report last cached value
+
+			if (bufferLength == XUSB_RUMBLE_SIZE)
+			{
+				notify->LargeMotor = static_cast<PUCHAR>(clientBuffer)[3];
+				notify->SmallMotor = static_cast<PUCHAR>(clientBuffer)[4];
+			}
+			else
+			{
+				notify->LargeMotor = this->_Rumble[3]; // Cached value
+				notify->SmallMotor = this->_Rumble[4]; // Cached value
+			}
 
 			DumpAsHex("!! XUSB_REQUEST_NOTIFICATION", 
 				notify, 

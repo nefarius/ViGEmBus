@@ -621,7 +621,7 @@ VIGEM_ERROR vigem_target_x360_register_notification(
 				    continue;
 			    }
 
-			    if (GetLastError() == ERROR_ACCESS_DENIED)
+			    if (GetLastError() == ERROR_ACCESS_DENIED || GetLastError() == ERROR_OPERATION_ABORTED)
 			    {
 				    CloseHandle(lOverlapped.hEvent);
 				    return;
@@ -712,7 +712,7 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
 				    continue;
 			    }
 
-			    if (GetLastError() == ERROR_ACCESS_DENIED)
+			    if (GetLastError() == ERROR_ACCESS_DENIED || GetLastError() == ERROR_OPERATION_ABORTED)
 			    {
 				    CloseHandle(lOverlapped.hEvent);
 				    return VIGEM_ERROR_INVALID_TARGET;
