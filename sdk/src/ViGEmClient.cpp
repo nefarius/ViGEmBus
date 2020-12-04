@@ -676,7 +676,6 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
 	    [](
 	    PVIGEM_TARGET _Target,
 	    PVIGEM_CLIENT _Client,
-	    PFN_VIGEM_DS4_NOTIFICATION _Notification,
 	    LPVOID _UserData)
 	    {
 		    DWORD transferred = 0;
@@ -701,26 +700,30 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
 
 			    if (GetOverlappedResult(_Client->hBusDevice, &lOverlapped, &transferred, TRUE) != 0)
 			    {
-				    _Notification(
-                        _Client, 
-                        _Target, 
-                        ds4rn.Report.LargeMotor, 
-                        ds4rn.Report.SmallMotor, 
-                        ds4rn.Report.LightbarColor, 
-                        _UserData
-                    );
+				    if (_Target->Notification == nullptr)
+				    {
+					    CloseHandle(lOverlapped.hEvent);
+					    return;
+				    }
+
+				    reinterpret_cast<PFN_VIGEM_DS4_NOTIFICATION>(_Target->Notification)(
+					    _Client, _Target, ds4rn.Report.LargeMotor,
+					    ds4rn.Report.SmallMotor,
+					    ds4rn.Report.LightbarColor, _UserData
+				    );
+
 				    continue;
 			    }
 
 			    if (GetLastError() == ERROR_ACCESS_DENIED || GetLastError() == ERROR_OPERATION_ABORTED)
 			    {
 				    CloseHandle(lOverlapped.hEvent);
-				    return VIGEM_ERROR_INVALID_TARGET;
+				    return;
 			    }
 		    }
 		    while (TRUE);
 	    },
-	    target, vigem, notification, userData
+	    target, vigem, userData
     };
 
     _async.detach();
