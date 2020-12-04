@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Nuke.Common;
 using Nuke.Common.CI;
+using Nuke.Common.CI.AppVeyor;
 using Nuke.Common.Execution;
 using Nuke.Common.Git;
 using Nuke.Common.IO;
@@ -31,11 +32,7 @@ class Build : NukeBuild
     [Solution] readonly Solution Solution;
     [GitRepository] readonly GitRepository GitRepository;
 
-    Target Clean => _ => _
-        .Before(Restore)
-        .Executes(() =>
-        {
-        });
+    AbsolutePath DmfSolution => RootDirectory / "../DMF/Dmf.sln";
 
     Target Restore => _ => _
         .Executes(() =>
@@ -45,8 +42,24 @@ class Build : NukeBuild
                 .SetTargets("Restore"));
         });
 
+    Target BuildDmf => _ => _
+        .Executes(() =>
+        {
+            if(IsLocalBuild)
+                return;
+
+            Console.WriteLine($"DMF solution path: {DmfSolution}");
+
+            MSBuild(s => s
+                .SetTargetPath(DmfSolution)
+                .SetTargets("Rebuild")
+                .SetConfiguration(Configuration)
+                .SetMaxCpuCount(Environment.ProcessorCount)
+                .SetNodeReuse(IsLocalBuild));
+        });
+
     Target Compile => _ => _
-        .DependsOn(Restore)
+        .DependsOn(BuildDmf)
         .Executes(() =>
         {
             MSBuild(s => s

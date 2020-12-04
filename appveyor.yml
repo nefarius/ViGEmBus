@@ -6,13 +6,13 @@ platform:
 configuration:
 - Release
 install:
-- cmd: git submodule -q update --init
+- cmd: git clone -q https://github.com/microsoft/DMF.git C:\projects\DMF
 before_build:
 - ps: Invoke-WebRequest "https://github.com/nefarius/vpatch/releases/latest/download/vpatch.exe" -OutFile vpatch.exe
 - cmd: vpatch.exe --stamp-version "%APPVEYOR_BUILD_VERSION%" --target-file ".\sys\ViGEmBus.vcxproj" --vcxproj.inf-time-stamp
 - cmd: vpatch.exe --stamp-version "%APPVEYOR_BUILD_VERSION%" --target-file ".\sys\ViGEmBus.rc" --resource.file-version --resource.product-version
-build:
-  project: $(APPVEYOR_BUILD_FOLDER)\$(APPVEYOR_PROJECT_NAME).sln
+build_script:
+- ps: .\build.ps1
 after_build:
 - cmd: makecab.exe /f ViGEmBus_%PLATFORM%.ddf
 artifacts:
