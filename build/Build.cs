@@ -50,10 +50,16 @@ class Build : NukeBuild
 
             Console.WriteLine($"DMF solution path: {DmfSolution}");
 
+            var platform = MSBuildTargetPlatform.x64;
+
+            if(AppVeyor.Instance.Platform != null && AppVeyor.Instance.Platform.Equals("x86"))
+                platform = MSBuildTargetPlatform.Win32;
+
             MSBuild(s => s
                 .SetTargetPath(DmfSolution)
                 .SetTargets("Rebuild")
                 .SetConfiguration(Configuration)
+                .SetTargetPlatform(platform)
                 .SetMaxCpuCount(Environment.ProcessorCount)
                 .SetNodeReuse(IsLocalBuild));
         });
