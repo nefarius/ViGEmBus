@@ -137,7 +137,6 @@
           <File Name="ViGEmBus.sys" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.sys" />
           <File Name="ViGEmBus.inf" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.inf" />
           <File Name="ViGEmBus.cat" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\ViGEmBus.cat" />
-          <File Name="WdfCoinstaller01009.dll" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\WdfCoinstaller01009.dll" />
           <File Name="devcon.exe" Source="$(var.SolutionDir)\drivers\$(var.ArchDir)\devcon.exe" />
           <File Name="devcon-LICENSE" Source="$(var.SolutionDir)\drivers\devcon-LICENSE" />
           <File Name="LICENSE" Source="$(var.SolutionDir)\LICENSE" />
@@ -146,7 +145,6 @@
           <File Name="ViGEmBus.sys" Source="$(var.SolutionDir)bin\$(var.ArchDir)\ViGEmBus\ViGEmBus.sys" />
           <File Name="ViGEmBus.inf" Source="$(var.SolutionDir)bin\$(var.ArchDir)\ViGEmBus\ViGEmBus.inf" />
           <File Name="ViGEmBus.cat" Source="$(var.SolutionDir)bin\$(var.ArchDir)\ViGEmBus\ViGEmBus.cat" />
-          <File Name="WdfCoinstaller01009.dll" Source="$(var.SolutionDir)bin\$(var.ArchDir)\ViGEmBus\WdfCoinstaller01009.dll" />
           <File Name="devcon.exe" Source="$(var.SolutionDir)drivers\$(var.ArchDir)\devcon.exe" />
           <File Name="devcon-LICENSE" Source="$(var.SolutionDir)drivers\devcon-LICENSE" />
           <File Name="LICENSE" Source="$(var.SolutionDir)LICENSE" />
