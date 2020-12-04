@@ -16,4 +16,3 @@ LICENSE
 bin\x64\ViGEmBus.pdb
 bin\x64\ViGEmBus\ViGEmBus.inf
 bin\x64\ViGEmBus\ViGEmBus.sys
-bin\x64\ViGEmBus\WdfCoinstaller01009.dll
