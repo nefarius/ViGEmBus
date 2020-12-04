@@ -86,6 +86,7 @@
     <DriverType>KMDF</DriverType>
     <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
+	<SignMode>Off</SignMode>
   </PropertyGroup>
   <PropertyGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
@@ -100,6 +101,7 @@
     <DriverType>KMDF</DriverType>
     <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
+	<SignMode>Off</SignMode>
   </PropertyGroup>
   <PropertyGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
