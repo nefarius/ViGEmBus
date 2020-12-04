@@ -19,7 +19,6 @@ after_build:
 artifacts:
 - path: 'bin**\$(APPVEYOR_PROJECT_NAME)\*.inf'
 - path: 'bin**\$(APPVEYOR_PROJECT_NAME)\*.sys'
-- path: 'bin**\$(APPVEYOR_PROJECT_NAME)\*.dll'
 - path: 'bin**\*.pdb'
 - path: 'disk1\*.cab'
 - path: 'bin**\*.msi'
