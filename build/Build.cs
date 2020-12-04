@@ -45,14 +45,14 @@ class Build : NukeBuild
     Target BuildDmf => _ => _
         .Executes(() =>
         {
-            if(IsLocalBuild)
+            if (IsLocalBuild)
                 return;
 
             Console.WriteLine($"DMF solution path: {DmfSolution}");
 
             var platform = MSBuildTargetPlatform.x64;
 
-            if(AppVeyor.Instance.Platform != null && AppVeyor.Instance.Platform.Equals("x86"))
+            if (AppVeyor.Instance.Platform != null && AppVeyor.Instance.Platform.Equals("x86"))
                 platform = MSBuildTargetPlatform.Win32;
 
             MSBuild(s => s
