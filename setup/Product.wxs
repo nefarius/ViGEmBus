@@ -93,7 +93,7 @@
     <!-- build removal command -->
     <CustomAction Id="DevconRemovePropertyAssign"
                   Property="DevconRemoveQuiet"
-                  Value="&quot;[INSTALLFOLDER]devcon.exe&quot; remove &quot;Nefarius\ViGEmBus\Gen1&quot;"
+                  Value="&quot;[INSTALLFOLDER]devcon.exe&quot; /r remove &quot;Nefarius\ViGEmBus\Gen1&quot;"
                   Execute="immediate" />
 
     <!-- execute removal with suppressed UI -->
