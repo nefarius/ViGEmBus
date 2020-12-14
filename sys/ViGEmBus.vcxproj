@@ -86,7 +86,7 @@
     <DriverType>KMDF</DriverType>
     <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
-	<SignMode>Off</SignMode>
+    <SignMode>Off</SignMode>
   </PropertyGroup>
   <PropertyGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
@@ -101,7 +101,7 @@
     <DriverType>KMDF</DriverType>
     <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
-	<SignMode>Off</SignMode>
+    <SignMode>Off</SignMode>
   </PropertyGroup>
   <PropertyGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
@@ -231,6 +231,9 @@
     <Link>
       <AdditionalDependencies>..\..\DMF\Release\Win32\lib\DmfK\DmfK.lib;$(DDK_LIB_PATH)wdmsec.lib;%(AdditionalDependencies);ntstrsafe.lib;usbdex.lib</AdditionalDependencies>
     </Link>
+    <Inf>
+      <TimeStamp>1.0.0.0</TimeStamp>
+    </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -259,6 +262,9 @@
     <Link>
       <AdditionalDependencies>..\..\DMF\Release\x64\lib\DmfK\DmfK.lib;$(DDK_LIB_PATH)wdmsec.lib;%(AdditionalDependencies);ntstrsafe.lib;usbdex.lib</AdditionalDependencies>
     </Link>
+    <Inf>
+      <TimeStamp>1.0.0.0</TimeStamp>
+    </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
