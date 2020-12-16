@@ -45,7 +45,12 @@ The `ViGEm` Bus Driver is licensed under the **BSD-3-Clause**, see [LICENSE](./L
 
 ## How to build
 
-[Install Visual Studio 2019 and WDK for Windows 10, version 1903](https://docs.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk#wdk-for-windows-10-version-1903).
+### Prerequisites
+
+- [Step 1: Install Visual Studio 2019](<https://docs.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk#download-icon-step-1-install-visual-studio-2019>)
+- [Step 2: Install WDK for Windows 10, version 2004](<https://docs.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk#download-icon-step-2-install-wdk-for-windows-10-version-2004>)
+- [Step 3: Clone the Driver Module Framework (DMF)](https://github.com/microsoft/DMF) into the same parent directory.
+  - Build the `DmfK` project with Release and Debug configurations for all architectures (x64 and Win32).
 
 You can build directly within Visual Studio.
 
