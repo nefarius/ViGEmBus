@@ -37,7 +37,13 @@ A few examples of the most common use cases for `ViGEm` are:
 
 ## Supported Systems
 
+### Version 1.16 and below
+
 The driver is built for Windows 7/8.1/10 (x86 and amd64).
+
+### Version 1.17 and above
+
+The driver is built for Windows 10 only (x86 and amd64).
 
 ## License
 
