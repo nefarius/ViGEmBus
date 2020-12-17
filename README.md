@@ -60,7 +60,7 @@ The `ViGEm` Bus Driver is licensed under the **BSD-3-Clause**, see [LICENSE](./L
 
 You can build directly within Visual Studio.
 
-Do bear in mind that you'll need to **sign** the driver to use it without [test mode](<https://technet.microsoft.com/en-us/ff553484(v=vs.96)>).
+Do bear in mind that you'll need to **sign** the driver to use it without [test mode](https://docs.microsoft.com/en-us/windows-hardware/drivers/install/the-testsigning-boot-configuration-option#enable-or-disable-use-of-test-signed-code).
 
 ## Contribute
 
