@@ -47,7 +47,7 @@ The driver is built for Windows 10 only (x86 and amd64).
 
 ## License
 
-The `ViGEm` Bus Driver is licensed under the **BSD-3-Clause**, see [LICENSE](./LICENSE.md) for more information.
+The ViGEm Bus Driver is licensed under the **BSD-3-Clause**, see [LICENSE](./LICENSE.md) for more information.
 
 ## How to build
 
