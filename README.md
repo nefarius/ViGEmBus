@@ -83,8 +83,8 @@ Pre-built production-signed binaries are provided by `Nefarius Software Solution
 Sponsors listed here have helped the project flourish by either financial support or by gifting licenses:
 
 - [3dRudder](https://www.3drudder.com/)
-- [Parsec](https://parsecgaming.com/)
-- [Rainway, Inc](https://rainway.io/)
+- [Parsec](https://parsec.app/)
+- [Rainway, Inc](https://rainway.com/)
 - [JetBrains](https://www.jetbrains.com/resharper/)
 - [Advanced Installer](https://www.advancedinstaller.com/)
 - [ICAROS](https://www.icaros.com/)
@@ -96,15 +96,15 @@ A brief listing of projects/companies/vendors known to build upon the powers of 
 This list is non-exhaustive, if you'd like to see your project included, contact us!
 
 - [3dRudder](https://www.3drudder.com/)
-- [Parsec](https://parsecgaming.com/)
+- [Parsec](https://parsec.app/)
 - [GloSC](https://github.com/Alia5/GloSC)
 - [UCR](https://github.com/Snoothy/UCR)
 - [InputMapper](https://inputmapper.com/)
 - [Oculus VR, LLC.](https://www.oculus.com/)
-- [Rainway, Inc](https://rainway.io/)
+- [Rainway, Inc](https://rainway.com/)
 - [WiimoteHook](https://forum.cemu.info/showthread.php/140-WiimoteHook-Nintendo-Wii-Remote-with-Motion-Rumble-and-Nunchuk-support)
 - [XJoy](https://github.com/sam0x17/XJoy)
-- [HP](https://www8.hp.com/us/en/campaigns/gamingpcs/overview.html)
+- [HP](https://www8.hp.com/us/en/gaming/omen.html)
 - [DS4Windows](https://ryochan7.github.io/ds4windows-site/)
 - [XOutput](https://github.com/csutorasa/XOutput)
 - [RdpGamepad](https://github.com/microsoft/RdpGamepad)
