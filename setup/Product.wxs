@@ -61,7 +61,7 @@
 
     <!-- https://stackoverflow.com/a/23061358 -->
     <Condition Message="This application can only be installed on Windows 10.">
-      <![CDATA[WIN10FOUND]]>
+      <![CDATA[Installed OR WIN10FOUND]]>
     </Condition>
 
     <!-- write version value to registry -->
