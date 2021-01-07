@@ -39,11 +39,11 @@ A few examples of the most common use cases for `ViGEm` are:
 
 ### Version 1.16 and below
 
-The driver is built for Windows 7/8.1/10 (x86 and amd64).
+The driver is built for Windows 7/8.1/10/Server 2016/Server 2019 (x86 and amd64).
 
 ### Version 1.17 and above
 
-The driver is built for Windows 10 only (x86 and amd64).
+The driver is built for Windows 10/Server 2016/Server 2019 only (x86 and amd64).
 
 ## License
 
