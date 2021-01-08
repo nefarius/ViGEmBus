@@ -212,7 +212,7 @@ typedef struct _DS4_TOUCH
     BYTE bTouchData1[3];    // Two 12 bits values (for X and Y) 
                             // middle byte holds last 4 bits of X and the starting 4 bits of Y
     BYTE bIsUpTrackingNum2; // second touch data immediately follows data of first touch 
-    BYTE bTouchData2[3];    // resolution is 1920x943
+    BYTE bTouchData2[3];    // resolution is 1920x942
 } DS4_TOUCH, * PDS4_TOUCH;
 
 //
