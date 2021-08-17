@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Community support
+    url: https://vigem.org/Community-Support/
+    about: Use these resources for support.
+  - name: 📖 Documentation
+    url: https://vigem.org/projects/
+    about: Extended documentation about the projects.
+  - name: ❓ Other issue?
+    url: https://forums.vigem.org/
+    about: Search on the community forums.
