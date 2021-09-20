@@ -27,4 +27,4 @@ Last but not least look for `C:\Windows\INF\setupapi.dev.log` and attach it as w
 
 Optionally compress both files down if it gives you troubles uploading.
 
-Your compliance is apprechiated! 😘
+Your compliance is appreciated! 😘
