@@ -684,7 +684,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::DumpAsHex(PCSTR Prefix, PVOID Buffer,
 #ifdef DBG
 
 	size_t dumpBufferLength = ((BufferLength * sizeof(CHAR)) * 2) + 1;
-	PSTR dumpBuffer = static_cast<PSTR>(ExAllocatePoolWithTag(
+	PSTR dumpBuffer = static_cast<PSTR>(ExAllocatePoolZero(
 		NonPagedPoolNx,
 		dumpBufferLength,
 		'1234'

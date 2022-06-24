@@ -1189,8 +1189,8 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::SubmitReportImpl(PVOID NewRepo
 
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::ReverseByteArray(PUCHAR Array, INT Length)
 {
-	const auto s = static_cast<PUCHAR>(ExAllocatePoolWithTag(
-		NonPagedPool,
+	const auto s = static_cast<PUCHAR>(ExAllocatePoolZero(
+		NonPagedPoolNx,
 		sizeof(UCHAR) * Length,
 		'U4SD'
 	));

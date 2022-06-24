@@ -66,40 +66,42 @@ EXTERN_C_START
 // 
 NTSTATUS DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING RegistryPath)
 {
-    WDF_DRIVER_CONFIG       config;
-    NTSTATUS                status;
-    WDFDRIVER               driver;
-    WDF_OBJECT_ATTRIBUTES   attributes;
+	WDF_DRIVER_CONFIG       config;
+	NTSTATUS                status;
+	WDFDRIVER               driver;
+	WDF_OBJECT_ATTRIBUTES   attributes;
 
-    KdPrint((DRIVERNAME "Virtual Gamepad Emulation Bus Driver [built: %s %s]\n", __DATE__, __TIME__));
+	KdPrint((DRIVERNAME "Virtual Gamepad Emulation Bus Driver [built: %s %s]\n", __DATE__, __TIME__));
 
-    //
-    // Initialize WPP Tracing
-    //
-    WPP_INIT_TRACING(DriverObject, RegistryPath);
+	//
+	// Initialize WPP Tracing
+	//
+	WPP_INIT_TRACING(DriverObject, RegistryPath);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION,
-        TRACE_DRIVER,
-        "Loading Virtual Gamepad Emulation Bus Driver"
-    );
+	TraceEvents(TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
+		"Loading Virtual Gamepad Emulation Bus Driver"
+	);
 
-    //
-    // Register cleanup callback
-    // 
-    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-    attributes.EvtCleanupCallback = Bus_EvtDriverContextCleanup;
+	ExInitializeDriverRuntime(DrvRtPoolNxOptIn);
 
-    WDF_DRIVER_CONFIG_INIT(&config, Bus_EvtDeviceAdd);
+	//
+	// Register cleanup callback
+	// 
+	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+	attributes.EvtCleanupCallback = Bus_EvtDriverContextCleanup;
 
-    status = WdfDriverCreate(DriverObject, RegistryPath, &attributes, &config, &driver);
+	WDF_DRIVER_CONFIG_INIT(&config, Bus_EvtDeviceAdd);
 
-    if (!NT_SUCCESS(status))
-    {
-        WPP_CLEANUP(DriverObject);
-        KdPrint((DRIVERNAME "WdfDriverCreate failed with status 0x%x\n", status));
-    }
+	status = WdfDriverCreate(DriverObject, RegistryPath, &attributes, &config, &driver);
 
-    return status;
+	if (!NT_SUCCESS(status))
+	{
+		WPP_CLEANUP(DriverObject);
+		KdPrint((DRIVERNAME "WdfDriverCreate failed with status 0x%x\n", status));
+	}
+
+	return status;
 }
 
 //
@@ -107,168 +109,168 @@ NTSTATUS DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING Registry
 // 
 NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 {
-    WDF_CHILD_LIST_CONFIG       config;
-    NTSTATUS                    status;
-    WDFDEVICE                   device;
-    WDF_IO_QUEUE_CONFIG         queueConfig;
-    PNP_BUS_INFORMATION         busInfo;
-    WDFQUEUE                    queue;
-    WDF_FILEOBJECT_CONFIG       foConfig;
-    WDF_OBJECT_ATTRIBUTES       fdoAttributes;
-    WDF_OBJECT_ATTRIBUTES       fileHandleAttributes;
-    PFDO_DEVICE_DATA            pFDOData;
-    PWSTR                       pSymbolicNameList;
+	WDF_CHILD_LIST_CONFIG       config;
+	NTSTATUS                    status;
+	WDFDEVICE                   device;
+	WDF_IO_QUEUE_CONFIG         queueConfig;
+	PNP_BUS_INFORMATION         busInfo;
+	WDFQUEUE                    queue;
+	WDF_FILEOBJECT_CONFIG       foConfig;
+	WDF_OBJECT_ATTRIBUTES       fdoAttributes;
+	WDF_OBJECT_ATTRIBUTES       fileHandleAttributes;
+	PFDO_DEVICE_DATA            pFDOData;
+	PWSTR                       pSymbolicNameList;
 
-    UNREFERENCED_PARAMETER(Driver);
+	UNREFERENCED_PARAMETER(Driver);
 
-    PAGED_CODE();
+	PAGED_CODE();
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
 #pragma region Check for duplicated FDO
 
-    //
-    // Note: this could be avoided if converted to non-PNP driver
-    // and use of named device object. Food for thought for future.
-    // 
-	
-    status = IoGetDeviceInterfaces(
-        &GUID_DEVINTERFACE_BUSENUM_VIGEM, 
-        NULL,
-        0, // Important!
-        &pSymbolicNameList
-    );
-    if (NT_SUCCESS(status))
-    {
-	    const bool deviceAlreadyExists = (0 != *pSymbolicNameList);
-	    ExFreePool(pSymbolicNameList);
+	//
+	// Note: this could be avoided if converted to non-PNP driver
+	// and use of named device object. Food for thought for future.
+	// 
 
-	    if (deviceAlreadyExists)
-	    {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_DRIVER,
-                "Device with interface GUID {%!GUID!} already exists (%ws)",
-                &GUID_DEVINTERFACE_BUSENUM_VIGEM,
-                pSymbolicNameList
-            );
+	status = IoGetDeviceInterfaces(
+		&GUID_DEVINTERFACE_BUSENUM_VIGEM,
+		NULL,
+		0, // Important!
+		&pSymbolicNameList
+	);
+	if (NT_SUCCESS(status))
+	{
+		const bool deviceAlreadyExists = (0 != *pSymbolicNameList);
+		ExFreePool(pSymbolicNameList);
 
-            return STATUS_RESOURCE_IN_USE;
-	    }
-    }
-    else
-    {
-	    TraceEvents(TRACE_LEVEL_WARNING,
-	                TRACE_DRIVER,
-	                "IoGetDeviceInterfaces failed with status %!STATUS!",
-	                status);
-    }
+		if (deviceAlreadyExists)
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_DRIVER,
+				"Device with interface GUID {%!GUID!} already exists (%ws)",
+				&GUID_DEVINTERFACE_BUSENUM_VIGEM,
+				pSymbolicNameList
+			);
+
+			return STATUS_RESOURCE_IN_USE;
+		}
+	}
+	else
+	{
+		TraceEvents(TRACE_LEVEL_WARNING,
+			TRACE_DRIVER,
+			"IoGetDeviceInterfaces failed with status %!STATUS!",
+			status);
+	}
 
 #pragma endregion
 
-    WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
-    // More than one process may talk to the bus at the same time
-    WdfDeviceInitSetExclusive(DeviceInit, FALSE);
-    // Bus is power policy owner over all PDOs
-    WdfDeviceInitSetPowerPolicyOwnership(DeviceInit, TRUE);
+	WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
+	// More than one process may talk to the bus at the same time
+	WdfDeviceInitSetExclusive(DeviceInit, FALSE);
+	// Bus is power policy owner over all PDOs
+	WdfDeviceInitSetPowerPolicyOwnership(DeviceInit, TRUE);
 
 #pragma region Prepare child list
 
-    WDF_CHILD_LIST_CONFIG_INIT(&config, sizeof(PDO_IDENTIFICATION_DESCRIPTION), Bus_EvtDeviceListCreatePdo);
+	WDF_CHILD_LIST_CONFIG_INIT(&config, sizeof(PDO_IDENTIFICATION_DESCRIPTION), Bus_EvtDeviceListCreatePdo);
 
-    config.EvtChildListIdentificationDescriptionCompare = EmulationTargetPDO::EvtChildListIdentificationDescriptionCompare;
+	config.EvtChildListIdentificationDescriptionCompare = EmulationTargetPDO::EvtChildListIdentificationDescriptionCompare;
 
-    WdfFdoInitSetDefaultChildListConfig(DeviceInit, &config, WDF_NO_OBJECT_ATTRIBUTES);
+	WdfFdoInitSetDefaultChildListConfig(DeviceInit, &config, WDF_NO_OBJECT_ATTRIBUTES);
 
 #pragma endregion
 
 #pragma region Assign File Object Configuration
 
-    WDF_FILEOBJECT_CONFIG_INIT(&foConfig, Bus_DeviceFileCreate, Bus_FileClose, NULL);
+	WDF_FILEOBJECT_CONFIG_INIT(&foConfig, Bus_DeviceFileCreate, Bus_FileClose, NULL);
 
-    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&fileHandleAttributes, FDO_FILE_DATA);
+	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&fileHandleAttributes, FDO_FILE_DATA);
 
-    WdfDeviceInitSetFileObjectConfig(DeviceInit, &foConfig, &fileHandleAttributes);
+	WdfDeviceInitSetFileObjectConfig(DeviceInit, &foConfig, &fileHandleAttributes);
 
 #pragma endregion
 
 #pragma region Create FDO
 
-    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&fdoAttributes, FDO_DEVICE_DATA);
+	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&fdoAttributes, FDO_DEVICE_DATA);
 
-    status = WdfDeviceCreate(&DeviceInit, &fdoAttributes, &device);
+	status = WdfDeviceCreate(&DeviceInit, &fdoAttributes, &device);
 
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "WdfDeviceCreate failed with status %!STATUS!",
-            status);
-        return status;
-    }
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"WdfDeviceCreate failed with status %!STATUS!",
+			status);
+		return status;
+	}
 
-    pFDOData = FdoGetData(device);
-    if (pFDOData == NULL)
-    {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "FdoGetData failed");
-        return STATUS_UNSUCCESSFUL;
-    }
+	pFDOData = FdoGetData(device);
+	if (pFDOData == NULL)
+	{
+		TraceEvents(TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"FdoGetData failed");
+		return STATUS_UNSUCCESSFUL;
+	}
 
-    pFDOData->InterfaceReferenceCounter = 0;
-    pFDOData->NextSessionId = FDO_FIRST_SESSION_ID;
+	pFDOData->InterfaceReferenceCounter = 0;
+	pFDOData->NextSessionId = FDO_FIRST_SESSION_ID;
 
 #pragma endregion
 
 #pragma region Create default I/O queue for FDO
 
-    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
+	WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
 
-    queueConfig.EvtIoDeviceControl = Bus_EvtIoDeviceControl;
+	queueConfig.EvtIoDeviceControl = Bus_EvtIoDeviceControl;
 
-    __analysis_assume(queueConfig.EvtIoStop != 0);
-    status = WdfIoQueueCreate(device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
-    __analysis_assume(queueConfig.EvtIoStop == 0);
+	__analysis_assume(queueConfig.EvtIoStop != 0);
+	status = WdfIoQueueCreate(device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
+	__analysis_assume(queueConfig.EvtIoStop == 0);
 
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "WdfIoQueueCreate failed with status %!STATUS!",
-            status);
-        return status;
-    }
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"WdfIoQueueCreate failed with status %!STATUS!",
+			status);
+		return status;
+	}
 
 #pragma endregion
 
 #pragma region Expose FDO interface
 
-    status = WdfDeviceCreateDeviceInterface(device, &GUID_DEVINTERFACE_BUSENUM_VIGEM, NULL);
+	status = WdfDeviceCreateDeviceInterface(device, &GUID_DEVINTERFACE_BUSENUM_VIGEM, NULL);
 
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "WdfDeviceCreateDeviceInterface failed with status %!STATUS!",
-            status);
-        return status;
-    }
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"WdfDeviceCreateDeviceInterface failed with status %!STATUS!",
+			status);
+		return status;
+	}
 
 #pragma endregion
 
 #pragma region Set bus information
 
-    busInfo.BusTypeGuid = GUID_BUS_TYPE_USB;
-    busInfo.LegacyBusType = PNPBus;
-    busInfo.BusNumber = 0;
+	busInfo.BusTypeGuid = GUID_BUS_TYPE_USB;
+	busInfo.LegacyBusType = PNPBus;
+	busInfo.BusNumber = 0;
 
-    WdfDeviceSetBusInformationForChildren(device, &busInfo);
+	WdfDeviceSetBusInformationForChildren(device, &busInfo);
 
 #pragma endregion
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit with status %!STATUS!", status);
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit with status %!STATUS!", status);
 
-    return status;
+	return status;
 }
 
 // Gets called when the user-land process (or kernel driver) exits or closes the handle,
@@ -277,60 +279,60 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 _Use_decl_annotations_
 VOID
 Bus_DeviceFileCreate(
-    _In_ WDFDEVICE     Device,
-    _In_ WDFREQUEST    Request,
-    _In_ WDFFILEOBJECT FileObject
+	_In_ WDFDEVICE     Device,
+	_In_ WDFREQUEST    Request,
+	_In_ WDFFILEOBJECT FileObject
 )
 {
-    NTSTATUS         status = STATUS_INVALID_PARAMETER;
-    PFDO_FILE_DATA   pFileData = NULL;
-    PFDO_DEVICE_DATA pFDOData = NULL;
-    LONG             refCount = 0;
-    LONG             sessionId = 0;
+	NTSTATUS         status = STATUS_INVALID_PARAMETER;
+	PFDO_FILE_DATA   pFileData = NULL;
+	PFDO_DEVICE_DATA pFDOData = NULL;
+	LONG             refCount = 0;
+	LONG             sessionId = 0;
 
-    UNREFERENCED_PARAMETER(Request);
+	UNREFERENCED_PARAMETER(Request);
 
-    PAGED_CODE();
+	PAGED_CODE();
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
-    pFileData = FileObjectGetData(FileObject);
+	pFileData = FileObjectGetData(FileObject);
 
-    if (pFileData == NULL)
-    {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "FileObjectGetData failed to return file object from WDFFILEOBJECT 0x%p",
-            FileObject);
-    }
-    else
-    {
-        pFDOData = FdoGetData(Device);
-        if (pFDOData == NULL)
-        {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_DRIVER,
-                "FdoGetData failed");
-            status = STATUS_NO_SUCH_DEVICE;
-        }
-        else
-        {
-            refCount = InterlockedIncrement(&pFDOData->InterfaceReferenceCounter);
-            sessionId = InterlockedIncrement(&pFDOData->NextSessionId);
+	if (pFileData == NULL)
+	{
+		TraceEvents(TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"FileObjectGetData failed to return file object from WDFFILEOBJECT 0x%p",
+			FileObject);
+	}
+	else
+	{
+		pFDOData = FdoGetData(Device);
+		if (pFDOData == NULL)
+		{
+			TraceEvents(TRACE_LEVEL_ERROR,
+				TRACE_DRIVER,
+				"FdoGetData failed");
+			status = STATUS_NO_SUCH_DEVICE;
+		}
+		else
+		{
+			refCount = InterlockedIncrement(&pFDOData->InterfaceReferenceCounter);
+			sessionId = InterlockedIncrement(&pFDOData->NextSessionId);
 
-            pFileData->SessionId = sessionId;
-            status = STATUS_SUCCESS;
+			pFileData->SessionId = sessionId;
+			status = STATUS_SUCCESS;
 
-            TraceEvents(TRACE_LEVEL_INFORMATION,
-                TRACE_DRIVER,
-                "File/session id = %d, device ref. count = %d",
-                (int)sessionId, (int)refCount);
-        }
-    }
+			TraceEvents(TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"File/session id = %d, device ref. count = %d",
+				(int)sessionId, (int)refCount);
+		}
+	}
 
-    WdfRequestComplete(Request, status);
+	WdfRequestComplete(Request, status);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit with status %!STATUS!", status);
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
 //
@@ -339,139 +341,139 @@ Bus_DeviceFileCreate(
 _Use_decl_annotations_
 VOID
 Bus_FileClose(
-    WDFFILEOBJECT FileObject
+	WDFFILEOBJECT FileObject
 )
 {
-    WDFDEVICE                      device;
-    WDFDEVICE                      hChild;
-    NTSTATUS                       status;
-    WDFCHILDLIST                   list;
-    WDF_CHILD_LIST_ITERATOR        iterator;
-    WDF_CHILD_RETRIEVE_INFO        childInfo;
-    PDO_IDENTIFICATION_DESCRIPTION description;
-    PFDO_FILE_DATA                 pFileData = NULL;
-    PFDO_DEVICE_DATA               pFDOData = NULL;
-    LONG                           refCount = 0;
+	WDFDEVICE                      device;
+	WDFDEVICE                      hChild;
+	NTSTATUS                       status;
+	WDFCHILDLIST                   list;
+	WDF_CHILD_LIST_ITERATOR        iterator;
+	WDF_CHILD_RETRIEVE_INFO        childInfo;
+	PDO_IDENTIFICATION_DESCRIPTION description;
+	PFDO_FILE_DATA                 pFileData = NULL;
+	PFDO_DEVICE_DATA               pFDOData = NULL;
+	LONG                           refCount = 0;
 
-    PAGED_CODE();
+	PAGED_CODE();
 
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
-    // Check common context
-    pFileData = FileObjectGetData(FileObject);
-    if (pFileData == NULL)
-    {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "FileObjectGetData failed to return file object from WDFFILEOBJECT 0x%p",
-            FileObject);
-        return;
-    }
+	// Check common context
+	pFileData = FileObjectGetData(FileObject);
+	if (pFileData == NULL)
+	{
+		TraceEvents(TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"FileObjectGetData failed to return file object from WDFFILEOBJECT 0x%p",
+			FileObject);
+		return;
+	}
 
-    device = WdfFileObjectGetDevice(FileObject);
+	device = WdfFileObjectGetDevice(FileObject);
 
-    pFDOData = FdoGetData(device);
-    if (pFDOData == NULL)
-    {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_DRIVER,
-            "FdoGetData failed");
-        status = STATUS_NO_SUCH_DEVICE;
-    }
-    else
-    {
-        refCount = InterlockedDecrement(&pFDOData->InterfaceReferenceCounter);
+	pFDOData = FdoGetData(device);
+	if (pFDOData == NULL)
+	{
+		TraceEvents(TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"FdoGetData failed");
+		status = STATUS_NO_SUCH_DEVICE;
+	}
+	else
+	{
+		refCount = InterlockedDecrement(&pFDOData->InterfaceReferenceCounter);
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_DRIVER,
-            "Device ref. count = %d",
-            (int)refCount);
-    }
+		TraceEvents(TRACE_LEVEL_INFORMATION,
+			TRACE_DRIVER,
+			"Device ref. count = %d",
+			(int)refCount);
+	}
 
-    list = WdfFdoGetDefaultChildList(device);
+	list = WdfFdoGetDefaultChildList(device);
 
-    WDF_CHILD_LIST_ITERATOR_INIT(&iterator, WdfRetrievePresentChildren);
+	WDF_CHILD_LIST_ITERATOR_INIT(&iterator, WdfRetrievePresentChildren);
 
-    WdfChildListBeginIteration(list, &iterator);
+	WdfChildListBeginIteration(list, &iterator);
 
-    for (;;)
-    {
-        WDF_CHILD_RETRIEVE_INFO_INIT(&childInfo, &description.Header);
-        WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(&description.Header, sizeof(description));
+	for (;;)
+	{
+		WDF_CHILD_RETRIEVE_INFO_INIT(&childInfo, &description.Header);
+		WDF_CHILD_IDENTIFICATION_DESCRIPTION_HEADER_INIT(&description.Header, sizeof(description));
 
-        status = WdfChildListRetrieveNextDevice(list, &iterator, &hChild, &childInfo);
-        if (!NT_SUCCESS(status) || status == STATUS_NO_MORE_ENTRIES)
-        {
-            break;
-        }
+		status = WdfChildListRetrieveNextDevice(list, &iterator, &hChild, &childInfo);
+		if (!NT_SUCCESS(status) || status == STATUS_NO_MORE_ENTRIES)
+		{
+			break;
+		}
 
-        //TraceEvents(TRACE_LEVEL_VERBOSE,
-        //    TRACE_DRIVER,
-        //    "PDO properties: status = %!STATUS!, pdoPID = %d, curPID = %d, pdoSID = %d, curSID = %d, internal = %d",
-        //    (int)childInfo.Status,
-        //    (int)description.OwnerProcessId,
-        //    (int)CURRENT_PROCESS_ID(),
-        //    (int)description.SessionId,
-        //    (int)pFileData->SessionId,
-        //    (int)description.OwnerIsDriver
-        //);
+		//TraceEvents(TRACE_LEVEL_VERBOSE,
+		//    TRACE_DRIVER,
+		//    "PDO properties: status = %!STATUS!, pdoPID = %d, curPID = %d, pdoSID = %d, curSID = %d, internal = %d",
+		//    (int)childInfo.Status,
+		//    (int)description.OwnerProcessId,
+		//    (int)CURRENT_PROCESS_ID(),
+		//    (int)description.SessionId,
+		//    (int)pFileData->SessionId,
+		//    (int)description.OwnerIsDriver
+		//);
 
-        // Only unplug devices with matching session id
-        if (childInfo.Status == WdfChildListRetrieveDeviceSuccess
-            && description.SessionId == pFileData->SessionId)
-        {
-            TraceEvents(TRACE_LEVEL_INFORMATION,
-                TRACE_DRIVER,
-                "Unplugging device with serial %d",
-                description.SerialNo);
+		// Only unplug devices with matching session id
+		if (childInfo.Status == WdfChildListRetrieveDeviceSuccess
+			&& description.SessionId == pFileData->SessionId)
+		{
+			TraceEvents(TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"Unplugging device with serial %d",
+				description.SerialNo);
 
-            // "Unplug" child
-            status = WdfChildListUpdateChildDescriptionAsMissing(list, &description.Header);
-            if (!NT_SUCCESS(status))
-            {
-                TraceEvents(TRACE_LEVEL_ERROR,
-                    TRACE_DRIVER,
-                    "WdfChildListUpdateChildDescriptionAsMissing failed with status %!STATUS!",
-                    status);
-            }
-        }
-    }
+			// "Unplug" child
+			status = WdfChildListUpdateChildDescriptionAsMissing(list, &description.Header);
+			if (!NT_SUCCESS(status))
+			{
+				TraceEvents(TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"WdfChildListUpdateChildDescriptionAsMissing failed with status %!STATUS!",
+					status);
+			}
+		}
+	}
 
-    WdfChildListEndIteration(list, &iterator);
+	WdfChildListEndIteration(list, &iterator);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit with status %!STATUS!", status);
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
 VOID
 Bus_EvtDriverContextCleanup(
-    _In_ WDFOBJECT DriverObject
+	_In_ WDFOBJECT DriverObject
 )
 /*++
 Routine Description:
 
-    Free all the resources allocated in DriverEntry.
+	Free all the resources allocated in DriverEntry.
 
 Arguments:
 
-    DriverObject - handle to a WDF Driver object.
+	DriverObject - handle to a WDF Driver object.
 
 Return Value:
 
-    VOID.
+	VOID.
 
 --*/
 {
-    UNREFERENCED_PARAMETER(DriverObject);
+	UNREFERENCED_PARAMETER(DriverObject);
 
-    PAGED_CODE();
+	PAGED_CODE();
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
-    //
-    // Stop WPP Tracing
-    //
-    WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
+	//
+	// Stop WPP Tracing
+	//
+	WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
 
 }
 

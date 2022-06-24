@@ -44,7 +44,7 @@ void* operator new
     size_t size
     )
 {
-    return ExAllocatePoolWithTag(NonPagedPoolNx, size, cpp_pool_tag);
+    return ExAllocatePoolZero(NonPagedPoolNx, size, cpp_pool_tag);
 }
 
 void* operator new[]
@@ -52,7 +52,7 @@ void* operator new[]
     size_t size
     )
 {
-    return ExAllocatePoolWithTag(NonPagedPoolNx, size, cpp_pool_tag);
+    return ExAllocatePoolZero(NonPagedPoolNx, size, cpp_pool_tag);
 }
 
 void operator delete
@@ -107,7 +107,7 @@ void* __CRTDECL operator new
     size_t size
     )
 {
-    return ExAllocatePoolWithTag(NonPagedPoolNx, size, cpp_pool_tag);
+    return ExAllocatePoolZero(NonPagedPoolNx, size, cpp_pool_tag);
 }
 
 void* __CRTDECL operator new[]
@@ -115,7 +115,7 @@ void* __CRTDECL operator new[]
     size_t size
     )
 {
-    return ExAllocatePoolWithTag(NonPagedPoolNx, size, cpp_pool_tag);
+    return ExAllocatePoolZero(NonPagedPoolNx, size, cpp_pool_tag);
 }
 
 void __CRTDECL operator delete
