@@ -3,6 +3,8 @@ image: Visual Studio 2019
 skip_commits:
   files:
     - '**/*.md'
+cache:
+- C:\projects\DMF
 platform:
 - x86
 - x64
