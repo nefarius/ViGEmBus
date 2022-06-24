@@ -1,5 +1,8 @@
 version: 1.18.{build}.0
 image: Visual Studio 2019
+skip_commits:
+  files:
+    - '**/*.md'
 platform:
 - x86
 - x64
