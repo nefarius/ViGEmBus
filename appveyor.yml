@@ -6,6 +6,8 @@ platform:
 configuration:
 - Release
 install:
+- ps: iwr "https://download.microsoft.com/download/7/1/9/719a29d3-bf8c-49eb-b9bd-9bde8d17e142/wdk/wdksetup.exe" -OutFile wdksetup.exe
+- cmd: .\wdksetup.exe /features + /q /norestart
 - cmd: git submodule -q update --init
 - cmd: git clone -q https://github.com/microsoft/DMF.git C:\projects\DMF
 before_build:
