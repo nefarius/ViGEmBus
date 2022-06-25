@@ -41,8 +41,6 @@
 #include "XusbPdo.hpp"
 #include "Ds4Pdo.hpp"
 
-#include "Debugging.hpp"
-
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (PAGE, Bus_PlugInDevice)
 #pragma alloc_text (PAGE, Bus_UnPlugDevice)
@@ -84,7 +82,7 @@ EXTERN_C NTSTATUS Bus_PlugInDevice(
 	);
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_BUSENUM,
 			"WdfRequestRetrieveInputBuffer failed with status %!STATUS!", status);
 		return status;
@@ -92,7 +90,7 @@ EXTERN_C NTSTATUS Bus_PlugInDevice(
 
 	if ((sizeof(VIGEM_PLUGIN_TARGET) != plugIn->Size) || (length != plugIn->Size))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_BUSENUM,
 			"sizeof(VIGEM_PLUGIN_TARGET) buffer size mismatch [%d != %d]",
 			sizeof(VIGEM_PLUGIN_TARGET), plugIn->Size);
@@ -101,7 +99,7 @@ EXTERN_C NTSTATUS Bus_PlugInDevice(
 
 	if (plugIn->SerialNo == 0)
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_BUSENUM,
 			"Serial no. 0 not allowed");
 		return STATUS_INVALID_PARAMETER;
@@ -112,7 +110,7 @@ EXTERN_C NTSTATUS Bus_PlugInDevice(
 	fileObject = WdfRequestGetFileObject(Request);
 	if (fileObject == NULL)
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_BUSENUM,
 			"WdfRequestGetFileObject failed to fetch WDFFILEOBJECT from request 0x%p",
 			Request);
@@ -122,7 +120,7 @@ EXTERN_C NTSTATUS Bus_PlugInDevice(
 	pFileData = FileObjectGetData(fileObject);
 	if (pFileData == NULL)
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_BUSENUM,
 			"FileObjectGetData failed to get context data for 0x%p",
 			fileObject);
@@ -199,7 +197,7 @@ EXTERN_C NTSTATUS Bus_PlugInDevice(
 
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_BUSENUM,
 			"WdfChildListAddOrUpdateChildDescriptionAsPresent failed with status %!STATUS!",
 			status);
@@ -214,7 +212,7 @@ EXTERN_C NTSTATUS Bus_PlugInDevice(
 	{
 		status = STATUS_INVALID_PARAMETER;
 
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_BUSENUM,
 			"The described PDO already exists (%!STATUS!)",
 			status);
@@ -263,7 +261,7 @@ EXTERN_C NTSTATUS Bus_UnPlugDevice(
 
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_BUSENUM,
 			"WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
 			status);
@@ -272,7 +270,7 @@ EXTERN_C NTSTATUS Bus_UnPlugDevice(
 
 	if ((sizeof(VIGEM_UNPLUG_TARGET) != unPlug->Size) || (length != unPlug->Size))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_BUSENUM,
 			"sizeof(VIGEM_UNPLUG_TARGET) buffer size mismatch [%d != %d]",
 			sizeof(VIGEM_UNPLUG_TARGET), unPlug->Size);
@@ -285,7 +283,7 @@ EXTERN_C NTSTATUS Bus_UnPlugDevice(
 	fileObject = WdfRequestGetFileObject(Request);
 	if (fileObject == NULL)
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_BUSENUM,
 			"WdfRequestGetFileObject failed to fetch WDFFILEOBJECT from request 0x%p",
 			Request);
@@ -295,14 +293,14 @@ EXTERN_C NTSTATUS Bus_UnPlugDevice(
 	pFileData = FileObjectGetData(fileObject);
 	if (pFileData == NULL)
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_BUSENUM,
 			"FileObjectGetData failed to get context data for 0x%p",
 			fileObject);
 		return STATUS_INVALID_PARAMETER;
 	}
 
-	TraceEvents(TRACE_LEVEL_VERBOSE,
+	TraceVerbose(
 		TRACE_BUSENUM,
 		"Starting child list traversal");
 
@@ -322,7 +320,7 @@ EXTERN_C NTSTATUS Bus_UnPlugDevice(
 		// Error or no more children, end loop
 		if (!NT_SUCCESS(status) || status == STATUS_NO_MORE_ENTRIES)
 		{
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceVerbose(
 				TRACE_BUSENUM,
 				"WdfChildListRetrieveNextDevice returned with status %!STATUS!",
 				status);
@@ -332,7 +330,7 @@ EXTERN_C NTSTATUS Bus_UnPlugDevice(
 		// If unable to retrieve device
 		if (childInfo.Status != WdfChildListRetrieveDeviceSuccess)
 		{
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceVerbose(
 				TRACE_BUSENUM,
 				"childInfo.Status = %d",
 				childInfo.Status);
@@ -342,7 +340,7 @@ EXTERN_C NTSTATUS Bus_UnPlugDevice(
 		// Child isn't the one we looked for, skip
 		if (!unplugAll && description.SerialNo != unPlug->SerialNo)
 		{
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceVerbose(
 				TRACE_BUSENUM,
 				"Seeking serial mismatch: %d != %d",
 				description.SerialNo,
@@ -350,7 +348,7 @@ EXTERN_C NTSTATUS Bus_UnPlugDevice(
 			continue;
 		}
 
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceVerbose(
 			TRACE_BUSENUM,
 			"description.SessionId = %d, pFileData->SessionId = %d",
 			description.SessionId,
@@ -363,7 +361,7 @@ EXTERN_C NTSTATUS Bus_UnPlugDevice(
 			status = WdfChildListUpdateChildDescriptionAsMissing(list, &description.Header);
 			if (!NT_SUCCESS(status))
 			{
-				TraceEvents(TRACE_LEVEL_ERROR,
+				TraceError(
 					TRACE_BUSENUM,
 					"WdfChildListUpdateChildDescriptionAsMissing failed with status %!STATUS!",
 					status);
@@ -373,7 +371,7 @@ EXTERN_C NTSTATUS Bus_UnPlugDevice(
 
 	WdfChildListEndIteration(list, &iterator);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE,
+	TraceVerbose(
 		TRACE_BUSENUM,
 		"Finished child list traversal");
 

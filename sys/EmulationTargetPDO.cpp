@@ -42,8 +42,6 @@
 #include <usbioctl.h>
 #include <usbiodef.h>
 
-#include "Debugging.hpp"
-
 
 PCWSTR ViGEm::Bus::Core::EmulationTargetPDO::_deviceLocation = L"Virtual Gamepad Emulation Bus";
 
@@ -89,7 +87,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		status = WdfPdoInitAssignDeviceID(DeviceInit, &deviceId);
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_BUSPDO,
 				"WdfPdoInitAssignDeviceID failed with status %!STATUS!",
 				status);
@@ -100,7 +98,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		status = RtlUnicodeStringPrintf(&buffer, L"%02d", this->_SerialNo);
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_BUSPDO,
 				"RtlUnicodeStringPrintf failed with status %!STATUS!",
 				status);
@@ -111,7 +109,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		status = WdfPdoInitAssignInstanceID(DeviceInit, &buffer);
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_BUSPDO,
 				"WdfPdoInitAssignInstanceID failed with status %!STATUS!",
 				status);
@@ -122,7 +120,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		status = WdfPdoInitAddDeviceText(DeviceInit, &deviceDescription, &deviceLocation, 0x409);
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_BUSPDO,
 				"WdfPdoInitAddDeviceText failed with status %!STATUS!",
 				status);
@@ -158,14 +156,14 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		status = WdfDeviceCreate(&DeviceInit, &pdoAttributes, &this->_PdoDevice);
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_BUSPDO,
 				"WdfDeviceCreate failed with status %!STATUS!",
 				status);
 			break;
 		}
 
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceVerbose(
 			TRACE_BUSPDO,
 			"Created PDO 0x%p",
 			this->_PdoDevice);
@@ -181,7 +179,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		);
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_BUSPDO,
 				"WdfDeviceCreateDeviceInterface failed with status %!STATUS!",
 				status);
@@ -202,7 +200,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_BUSPDO,
 				"Couldn't initialize additional contexts: %!STATUS!",
 				status);
@@ -212,7 +210,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 #pragma endregion
 
 #pragma region Create Queues & Locks
-		
+
 		WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
 		attributes.ParentObject = this->_PdoDevice;
 
@@ -227,7 +225,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		);
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_BUSPDO,
 				"WdfIoQueueCreate (PendingUsbInRequests) failed with status %!STATUS!",
 				status);
@@ -248,7 +246,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		);
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_BUSPDO,
 				"WdfIoQueueCreate (PendingNotificationRequests) failed with status %!STATUS!",
 				status);
@@ -262,7 +260,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		);
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_BUSPDO,
 				"WdfIoQueueReadyNotify (PendingNotificationRequests) failed with status %!STATUS!",
 				status);
@@ -288,7 +286,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		);
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_BUSPDO,
 				"WdfIoQueueCreate (Default) failed with status %!STATUS!",
 				status);
@@ -330,7 +328,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtDeviceContextCleanup(
 	IN WDFOBJECT Device
 )
 {
-	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Entry");
+	TraceVerbose(TRACE_BUSPDO, "%!FUNC! Entry");
 
 	const auto ctx = EmulationTargetPdoGetContext(Device);
 
@@ -367,13 +365,13 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtDeviceContextCleanup(
 			);
 		}
 	}
-	
+
 	//
 	// PDO device object getting disposed, free context object 
 	// 
 	delete ctx->Target;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_BUSPDO, "%!FUNC! Exit");
+	TraceVerbose(TRACE_BUSPDO, "%!FUNC! Exit");
 }
 
 NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::SubmitReport(PVOID NewReport)
@@ -428,21 +426,21 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueueWaitDeviceReady(WDFREQUEST
 		else
 		{
 			TraceEvents(TRACE_LEVEL_WARNING,
-			            TRACE_BUSPDO,
-			            "KeWaitForSingleObject failed with status %!STATUS!",
-			            status
+				TRACE_BUSPDO,
+				"KeWaitForSingleObject failed with status %!STATUS!",
+				status
 			);
 		}
 	}
-	
+
 	status = WdfRequestForwardToIoQueue(Request, this->_WaitDeviceReadyRequests);
 
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_BUSPDO,
-		            "WdfRequestForwardToIoQueue failed with status %!STATUS!",
-		            status
+		TraceError(
+			TRACE_BUSPDO,
+			"WdfRequestForwardToIoQueue failed with status %!STATUS!",
+			status
 		);
 
 		return status;
@@ -451,23 +449,23 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueueWaitDeviceReady(WDFREQUEST
 	OBJECT_ATTRIBUTES threadOb;
 
 	InitializeObjectAttributes(&threadOb, NULL,
-	                           OBJ_KERNEL_HANDLE, NULL, NULL);
+		OBJ_KERNEL_HANDLE, NULL, NULL);
 
 	status = PsCreateSystemThread(&this->_WaitDeviceReadyCompletionWorkerThreadHandle,
-	                              static_cast<ACCESS_MASK>(0L),
-	                              &threadOb,
-	                              nullptr,
-	                              nullptr,
-	                              WaitDeviceReadyCompletionWorkerRoutine,
-	                              this
+		static_cast<ACCESS_MASK>(0L),
+		&threadOb,
+		nullptr,
+		nullptr,
+		WaitDeviceReadyCompletionWorkerRoutine,
+		this
 	);
 
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_BUSPDO,
-		            "PsCreateSystemThread failed with status %!STATUS!",
-		            status
+		TraceError(
+			TRACE_BUSPDO,
+			"PsCreateSystemThread failed with status %!STATUS!",
+			status
 		);
 	}
 
@@ -481,7 +479,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoPrepare(WDFDEVICE ParentDevice
 	WDF_IO_QUEUE_CONFIG plugInQueueConfig;
 	DMF_MODULE_ATTRIBUTES moduleAttributes;
 	DMF_CONFIG_BufferQueue dmfBufferCfg;
-	
+
 	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
 	attributes.ParentObject = ParentDevice;
 
@@ -496,7 +494,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoPrepare(WDFDEVICE ParentDevice
 	);
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_BUSPDO,
 			"WdfIoQueueCreate (PendingPlugInRequests) failed with status %!STATUS!",
 			status);
@@ -530,10 +528,10 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoPrepare(WDFDEVICE ParentDevice
 
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
-		            TRACE_BUSPDO,
-		            "DMF_BufferQueue_Create failed with status %!STATUS!",
-		            status
+		TraceError(
+			TRACE_BUSPDO,
+			"DMF_BufferQueue_Create failed with status %!STATUS!",
+			status
 		);
 	}
 
@@ -617,8 +615,8 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::WaitDeviceReadyCompletionWorkerRoutin
 	timeout.QuadPart = WDF_REL_TIMEOUT_IN_SEC(1);
 
 	TraceEvents(TRACE_LEVEL_INFORMATION,
-	            TRACE_BUSPDO,
-	            "Waiting for 1 second to complete PDO boot..."
+		TRACE_BUSPDO,
+		"Waiting for 1 second to complete PDO boot..."
 	);
 
 	NTSTATUS status = KeWaitForSingleObject(
@@ -637,8 +635,8 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::WaitDeviceReadyCompletionWorkerRoutin
 		if (!NT_SUCCESS(WdfIoQueueRetrieveNextRequest(ctx->_WaitDeviceReadyRequests, &waitRequest)))
 		{
 			TraceEvents(TRACE_LEVEL_WARNING,
-			            TRACE_BUSPDO,
-			            "No pending device wait request available"
+				TRACE_BUSPDO,
+				"No pending device wait request available"
 			);
 			break;
 		}
@@ -646,8 +644,8 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::WaitDeviceReadyCompletionWorkerRoutin
 		if (status == STATUS_TIMEOUT)
 		{
 			TraceEvents(TRACE_LEVEL_WARNING,
-			            TRACE_BUSPDO,
-			            "Device wait request timed out, completing with error"
+				TRACE_BUSPDO,
+				"Device wait request timed out, completing with error"
 			);
 
 			//
@@ -660,8 +658,8 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::WaitDeviceReadyCompletionWorkerRoutin
 		if (NT_SUCCESS(status))
 		{
 			TraceEvents(TRACE_LEVEL_INFORMATION,
-			            TRACE_BUSPDO,
-			            "Device wait request completed successfully"
+				TRACE_BUSPDO,
+				"Device wait request completed successfully"
 			);
 
 			//
@@ -670,8 +668,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::WaitDeviceReadyCompletionWorkerRoutin
 			WdfRequestComplete(waitRequest, STATUS_SUCCESS);
 			break;
 		}
-	}
-	while (FALSE);
+	} while (FALSE);
 
 	ZwClose(ctx->_WaitDeviceReadyCompletionWorkerThreadHandle);
 	ctx->_WaitDeviceReadyCompletionWorkerThreadHandle = nullptr;
@@ -699,7 +696,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::DumpAsHex(PCSTR Prefix, PVOID Buffer,
 			sprintf(&dumpBuffer[i * 2], "%02X", static_cast<PUCHAR>(Buffer)[i]);
 		}
 
-		TraceDbg(TRACE_BUSPDO,
+		TraceVerbose(TRACE_BUSPDO,
 			"%s - Buffer length: %04d, buffer content: %s\n",
 			Prefix,
 			BufferLength,
@@ -751,14 +748,14 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::UsbGetConfigurationDescriptorType
 
 NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::UsbSelectConfiguration(PURB Urb)
 {
-	TraceDbg(
+	TraceVerbose(
 		TRACE_USBPDO,
 		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: TotalLength %d",
 		Urb->UrbHeader.Length);
 
 	if (Urb->UrbHeader.Length == sizeof(struct _URB_SELECT_CONFIGURATION))
 	{
-		TraceDbg(
+		TraceVerbose(
 			TRACE_USBPDO,
 			">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: NULL ConfigurationDescriptor");
 		return STATUS_SUCCESS;
@@ -835,7 +832,7 @@ BOOLEAN ViGEm::Bus::Core::EmulationTargetPDO::EvtChildListIdentificationDescript
 
 
 NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueueWaitDeviceReady(WDFDEVICE ParentDevice, ULONG SerialNo,
-                                                                      WDFREQUEST Request)
+	WDFREQUEST Request)
 {
 	NTSTATUS status;
 	PDO_IDENTIFICATION_DESCRIPTION description;
@@ -843,8 +840,8 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueueWaitDeviceReady(WDFDEVICE 
 	WDF_CHILD_RETRIEVE_INFO childInfo;
 	WDFDEVICE childDevice;
 
-	TraceDbg(TRACE_BUSPDO, "%!FUNC! Entry");
-	
+	FuncEntry(TRACE_BUSPDO);
+
 	const WDFCHILDLIST list = WdfFdoGetDefaultChildList(ParentDevice);
 
 	WDF_CHILD_LIST_ITERATOR_INIT(
@@ -893,8 +890,8 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueueWaitDeviceReady(WDFDEVICE 
 		&iterator
 	);
 
-	TraceDbg(TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
-	
+	TraceVerbose(TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
+
 	return status;
 }
 
@@ -904,7 +901,7 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EvtDevicePrepareHardware(
 	_In_ WDFCMRESLIST ResourcesTranslated
 )
 {
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Entry");
+	FuncEntry(TRACE_BUSPDO);
 
 	UNREFERENCED_PARAMETER(ResourcesRaw);
 	UNREFERENCED_PARAMETER(ResourcesTranslated);
@@ -936,7 +933,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 	PURB urb;
 	PIO_STACK_LOCATION irpStack;
 
-	TraceDbg(TRACE_BUSPDO, "%!FUNC! Entry");
+	FuncEntry(TRACE_BUSPDO);
 
 	// No help from the framework available from here on
 	irp = WdfRequestWdmGetIrp(Request);
@@ -946,7 +943,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 	{
 	case IOCTL_INTERNAL_USB_SUBMIT_URB:
 
-		TraceDbg(
+		TraceVerbose(
 			TRACE_BUSPDO,
 			">> IOCTL_INTERNAL_USB_SUBMIT_URB");
 
@@ -956,7 +953,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 		{
 		case URB_FUNCTION_CONTROL_TRANSFER:
 
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceVerbose(
 				TRACE_BUSPDO,
 				">> >> URB_FUNCTION_CONTROL_TRANSFER");
 
@@ -966,7 +963,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 		case URB_FUNCTION_CONTROL_TRANSFER_EX:
 
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceVerbose(
 				TRACE_BUSPDO,
 				">> >> URB_FUNCTION_CONTROL_TRANSFER_EX");
 
@@ -976,7 +973,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 		case URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER:
 
-			TraceDbg(
+			TraceVerbose(
 				TRACE_BUSPDO,
 				">> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER");
 
@@ -986,7 +983,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 		case URB_FUNCTION_SELECT_CONFIGURATION:
 
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceVerbose(
 				TRACE_BUSPDO,
 				">> >> URB_FUNCTION_SELECT_CONFIGURATION");
 
@@ -996,7 +993,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 		case URB_FUNCTION_SELECT_INTERFACE:
 
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceVerbose(
 				TRACE_BUSPDO,
 				">> >> URB_FUNCTION_SELECT_INTERFACE");
 
@@ -1006,7 +1003,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 		case URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE:
 
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceVerbose(
 				TRACE_BUSPDO,
 				">> >> URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE");
 
@@ -1014,7 +1011,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 			{
 			case USB_DEVICE_DESCRIPTOR_TYPE:
 
-				TraceEvents(TRACE_LEVEL_VERBOSE,
+				TraceVerbose(
 					TRACE_BUSPDO,
 					">> >> >> USB_DEVICE_DESCRIPTOR_TYPE");
 
@@ -1025,7 +1022,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 			case USB_CONFIGURATION_DESCRIPTOR_TYPE:
 
-				TraceEvents(TRACE_LEVEL_VERBOSE,
+				TraceVerbose(
 					TRACE_BUSPDO,
 					">> >> >> USB_CONFIGURATION_DESCRIPTOR_TYPE");
 
@@ -1035,7 +1032,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 			case USB_STRING_DESCRIPTOR_TYPE:
 
-				TraceEvents(TRACE_LEVEL_VERBOSE,
+				TraceVerbose(
 					TRACE_BUSPDO,
 					">> >> >> USB_STRING_DESCRIPTOR_TYPE");
 
@@ -1045,14 +1042,14 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 			default:
 
-				TraceEvents(TRACE_LEVEL_VERBOSE,
+				TraceVerbose(
 					TRACE_BUSPDO,
 					">> >> >> Unknown descriptor type");
 
 				break;
 			}
 
-			TraceDbg(
+			TraceVerbose(
 				TRACE_BUSPDO,
 				"<< <<");
 
@@ -1060,7 +1057,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 		case URB_FUNCTION_GET_STATUS_FROM_DEVICE:
 
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceVerbose(
 				TRACE_BUSPDO,
 				">> >> URB_FUNCTION_GET_STATUS_FROM_DEVICE");
 
@@ -1071,7 +1068,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 		case URB_FUNCTION_ABORT_PIPE:
 
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceVerbose(
 				TRACE_BUSPDO,
 				">> >> URB_FUNCTION_ABORT_PIPE");
 
@@ -1081,7 +1078,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 		case URB_FUNCTION_CLASS_INTERFACE:
 
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceVerbose(
 				TRACE_BUSPDO,
 				">> >> URB_FUNCTION_CLASS_INTERFACE");
 
@@ -1091,7 +1088,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 		case URB_FUNCTION_GET_DESCRIPTOR_FROM_INTERFACE:
 
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceVerbose(
 				TRACE_BUSPDO,
 				">> >> URB_FUNCTION_GET_DESCRIPTOR_FROM_INTERFACE");
 
@@ -1101,7 +1098,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 		default:
 
-			TraceEvents(TRACE_LEVEL_VERBOSE,
+			TraceVerbose(
 				TRACE_BUSPDO,
 				">> >>  Unknown function: 0x%X",
 				urb->UrbHeader.Function);
@@ -1109,7 +1106,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 			break;
 		}
 
-		TraceDbg(
+		TraceVerbose(
 			TRACE_BUSPDO,
 			"<<");
 
@@ -1117,7 +1114,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 	case IOCTL_INTERNAL_USB_GET_PORT_STATUS:
 
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceVerbose(
 			TRACE_BUSPDO,
 			">> IOCTL_INTERNAL_USB_GET_PORT_STATUS");
 
@@ -1130,7 +1127,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 	case IOCTL_INTERNAL_USB_RESET_PORT:
 
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceVerbose(
 			TRACE_BUSPDO,
 			">> IOCTL_INTERNAL_USB_RESET_PORT");
 
@@ -1141,7 +1138,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 	case IOCTL_INTERNAL_USB_SUBMIT_IDLE_NOTIFICATION:
 
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceVerbose(
 			TRACE_BUSPDO,
 			">> IOCTL_INTERNAL_USB_SUBMIT_IDLE_NOTIFICATION");
 
@@ -1153,7 +1150,7 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 
 	default:
 
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceVerbose(
 			TRACE_BUSPDO,
 			">> Unknown I/O control code 0x%X",
 			IoControlCode);
@@ -1166,12 +1163,12 @@ VOID ViGEm::Bus::Core::EmulationTargetPDO::EvtIoInternalDeviceControl(
 		WdfRequestComplete(Request, status);
 	}
 
-	TraceDbg(TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
+	TraceVerbose(TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
 void ViGEm::Bus::Core::EmulationTargetPDO::EvtWdfIoPendingNotificationQueueState(
-  WDFQUEUE Queue,
-  WDFCONTEXT Context
+	WDFQUEUE Queue,
+	WDFCONTEXT Context
 )
 {
 	const auto pThis = static_cast<EmulationTargetPDO*>(Context);
@@ -1183,6 +1180,6 @@ void ViGEm::Bus::Core::EmulationTargetPDO::EvtWdfIoPendingNotificationQueueState
 	{
 		return;
 	}
-	
+
 	pThis->ProcessPendingNotification(Queue);
 }

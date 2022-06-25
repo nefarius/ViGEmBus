@@ -57,9 +57,6 @@
     <ClInclude Include="..\sdk\include\ViGEm\km\BusShared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Debugging.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="XusbPdo.cpp">

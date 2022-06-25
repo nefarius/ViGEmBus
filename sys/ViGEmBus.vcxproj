@@ -39,7 +39,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\sdk\include\ViGEm\km\BusShared.h" />
-    <ClInclude Include="Debugging.hpp" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="CRTCPP.hpp" />
     <ClInclude Include="Ds4Pdo.hpp" />

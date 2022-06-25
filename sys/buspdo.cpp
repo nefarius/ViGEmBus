@@ -36,8 +36,6 @@
 #include "Driver.h"
 #include "EmulationTargetPDO.hpp"
 
-#include "Debugging.hpp"
-
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(PAGE, Bus_EvtDeviceListCreatePdo)
 #endif

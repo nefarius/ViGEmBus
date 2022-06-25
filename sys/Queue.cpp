@@ -41,8 +41,6 @@
 #include "XusbPdo.hpp"
 #include "Ds4Pdo.hpp"
 
-#include "Debugging.hpp"
-
 using ViGEm::Bus::Core::PDO_IDENTIFICATION_DESCRIPTION;
 using ViGEm::Bus::Core::EmulationTargetPDO;
 using ViGEm::Bus::Targets::EmulationTargetXUSB;
@@ -76,7 +74,7 @@ VOID Bus_EvtIoDeviceControl(
 
 	Device = WdfIoQueueGetDevice(Queue);
 
-	TraceDbg(TRACE_QUEUE, "%!FUNC! Entry (device: 0x%p)", Device);
+	TraceVerbose(TRACE_QUEUE, "%!FUNC! Entry (device: 0x%p)", Device);
 
 	switch (IoControlCode)
 	{
@@ -84,7 +82,7 @@ VOID Bus_EvtIoDeviceControl(
 
 	case IOCTL_VIGEM_CHECK_VERSION:
 
-		TraceDbg(TRACE_QUEUE, "IOCTL_VIGEM_CHECK_VERSION");
+		TraceVerbose(TRACE_QUEUE, "IOCTL_VIGEM_CHECK_VERSION");
 
 		status = WdfRequestRetrieveInputBuffer(
 			Request,
@@ -101,7 +99,7 @@ VOID Bus_EvtIoDeviceControl(
 
 		status = (pCheckVersion->Version == VIGEM_COMMON_VERSION) ? STATUS_SUCCESS : STATUS_NOT_SUPPORTED;
 
-		TraceEvents(TRACE_LEVEL_VERBOSE,
+		TraceVerbose(
 		            TRACE_QUEUE,
 		            "Requested version: 0x%04X, compiled version: 0x%04X",
 		            pCheckVersion->Version, VIGEM_COMMON_VERSION);
@@ -114,7 +112,7 @@ VOID Bus_EvtIoDeviceControl(
 
 	case IOCTL_VIGEM_WAIT_DEVICE_READY:
 
-		TraceDbg(TRACE_QUEUE, "IOCTL_VIGEM_WAIT_DEVICE_READY");
+		TraceVerbose(TRACE_QUEUE, "IOCTL_VIGEM_WAIT_DEVICE_READY");
 
 		status = WdfRequestRetrieveInputBuffer(
 			Request,
@@ -132,7 +130,7 @@ VOID Bus_EvtIoDeviceControl(
 		// This request only supports a single PDO at a time
 		if (pWaitDeviceReady->SerialNo == 0)
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_QUEUE,
 				"Invalid serial 0 submitted");
 
@@ -156,7 +154,7 @@ VOID Bus_EvtIoDeviceControl(
 
 	case IOCTL_VIGEM_PLUGIN_TARGET:
 
-		TraceDbg(TRACE_QUEUE, "IOCTL_VIGEM_PLUGIN_TARGET");
+		TraceVerbose(TRACE_QUEUE, "IOCTL_VIGEM_PLUGIN_TARGET");
 
 		status = Bus_PlugInDevice(Device, Request, FALSE, &length);
 
@@ -168,7 +166,7 @@ VOID Bus_EvtIoDeviceControl(
 
 	case IOCTL_VIGEM_UNPLUG_TARGET:
 
-		TraceDbg(TRACE_QUEUE, "IOCTL_VIGEM_UNPLUG_TARGET");
+		TraceVerbose(TRACE_QUEUE, "IOCTL_VIGEM_UNPLUG_TARGET");
 
 		status = Bus_UnPlugDevice(Device, Request, FALSE, &length);
 
@@ -180,7 +178,7 @@ VOID Bus_EvtIoDeviceControl(
 
 	case IOCTL_XUSB_SUBMIT_REPORT:
 
-		TraceDbg(TRACE_QUEUE, "IOCTL_XUSB_SUBMIT_REPORT");
+		TraceVerbose(TRACE_QUEUE, "IOCTL_XUSB_SUBMIT_REPORT");
 
 		status = WdfRequestRetrieveInputBuffer(
 			Request,
@@ -191,7 +189,7 @@ VOID Bus_EvtIoDeviceControl(
 
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 			            TRACE_QUEUE,
 			            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
 			            status);
@@ -203,7 +201,7 @@ VOID Bus_EvtIoDeviceControl(
 			// This request only supports a single PDO at a time
 			if (xusbSubmit->SerialNo == 0)
 			{
-				TraceEvents(TRACE_LEVEL_ERROR,
+				TraceError(
 				            TRACE_QUEUE,
 				            "Invalid serial 0 submitted");
 
@@ -225,12 +223,12 @@ VOID Bus_EvtIoDeviceControl(
 
 	case IOCTL_XUSB_REQUEST_NOTIFICATION:
 
-		TraceDbg(TRACE_QUEUE, "IOCTL_XUSB_REQUEST_NOTIFICATION");
+		TraceVerbose(TRACE_QUEUE, "IOCTL_XUSB_REQUEST_NOTIFICATION");
 
 		// Don't accept the request if the output buffer can't hold the results
 		if (OutputBufferLength < sizeof(XUSB_REQUEST_NOTIFICATION))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 			            TRACE_QUEUE,
 			            "Output buffer %d too small, require at least %d",
 			            static_cast<int>(OutputBufferLength), static_cast<int>(sizeof(XUSB_REQUEST_NOTIFICATION)));
@@ -246,7 +244,7 @@ VOID Bus_EvtIoDeviceControl(
 
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 			            TRACE_QUEUE,
 			            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
 			            status);
@@ -258,7 +256,7 @@ VOID Bus_EvtIoDeviceControl(
 			// This request only supports a single PDO at a time
 			if (xusbNotify->SerialNo == 0)
 			{
-				TraceEvents(TRACE_LEVEL_ERROR,
+				TraceError(
 				            TRACE_QUEUE,
 				            "Invalid serial 0 submitted");
 
@@ -284,7 +282,7 @@ VOID Bus_EvtIoDeviceControl(
 
 	case IOCTL_DS4_SUBMIT_REPORT:
 
-		TraceDbg(TRACE_QUEUE, "IOCTL_DS4_SUBMIT_REPORT");
+		TraceVerbose(TRACE_QUEUE, "IOCTL_DS4_SUBMIT_REPORT");
 
 		status = WdfRequestRetrieveInputBuffer(
 			Request,
@@ -295,7 +293,7 @@ VOID Bus_EvtIoDeviceControl(
 
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 			            TRACE_QUEUE,
 			            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
 			            status);
@@ -307,7 +305,7 @@ VOID Bus_EvtIoDeviceControl(
 		// 
 		if (length < sizeof(DS4_SUBMIT_REPORT) || length > sizeof(DS4_SUBMIT_REPORT_EX))
 		{
-			TraceDbg(
+			TraceVerbose(
 				TRACE_QUEUE,
 				"Unexpected buffer size: %d",
 				static_cast<ULONG>(length)
@@ -322,7 +320,7 @@ VOID Bus_EvtIoDeviceControl(
 		// 
 		if (length != ds4Submit->Size)
 		{
-			TraceDbg(
+			TraceVerbose(
 				TRACE_QUEUE,
 				"Invalid buffer size: %d",
 				ds4Submit->Size
@@ -337,7 +335,7 @@ VOID Bus_EvtIoDeviceControl(
 		// 
 		if (ds4Submit->SerialNo == 0)
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 			            TRACE_QUEUE,
 			            "Invalid serial 0 submitted");
 
@@ -358,12 +356,12 @@ VOID Bus_EvtIoDeviceControl(
 
 	case IOCTL_DS4_REQUEST_NOTIFICATION:
 
-		TraceDbg(TRACE_QUEUE, "IOCTL_DS4_REQUEST_NOTIFICATION");
+		TraceVerbose(TRACE_QUEUE, "IOCTL_DS4_REQUEST_NOTIFICATION");
 
 		// Don't accept the request if the output buffer can't hold the results
 		if (OutputBufferLength < sizeof(DS4_REQUEST_NOTIFICATION))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 			            TRACE_QUEUE,
 			            "Output buffer %d too small, require at least %d",
 			            static_cast<int>(OutputBufferLength), static_cast<int>(sizeof(DS4_REQUEST_NOTIFICATION)));
@@ -379,7 +377,7 @@ VOID Bus_EvtIoDeviceControl(
 
 		if (!NT_SUCCESS(status))
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 			            TRACE_QUEUE,
 			            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
 			            status);
@@ -391,7 +389,7 @@ VOID Bus_EvtIoDeviceControl(
 			// This request only supports a single PDO at a time
 			if (ds4Notify->SerialNo == 0)
 			{
-				TraceEvents(TRACE_LEVEL_ERROR,
+				TraceError(
 				            TRACE_QUEUE,
 				            "Invalid serial 0 submitted");
 
@@ -417,7 +415,7 @@ VOID Bus_EvtIoDeviceControl(
 
 	case IOCTL_XUSB_GET_USER_INDEX:
 
-		TraceDbg(TRACE_QUEUE, "IOCTL_XUSB_GET_USER_INDEX");
+		TraceVerbose(TRACE_QUEUE, "IOCTL_XUSB_GET_USER_INDEX");
 
 		// Don't accept the request if the output buffer can't hold the results
 		if (OutputBufferLength < sizeof(XUSB_GET_USER_INDEX))
@@ -474,7 +472,7 @@ VOID Bus_EvtIoDeviceControl(
 		WdfRequestCompleteWithInformation(Request, status, length);
 	}
 
-	TraceDbg(TRACE_QUEUE, "%!FUNC! Exit with status %!STATUS!", status);
+	TraceVerbose(TRACE_QUEUE, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
 EXTERN_C_END

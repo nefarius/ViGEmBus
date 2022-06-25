@@ -51,8 +51,6 @@
 #include "XusbPdo.hpp"
 #include "Ds4Pdo.hpp"
 
-#include "Debugging.hpp"
-
 using ViGEm::Bus::Core::PDO_IDENTIFICATION_DESCRIPTION;
 using ViGEm::Bus::Core::EmulationTargetPDO;
 using ViGEm::Bus::Targets::EmulationTargetXUSB;
@@ -147,7 +145,7 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
 		if (deviceAlreadyExists)
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_DRIVER,
 				"Device with interface GUID {%!GUID!} already exists (%ws)",
 				&GUID_DEVINTERFACE_BUSENUM_VIGEM,
@@ -201,7 +199,7 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_DRIVER,
 			"WdfDeviceCreate failed with status %!STATUS!",
 			status);
@@ -211,7 +209,7 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 	pFDOData = FdoGetData(device);
 	if (pFDOData == NULL)
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_DRIVER,
 			"FdoGetData failed");
 		return STATUS_UNSUCCESSFUL;
@@ -234,7 +232,7 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_DRIVER,
 			"WdfIoQueueCreate failed with status %!STATUS!",
 			status);
@@ -249,7 +247,7 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_DRIVER,
 			"WdfDeviceCreateDeviceInterface failed with status %!STATUS!",
 			status);
@@ -300,7 +298,7 @@ Bus_DeviceFileCreate(
 
 	if (pFileData == NULL)
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_DRIVER,
 			"FileObjectGetData failed to return file object from WDFFILEOBJECT 0x%p",
 			FileObject);
@@ -310,7 +308,7 @@ Bus_DeviceFileCreate(
 		pFDOData = FdoGetData(Device);
 		if (pFDOData == NULL)
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
+			TraceError(
 				TRACE_DRIVER,
 				"FdoGetData failed");
 			status = STATUS_NO_SUCH_DEVICE;
@@ -364,7 +362,7 @@ Bus_FileClose(
 	pFileData = FileObjectGetData(FileObject);
 	if (pFileData == NULL)
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_DRIVER,
 			"FileObjectGetData failed to return file object from WDFFILEOBJECT 0x%p",
 			FileObject);
@@ -376,7 +374,7 @@ Bus_FileClose(
 	pFDOData = FdoGetData(device);
 	if (pFDOData == NULL)
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_DRIVER,
 			"FdoGetData failed");
 		status = STATUS_NO_SUCH_DEVICE;
@@ -408,7 +406,7 @@ Bus_FileClose(
 			break;
 		}
 
-		//TraceEvents(TRACE_LEVEL_VERBOSE,
+		//TraceVerbose(
 		//    TRACE_DRIVER,
 		//    "PDO properties: status = %!STATUS!, pdoPID = %d, curPID = %d, pdoSID = %d, curSID = %d, internal = %d",
 		//    (int)childInfo.Status,
@@ -432,7 +430,7 @@ Bus_FileClose(
 			status = WdfChildListUpdateChildDescriptionAsMissing(list, &description.Header);
 			if (!NT_SUCCESS(status))
 			{
-				TraceEvents(TRACE_LEVEL_ERROR,
+				TraceError(
 					TRACE_DRIVER,
 					"WdfChildListUpdateChildDescriptionAsMissing failed with status %!STATUS!",
 					status);

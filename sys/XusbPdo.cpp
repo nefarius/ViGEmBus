@@ -43,8 +43,6 @@
 #include <usbbusif.h>
 
 #include <ViGEm/km/BusShared.h>
-#include "Debugging.hpp"
-
 
 PCWSTR ViGEm::Bus::Targets::EmulationTargetXUSB::_deviceDescription = L"Virtual Xbox 360 Controller";
 
@@ -88,7 +86,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareDevice(PWDFDEVICE_I
 	status = RtlUnicodeStringInit(DeviceDescription, _deviceDescription);
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_XUSB,
 			"RtlUnicodeStringInit failed with status %!STATUS!",
 			status);
@@ -103,7 +101,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareDevice(PWDFDEVICE_I
 	status = WdfPdoInitAddHardwareID(DeviceInit, &buffer);
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_XUSB,
 			"WdfPdoInitAddHardwareID failed with status %!STATUS!",
 			status);
@@ -117,7 +115,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareDevice(PWDFDEVICE_I
 	status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_XUSB,
 			"WdfPdoInitAddCompatibleID #1 failed with status %!STATUS!",
 			status);
@@ -129,7 +127,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareDevice(PWDFDEVICE_I
 	status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_XUSB,
 			"WdfPdoInitAddCompatibleID #2 failed with status %!STATUS!",
 			status);
@@ -141,7 +139,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareDevice(PWDFDEVICE_I
 	status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_XUSB,
 			"WdfPdoInitAddCompatibleID #3 failed with status %!STATUS!",
 			status);
@@ -153,7 +151,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareDevice(PWDFDEVICE_I
 	status = WdfPdoInitAddCompatibleID(DeviceInit, &buffer);
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_XUSB,
 			"WdfPdoInitAddCompatibleID #4 failed with status %!STATUS!",
 			status);
@@ -197,7 +195,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoPrepareHardware()
 	status = WdfDeviceAddQueryInterface(this->_PdoDevice, &ifaceCfg);
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_XUSB,
 			"WdfDeviceAddQueryInterface failed with status %!STATUS!",
 			status);
@@ -215,7 +213,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoInitContext()
 	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
 	attributes.ParentObject = this->_PdoDevice;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_XUSB, "Initializing XUSB context...");
+	TraceVerbose(TRACE_XUSB, "Initializing XUSB context...");
 
 	RtlZeroMemory(this->_Rumble, ARRAYSIZE(this->_Rumble));
 
@@ -241,7 +239,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoInitContext()
 	);
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_XUSB,
 			"WdfMemoryCreate failed with status %!STATUS!",
 			status);
@@ -284,7 +282,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::PdoInitContext()
 	);
 	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceError(
 			TRACE_XUSB,
 			"WdfIoQueueCreate (HoldingUsbInRequests) failed with status %!STATUS!",
 			status);
@@ -468,7 +466,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PURB Urb)
 
 	PUSBD_INTERFACE_INFORMATION pInfo = &Urb->UrbSelectConfiguration.Interface;
 
-	TraceDbg(
+	TraceVerbose(
 		TRACE_XUSB,
 		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
 		(int)pInfo->Length,
@@ -500,7 +498,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PURB Urb)
 
 	pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-	TraceDbg(
+	TraceVerbose(
 		TRACE_XUSB,
 		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
 		(int)pInfo->Length,
@@ -548,7 +546,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PURB Urb)
 
 	pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-	TraceDbg(
+	TraceVerbose(
 		TRACE_XUSB,
 		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
 		(int)pInfo->Length,
@@ -572,7 +570,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SelectConfiguration(PURB Urb)
 
 	pInfo = (PUSBD_INTERFACE_INFORMATION)((PCHAR)pInfo + pInfo->Length);
 
-	TraceDbg(
+	TraceVerbose(
 		TRACE_XUSB,
 		">> >> >> URB_FUNCTION_SELECT_CONFIGURATION: Length %d, Interface %d, Alternate %d, Pipes %d",
 		(int)pInfo->Length,
@@ -611,7 +609,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbSelectInterface(PURB Urb)
 {
 	PUSBD_INTERFACE_INFORMATION pInfo = &Urb->UrbSelectInterface.Interface;
 
-	TraceDbg(
+	TraceVerbose(
 		TRACE_USBPDO,
 		">> >> >> URB_FUNCTION_SELECT_INTERFACE: Length %d, Interface %d, Alternate %d, Pipes %d",
 		(int)pInfo->Length,
@@ -619,7 +617,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbSelectInterface(PURB Urb)
 		(int)pInfo->AlternateSetting,
 		pInfo->NumberOfPipes);
 
-	TraceDbg(
+	TraceVerbose(
 		TRACE_USBPDO,
 		">> >> >> URB_FUNCTION_SELECT_INTERFACE: Class %d, SubClass %d, Protocol %d",
 		(int)pInfo->Class,
@@ -708,7 +706,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 	// Data coming FROM us TO higher driver
 	if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN)
 	{
-		TraceDbg(
+		TraceVerbose(
 			TRACE_USBPDO,
 			">> >> >> Incoming request, queuing...");
 
@@ -807,7 +805,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 	}
 
 	// Data coming FROM the higher driver TO us
-	TraceDbg(
+	TraceVerbose(
 		TRACE_USBPDO,
 		">> >> >> URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER: Handle %p, Flags %X, Length %d",
 		pTransfer->PipeHandle,
@@ -820,7 +818,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 	{
 		auto Buffer = static_cast<PUCHAR>(pTransfer->TransferBuffer);
 
-		TraceDbg(
+		TraceVerbose(
 			TRACE_USBPDO,
 			"-- LED Buffer: %02X %02X %02X",
 			Buffer[0], Buffer[1], Buffer[2]);
@@ -833,7 +831,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 			if (Buffer[2] == 0x04)this->_LedNumber = 2;
 			if (Buffer[2] == 0x05)this->_LedNumber = 3;
 
-			TraceDbg(
+			TraceVerbose(
 				TRACE_USBPDO,
 				"-- LED Number: %d",
 				this->_LedNumber);
@@ -850,7 +848,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 	{
 		auto Buffer = static_cast<PUCHAR>(pTransfer->TransferBuffer);
 
-		TraceDbg(
+		TraceVerbose(
 			TRACE_USBPDO,
 			"-- Rumble Buffer: %02X %02X %02X %02X %02X %02X %02X %02X",
 			Buffer[0],
@@ -891,18 +889,18 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 			notify->SmallMotor = this->_Rumble[4];
 
 			DumpAsHex("!! XUSB_REQUEST_NOTIFICATION",
-			          notify,
-			          sizeof(XUSB_REQUEST_NOTIFICATION)
+				notify,
+				sizeof(XUSB_REQUEST_NOTIFICATION)
 			);
 
 			WdfRequestCompleteWithInformation(notifyRequest, status, notify->Size);
 		}
 		else
 		{
-			TraceEvents(TRACE_LEVEL_ERROR,
-			            TRACE_USBPDO,
-			            "WdfRequestRetrieveOutputBuffer failed with status %!STATUS!",
-			            status);
+			TraceError(
+				TRACE_USBPDO,
+				"WdfRequestRetrieveOutputBuffer failed with status %!STATUS!",
+				status);
 		}
 	}
 	else
@@ -923,7 +921,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbBulkOrInterruptTransfer(_U
 
 			*static_cast<size_t*>(contextBuffer) = pTransfer->TransferBufferLength;
 
-			TraceDbg(TRACE_USBPDO, "Queued %Iu bytes", pTransfer->TransferBufferLength);
+			TraceVerbose(TRACE_USBPDO, "Queued %Iu bytes", pTransfer->TransferBufferLength);
 
 			DMF_BufferQueue_Enqueue(this->_UsbInterruptOutBufferQueue, clientBuffer);
 		}
@@ -977,7 +975,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::UsbControlTransfer(PURB Urb)
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SubmitReportImpl(PVOID NewReport)
 {
-	TraceDbg(TRACE_BUSENUM, "%!FUNC! Entry");
+	FuncEntry(TRACE_BUSENUM);
 
 	NTSTATUS    status = STATUS_SUCCESS;
 	BOOLEAN     changed;
@@ -990,14 +988,14 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SubmitReportImpl(PVOID NewRep
 	// Don't waste pending IRP if input hasn't changed
 	if (!changed)
 	{
-		TraceDbg(
+		TraceVerbose(
 			TRACE_BUSENUM,
 			"Input report hasn't changed since last update, aborting with %!STATUS!",
 			status);
 		return status;
 	}
 
-	TraceDbg(
+	TraceVerbose(
 		TRACE_BUSENUM,
 		"Received new report, processing");
 
@@ -1025,7 +1023,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::SubmitReportImpl(PVOID NewRep
 	// Complete pending request
 	WdfRequestComplete(usbRequest, status);
 
-	TraceDbg(TRACE_BUSENUM, "%!FUNC! Exit with status %!STATUS!", status);
+	TraceVerbose(TRACE_BUSENUM, "%!FUNC! Exit with status %!STATUS!", status);
 
 	return status;
 }
@@ -1037,7 +1035,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetXUSB::GetUserIndex(PULONG UserIndex
 
 	if (!UserIndex)
 		return STATUS_INVALID_PARAMETER;
-	
+
 	if (this->_LedNumber >= 0)
 	{
 		*UserIndex = static_cast<ULONG>(this->_LedNumber);
@@ -1057,8 +1055,8 @@ void ViGEm::Bus::Targets::EmulationTargetXUSB::ProcessPendingNotification(WDFQUE
 	size_t bufferLength;
 	PXUSB_REQUEST_NOTIFICATION notify = nullptr;
 
-	TraceDbg(TRACE_BUSENUM, "%!FUNC! Entry");
-	
+	FuncEntry(TRACE_BUSENUM);
+
 	//
 	// Loop through and drain all queued requests until buffer is empty
 	// 
@@ -1103,7 +1101,7 @@ void ViGEm::Bus::Targets::EmulationTargetXUSB::ProcessPendingNotification(WDFQUE
 			reinterpret_cast<PVOID*>(&notify),
 			nullptr
 		)))
-		{			
+		{
 			notify->Size = sizeof(XUSB_REQUEST_NOTIFICATION);
 			notify->SerialNo = this->_SerialNo;
 			notify->LedNumber = this->_LedNumber; // Report last cached value
@@ -1119,11 +1117,11 @@ void ViGEm::Bus::Targets::EmulationTargetXUSB::ProcessPendingNotification(WDFQUE
 				notify->SmallMotor = this->_Rumble[4]; // Cached value
 			}
 
-			DumpAsHex("!! XUSB_REQUEST_NOTIFICATION", 
-				notify, 
+			DumpAsHex("!! XUSB_REQUEST_NOTIFICATION",
+				notify,
 				sizeof(XUSB_REQUEST_NOTIFICATION)
 			);
-			
+
 			WdfRequestCompleteWithInformation(request, status, notify->Size);
 		}
 
@@ -1138,5 +1136,5 @@ void ViGEm::Bus::Targets::EmulationTargetXUSB::ProcessPendingNotification(WDFQUE
 		}
 	}
 
-	TraceDbg(TRACE_BUSENUM, "%!FUNC! Exit");
+	TraceVerbose(TRACE_BUSENUM, "%!FUNC! Exit");
 }
