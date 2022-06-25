@@ -57,7 +57,7 @@ class Build : NukeBuild
 
             MSBuild(s => s
                 .SetTargetPath(DmfSolution)
-                .SetTargets("Rebuild")
+                .SetTargets("Build")
                 .SetConfiguration(Configuration)
                 .SetTargetPlatform(platform)
                 .SetMaxCpuCount(Environment.ProcessorCount)
