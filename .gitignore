@@ -363,3 +363,5 @@ FodyWeavers.xsd
 /setup.rpt
 /drivers
 /_setup
+/setup/Setup Files
+/setup/ViGEmBus-cache
