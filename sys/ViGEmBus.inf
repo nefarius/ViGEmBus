@@ -56,12 +56,15 @@ WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll = 1
 ;*****************************************
 
 [Manufacturer]
-%ManufacturerName%=Standard,NTamd64,NTx86
+%ManufacturerName%=Standard,NTamd64,NTx86,NTARM64
 
 [Standard.NTamd64]
 %ViGEmBus.DeviceDesc%=ViGEmBus_Device, Nefarius\ViGEmBus\Gen1
 
 [Standard.NTx86]
+%ViGEmBus.DeviceDesc%=ViGEmBus_Device, Nefarius\ViGEmBus\Gen1
+
+[Standard.NTARM64]
 %ViGEmBus.DeviceDesc%=ViGEmBus_Device, Nefarius\ViGEmBus\Gen1
 
 [ViGEmBus_Device.NT]
