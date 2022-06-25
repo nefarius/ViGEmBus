@@ -11,6 +11,8 @@ platform:
 - ARM64
 configuration:
 - Release
+environment:
+- DmfRootPath: C:\projects\DMF
 install:
 - ps: iwr "https://download.microsoft.com/download/c/f/8/cf80b955-d578-4635-825c-2801911f9d79/wdk/wdksetup.exe" -OutFile wdksetup.exe
 - cmd: .\wdksetup.exe /features + /q /norestart
