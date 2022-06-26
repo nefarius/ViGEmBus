@@ -5,6 +5,7 @@ skip_commits:
     - '**/*.md'
 cache:
 - C:\projects\DMF
+- C:\projects\ViGEmBus\vpatch.exe
 platform:
 - x86
 - x64
