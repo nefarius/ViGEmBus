@@ -129,6 +129,7 @@
     <DriverType>KMDF</DriverType>
     <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
+	<SignMode>Off</SignMode>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
