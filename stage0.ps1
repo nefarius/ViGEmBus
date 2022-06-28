@@ -110,6 +110,9 @@ Get-AppVeyorArtifacts -Account "nefarius" -Project "ViGemBus" -Path $Path -Token
 # Download x86 binaries
 Get-AppVeyorArtifacts -Account "nefarius" -Project "ViGemBus" -Path $Path -Token $Token -Branch $BuildVersion -JobName "Platform: x86"
 
+# Download ARM64 binaries
+Get-AppVeyorArtifacts -Account "nefarius" -Project "ViGemBus" -Path $Path -Token $Token -Branch $BuildVersion -JobName "Platform: ARM64"
+
 # List of files to sign
 $files =    "`".\artifacts\disk1\*.cab`" "
 
@@ -121,3 +124,4 @@ if ($NoSigning -eq $false) {
 # Print helper job names for sign portal
 "ViGemBus x86 v$BuildVersion $(Get-Date -Format "dd.MM.yyyy")"
 "ViGemBus x64 v$BuildVersion $(Get-Date -Format "dd.MM.yyyy")"
+"ViGemBus ARM64 v$BuildVersion $(Get-Date -Format "dd.MM.yyyy")"
