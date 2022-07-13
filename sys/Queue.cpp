@@ -475,4 +475,148 @@ VOID Bus_EvtIoDeviceControl(
 	TraceVerbose(TRACE_QUEUE, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
+NTSTATUS
+Bus_CheckVersionHandler(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFQUEUE Queue,
+	_In_ WDFREQUEST Request,
+	_In_ ULONG IoctlCode,
+	_In_reads_(InputBufferSize) VOID* InputBuffer,
+	_In_ size_t InputBufferSize,
+	_Out_writes_(OutputBufferSize) VOID* OutputBuffer,
+	_In_ size_t OutputBufferSize,
+	_Out_ size_t* BytesReturned
+)
+{
+	
+}
+
+NTSTATUS
+Bus_WaitDeviceReadyHandler(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFQUEUE Queue,
+	_In_ WDFREQUEST Request,
+	_In_ ULONG IoctlCode,
+	_In_reads_(InputBufferSize) VOID* InputBuffer,
+	_In_ size_t InputBufferSize,
+	_Out_writes_(OutputBufferSize) VOID* OutputBuffer,
+	_In_ size_t OutputBufferSize,
+	_Out_ size_t* BytesReturned
+)
+{
+	
+}
+
+NTSTATUS
+Bus_PluginTargetHandler(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFQUEUE Queue,
+	_In_ WDFREQUEST Request,
+	_In_ ULONG IoctlCode,
+	_In_reads_(InputBufferSize) VOID* InputBuffer,
+	_In_ size_t InputBufferSize,
+	_Out_writes_(OutputBufferSize) VOID* OutputBuffer,
+	_In_ size_t OutputBufferSize,
+	_Out_ size_t* BytesReturned
+)
+{
+	
+}
+
+NTSTATUS
+Bus_UnplugTargetHandler(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFQUEUE Queue,
+	_In_ WDFREQUEST Request,
+	_In_ ULONG IoctlCode,
+	_In_reads_(InputBufferSize) VOID* InputBuffer,
+	_In_ size_t InputBufferSize,
+	_Out_writes_(OutputBufferSize) VOID* OutputBuffer,
+	_In_ size_t OutputBufferSize,
+	_Out_ size_t* BytesReturned
+)
+{
+	
+}
+
+NTSTATUS
+Bus_XusbSubmitReportHandler(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFQUEUE Queue,
+	_In_ WDFREQUEST Request,
+	_In_ ULONG IoctlCode,
+	_In_reads_(InputBufferSize) VOID* InputBuffer,
+	_In_ size_t InputBufferSize,
+	_Out_writes_(OutputBufferSize) VOID* OutputBuffer,
+	_In_ size_t OutputBufferSize,
+	_Out_ size_t* BytesReturned
+)
+{
+	
+}
+
+NTSTATUS
+Bus_XusbRequestNotificationHandler(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFQUEUE Queue,
+	_In_ WDFREQUEST Request,
+	_In_ ULONG IoctlCode,
+	_In_reads_(InputBufferSize) VOID* InputBuffer,
+	_In_ size_t InputBufferSize,
+	_Out_writes_(OutputBufferSize) VOID* OutputBuffer,
+	_In_ size_t OutputBufferSize,
+	_Out_ size_t* BytesReturned
+)
+{
+	
+}
+
+NTSTATUS
+Bus_Ds4SubmitReportHandler(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFQUEUE Queue,
+	_In_ WDFREQUEST Request,
+	_In_ ULONG IoctlCode,
+	_In_reads_(InputBufferSize) VOID* InputBuffer,
+	_In_ size_t InputBufferSize,
+	_Out_writes_(OutputBufferSize) VOID* OutputBuffer,
+	_In_ size_t OutputBufferSize,
+	_Out_ size_t* BytesReturned
+)
+{
+	
+}
+
+NTSTATUS
+Bus_Ds4RequestNotificationHandler(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFQUEUE Queue,
+	_In_ WDFREQUEST Request,
+	_In_ ULONG IoctlCode,
+	_In_reads_(InputBufferSize) VOID* InputBuffer,
+	_In_ size_t InputBufferSize,
+	_Out_writes_(OutputBufferSize) VOID* OutputBuffer,
+	_In_ size_t OutputBufferSize,
+	_Out_ size_t* BytesReturned
+)
+{
+	
+}
+
+NTSTATUS
+Bus_XusbGetUserIndexHandler(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFQUEUE Queue,
+	_In_ WDFREQUEST Request,
+	_In_ ULONG IoctlCode,
+	_In_reads_(InputBufferSize) VOID* InputBuffer,
+	_In_ size_t InputBufferSize,
+	_Out_writes_(OutputBufferSize) VOID* OutputBuffer,
+	_In_ size_t OutputBufferSize,
+	_Out_ size_t* BytesReturned
+)
+{
+	
+}
+
 EXTERN_C_END
