@@ -168,8 +168,6 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 	WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
 	// More than one process may talk to the bus at the same time
 	WdfDeviceInitSetExclusive(DeviceInit, FALSE);
-	// Bus is power policy owner over all PDOs
-	WdfDeviceInitSetPowerPolicyOwnership(DeviceInit, TRUE);
 
 #pragma region Prepare child list
 

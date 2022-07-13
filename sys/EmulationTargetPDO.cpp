@@ -71,8 +71,6 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 
 	// set device type
 	WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
-	// Bus is power policy owner
-	WdfDeviceInitSetPowerPolicyOwnership(DeviceInit, FALSE);
 
 	do
 	{
@@ -128,7 +126,6 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		}
 
 		// default locale is English
-		// TODO: add more locales
 		WdfPdoInitSetDefaultLocale(DeviceInit, 0x409);
 
 #pragma region PNP/Power event callbacks
@@ -140,9 +137,6 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
 #pragma endregion
-
-		// NOTE: not utilized at the moment
-		WdfPdoInitAllowForwardingRequestToParent(DeviceInit);
 
 #pragma endregion
 
