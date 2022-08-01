@@ -68,8 +68,8 @@ IoctlHandler_IoctlRecord ViGEmBus_IoctlSpecification[] =
 	{IOCTL_XUSB_SUBMIT_REPORT, sizeof(XUSB_SUBMIT_REPORT), 0, Bus_XusbSubmitReportHandler},
 	{IOCTL_XUSB_REQUEST_NOTIFICATION, sizeof(XUSB_REQUEST_NOTIFICATION), sizeof(XUSB_REQUEST_NOTIFICATION), Bus_XusbRequestNotificationHandler},
 	{IOCTL_DS4_SUBMIT_REPORT, sizeof(DS4_SUBMIT_REPORT), 0, Bus_Ds4SubmitReportHandler},
-	{IOCTL_DS4_REQUEST_NOTIFICATION, 0, 0, Bus_Ds4RequestNotificationHandler},
-	{IOCTL_XUSB_GET_USER_INDEX, 0, 0, Bus_XusbGetUserIndexHandler},
+	{IOCTL_DS4_REQUEST_NOTIFICATION, sizeof(DS4_REQUEST_NOTIFICATION), sizeof(DS4_REQUEST_NOTIFICATION), Bus_Ds4RequestNotificationHandler},
+	{IOCTL_XUSB_GET_USER_INDEX, sizeof(XUSB_GET_USER_INDEX), sizeof(XUSB_GET_USER_INDEX), Bus_XusbGetUserIndexHandler},
 };
 
 //
