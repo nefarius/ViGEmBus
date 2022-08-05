@@ -49,432 +49,6 @@ using ViGEm::Bus::Targets::EmulationTargetDS4;
 
 EXTERN_C_START
 
-//
-// Responds to I/O control requests sent to the FDO.
-// 
-VOID Bus_EvtIoDeviceControl(
-	IN WDFQUEUE Queue,
-	IN WDFREQUEST Request,
-	IN size_t OutputBufferLength,
-	IN size_t InputBufferLength,
-	IN ULONG IoControlCode
-)
-{
-	NTSTATUS status = STATUS_INVALID_PARAMETER;
-	WDFDEVICE Device;
-	size_t length = 0;
-	PXUSB_SUBMIT_REPORT xusbSubmit = nullptr;
-	PXUSB_REQUEST_NOTIFICATION xusbNotify = nullptr;
-	PDS4_SUBMIT_REPORT ds4Submit = nullptr;
-	PDS4_REQUEST_NOTIFICATION ds4Notify = nullptr;
-	PVIGEM_CHECK_VERSION pCheckVersion = nullptr;
-	PVIGEM_WAIT_DEVICE_READY pWaitDeviceReady = nullptr;
-	PXUSB_GET_USER_INDEX pXusbGetUserIndex = nullptr;
-	EmulationTargetPDO* pdo;
-
-	Device = WdfIoQueueGetDevice(Queue);
-
-	TraceVerbose(TRACE_QUEUE, "%!FUNC! Entry (device: 0x%p)", Device);
-
-	switch (IoControlCode)
-	{
-#pragma region IOCTL_VIGEM_CHECK_VERSION
-
-	case IOCTL_VIGEM_CHECK_VERSION:
-
-		TraceVerbose(TRACE_QUEUE, "IOCTL_VIGEM_CHECK_VERSION");
-
-		status = WdfRequestRetrieveInputBuffer(
-			Request,
-			sizeof(VIGEM_CHECK_VERSION),
-			reinterpret_cast<PVOID*>(&pCheckVersion),
-			&length
-		);
-
-		if (!NT_SUCCESS(status) || length != sizeof(VIGEM_CHECK_VERSION))
-		{
-			status = STATUS_INVALID_PARAMETER;
-			break;
-		}
-
-		status = (pCheckVersion->Version == VIGEM_COMMON_VERSION) ? STATUS_SUCCESS : STATUS_NOT_SUPPORTED;
-
-		TraceVerbose(
-		            TRACE_QUEUE,
-		            "Requested version: 0x%04X, compiled version: 0x%04X",
-		            pCheckVersion->Version, VIGEM_COMMON_VERSION);
-
-		break;
-
-#pragma endregion
-
-#pragma region IOCTL_VIGEM_WAIT_DEVICE_READY
-
-	case IOCTL_VIGEM_WAIT_DEVICE_READY:
-
-		TraceVerbose(TRACE_QUEUE, "IOCTL_VIGEM_WAIT_DEVICE_READY");
-
-		status = WdfRequestRetrieveInputBuffer(
-			Request,
-			sizeof(VIGEM_WAIT_DEVICE_READY),
-			reinterpret_cast<PVOID*>(&pWaitDeviceReady),
-			&length
-		);
-
-		if (!NT_SUCCESS(status) || length != sizeof(VIGEM_WAIT_DEVICE_READY))
-		{
-			status = STATUS_INVALID_PARAMETER;
-			break;
-		}
-
-		// This request only supports a single PDO at a time
-		if (pWaitDeviceReady->SerialNo == 0)
-		{
-			TraceError(
-				TRACE_QUEUE,
-				"Invalid serial 0 submitted");
-
-			status = STATUS_INVALID_PARAMETER;
-			break;
-		}
-
-		status = EmulationTargetPDO::EnqueueWaitDeviceReady(
-			Device,
-			pWaitDeviceReady->SerialNo,
-			Request
-		);
-
-		status = NT_SUCCESS(status) ? STATUS_PENDING : STATUS_DEVICE_DOES_NOT_EXIST;
-		
-		break;
-
-#pragma endregion
-
-#pragma region IOCTL_VIGEM_PLUGIN_TARGET
-
-	case IOCTL_VIGEM_PLUGIN_TARGET:
-
-		TraceVerbose(TRACE_QUEUE, "IOCTL_VIGEM_PLUGIN_TARGET");
-
-		status = Bus_PlugInDevice(Device, Request, FALSE, &length);
-
-		break;
-
-#pragma endregion
-
-#pragma region IOCTL_VIGEM_UNPLUG_TARGET
-
-	case IOCTL_VIGEM_UNPLUG_TARGET:
-
-		TraceVerbose(TRACE_QUEUE, "IOCTL_VIGEM_UNPLUG_TARGET");
-
-		status = Bus_UnPlugDevice(Device, Request, FALSE, &length);
-
-		break;
-
-#pragma endregion
-
-#pragma region IOCTL_XUSB_SUBMIT_REPORT
-
-	case IOCTL_XUSB_SUBMIT_REPORT:
-
-		TraceVerbose(TRACE_QUEUE, "IOCTL_XUSB_SUBMIT_REPORT");
-
-		status = WdfRequestRetrieveInputBuffer(
-			Request,
-			sizeof(XUSB_SUBMIT_REPORT),
-			reinterpret_cast<PVOID*>(&xusbSubmit),
-			&length
-		);
-
-		if (!NT_SUCCESS(status))
-		{
-			TraceError(
-			            TRACE_QUEUE,
-			            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
-			            status);
-			break;
-		}
-
-		if ((sizeof(XUSB_SUBMIT_REPORT) == xusbSubmit->Size) && (length == InputBufferLength))
-		{
-			// This request only supports a single PDO at a time
-			if (xusbSubmit->SerialNo == 0)
-			{
-				TraceError(
-				            TRACE_QUEUE,
-				            "Invalid serial 0 submitted");
-
-				status = STATUS_INVALID_PARAMETER;
-				break;
-			}
-
-			if (!EmulationTargetPDO::GetPdoByTypeAndSerial(Device, Xbox360Wired, xusbSubmit->SerialNo, &pdo))
-				status = STATUS_DEVICE_DOES_NOT_EXIST;
-			else
-				status = pdo->SubmitReport(xusbSubmit);
-		}
-
-		break;
-
-#pragma endregion
-
-#pragma region IOCTL_XUSB_REQUEST_NOTIFICATION
-
-	case IOCTL_XUSB_REQUEST_NOTIFICATION:
-
-		TraceVerbose(TRACE_QUEUE, "IOCTL_XUSB_REQUEST_NOTIFICATION");
-
-		// Don't accept the request if the output buffer can't hold the results
-		if (OutputBufferLength < sizeof(XUSB_REQUEST_NOTIFICATION))
-		{
-			TraceError(
-			            TRACE_QUEUE,
-			            "Output buffer %d too small, require at least %d",
-			            static_cast<int>(OutputBufferLength), static_cast<int>(sizeof(XUSB_REQUEST_NOTIFICATION)));
-			break;
-		}
-
-		status = WdfRequestRetrieveInputBuffer(
-			Request,
-			sizeof(XUSB_REQUEST_NOTIFICATION),
-			reinterpret_cast<PVOID*>(&xusbNotify),
-			&length
-		);
-
-		if (!NT_SUCCESS(status))
-		{
-			TraceError(
-			            TRACE_QUEUE,
-			            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
-			            status);
-			break;
-		}
-
-		if ((sizeof(XUSB_REQUEST_NOTIFICATION) == xusbNotify->Size) && (length == InputBufferLength))
-		{
-			// This request only supports a single PDO at a time
-			if (xusbNotify->SerialNo == 0)
-			{
-				TraceError(
-				            TRACE_QUEUE,
-				            "Invalid serial 0 submitted");
-
-				status = STATUS_INVALID_PARAMETER;
-				break;
-			}
-
-			if (!EmulationTargetPDO::GetPdoByTypeAndSerial(Device, Xbox360Wired, xusbNotify->SerialNo, &pdo))
-				status = STATUS_DEVICE_DOES_NOT_EXIST;
-			else
-			{
-				status = pdo->EnqueueNotification(Request);
-
-				status = (NT_SUCCESS(status)) ? STATUS_PENDING : status;
-			}
-		}
-
-		break;
-
-#pragma endregion
-
-#pragma region IOCTL_DS4_SUBMIT_REPORT
-
-	case IOCTL_DS4_SUBMIT_REPORT:
-
-		TraceVerbose(TRACE_QUEUE, "IOCTL_DS4_SUBMIT_REPORT");
-
-		status = WdfRequestRetrieveInputBuffer(
-			Request,
-			sizeof(DS4_SUBMIT_REPORT),
-			reinterpret_cast<PVOID*>(&ds4Submit),
-			&length
-		);
-
-		if (!NT_SUCCESS(status))
-		{
-			TraceError(
-			            TRACE_QUEUE,
-			            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
-			            status);
-			break;
-		}
-
-		//
-		// Check if buffer is within expected bounds
-		// 
-		if (length < sizeof(DS4_SUBMIT_REPORT) || length > sizeof(DS4_SUBMIT_REPORT_EX))
-		{
-			TraceVerbose(
-				TRACE_QUEUE,
-				"Unexpected buffer size: %d",
-				static_cast<ULONG>(length)
-			);
-
-			status = STATUS_INVALID_BUFFER_SIZE;
-			break;
-		}
-
-		//
-		// Check if this makes sense before passing it on
-		// 
-		if (length != ds4Submit->Size)
-		{
-			TraceVerbose(
-				TRACE_QUEUE,
-				"Invalid buffer size: %d",
-				ds4Submit->Size
-			);
-
-			status = STATUS_INVALID_BUFFER_SIZE;
-			break;
-		}
-
-		// 
-		// This request only supports a single PDO at a time
-		// 
-		if (ds4Submit->SerialNo == 0)
-		{
-			TraceError(
-			            TRACE_QUEUE,
-			            "Invalid serial 0 submitted");
-
-			status = STATUS_INVALID_PARAMETER;
-			break;
-		}
-
-		if (!EmulationTargetPDO::GetPdoByTypeAndSerial(Device, DualShock4Wired, ds4Submit->SerialNo, &pdo))
-			status = STATUS_DEVICE_DOES_NOT_EXIST;
-		else
-			status = pdo->SubmitReport(ds4Submit);
-
-		break;
-
-#pragma endregion
-
-#pragma region IOCTL_DS4_REQUEST_NOTIFICATION
-
-	case IOCTL_DS4_REQUEST_NOTIFICATION:
-
-		TraceVerbose(TRACE_QUEUE, "IOCTL_DS4_REQUEST_NOTIFICATION");
-
-		// Don't accept the request if the output buffer can't hold the results
-		if (OutputBufferLength < sizeof(DS4_REQUEST_NOTIFICATION))
-		{
-			TraceError(
-			            TRACE_QUEUE,
-			            "Output buffer %d too small, require at least %d",
-			            static_cast<int>(OutputBufferLength), static_cast<int>(sizeof(DS4_REQUEST_NOTIFICATION)));
-			break;
-		}
-
-		status = WdfRequestRetrieveInputBuffer(
-			Request,
-			sizeof(DS4_REQUEST_NOTIFICATION),
-			reinterpret_cast<PVOID*>(&ds4Notify),
-			&length
-		);
-
-		if (!NT_SUCCESS(status))
-		{
-			TraceError(
-			            TRACE_QUEUE,
-			            "WdfRequestRetrieveInputBuffer failed with status %!STATUS!",
-			            status);
-			break;
-		}
-
-		if ((sizeof(DS4_REQUEST_NOTIFICATION) == ds4Notify->Size) && (length == InputBufferLength))
-		{
-			// This request only supports a single PDO at a time
-			if (ds4Notify->SerialNo == 0)
-			{
-				TraceError(
-				            TRACE_QUEUE,
-				            "Invalid serial 0 submitted");
-
-				status = STATUS_INVALID_PARAMETER;
-				break;
-			}
-
-			if (!EmulationTargetPDO::GetPdoByTypeAndSerial(Device, DualShock4Wired, ds4Notify->SerialNo, &pdo))
-				status = STATUS_DEVICE_DOES_NOT_EXIST;
-			else
-			{
-				status = pdo->EnqueueNotification(Request);
-
-				status = (NT_SUCCESS(status)) ? STATUS_PENDING : status;
-			}
-		}
-
-		break;
-
-#pragma endregion
-
-#pragma region IOCTL_XUSB_GET_USER_INDEX
-
-	case IOCTL_XUSB_GET_USER_INDEX:
-
-		TraceVerbose(TRACE_QUEUE, "IOCTL_XUSB_GET_USER_INDEX");
-
-		// Don't accept the request if the output buffer can't hold the results
-		if (OutputBufferLength < sizeof(XUSB_GET_USER_INDEX))
-		{
-			KdPrint((DRIVERNAME "IOCTL_XUSB_GET_USER_INDEX: output buffer too small: %ul\n", OutputBufferLength));
-			break;
-		}
-
-		status = WdfRequestRetrieveInputBuffer(
-			Request,
-			sizeof(XUSB_GET_USER_INDEX),
-			reinterpret_cast<PVOID*>(&pXusbGetUserIndex),
-			&length);
-
-		if (!NT_SUCCESS(status))
-		{
-			KdPrint((DRIVERNAME "WdfRequestRetrieveInputBuffer failed 0x%x\n", status));
-			break;
-		}
-
-		if ((sizeof(XUSB_GET_USER_INDEX) == pXusbGetUserIndex->Size) && (length == InputBufferLength))
-		{
-			// This request only supports a single PDO at a time
-			if (pXusbGetUserIndex->SerialNo == 0)
-			{
-				status = STATUS_INVALID_PARAMETER;
-				break;
-			}
-
-			if (!EmulationTargetPDO::GetPdoByTypeAndSerial(Device, Xbox360Wired, pXusbGetUserIndex->SerialNo, &pdo))
-			{
-				status = STATUS_DEVICE_DOES_NOT_EXIST;
-				break;
-			}
-
-			status = static_cast<EmulationTargetXUSB*>(pdo)->GetUserIndex(&pXusbGetUserIndex->UserIndex);
-		}
-
-		break;
-
-#pragma endregion
-
-	default:
-
-		TraceEvents(TRACE_LEVEL_WARNING,
-		            TRACE_QUEUE,
-		            "Unknown I/O control code 0x%X", IoControlCode);
-
-		break; // default status is STATUS_INVALID_PARAMETER
-	}
-
-	if (status != STATUS_PENDING)
-	{
-		WdfRequestCompleteWithInformation(Request, status, length);
-	}
-
-	TraceVerbose(TRACE_QUEUE, "%!FUNC! Exit with status %!STATUS!", status);
-}
-
 NTSTATUS
 Bus_CheckVersionHandler(
 	_In_ DMFMODULE DmfModule,
@@ -488,7 +62,29 @@ Bus_CheckVersionHandler(
 	_Out_ size_t* BytesReturned
 )
 {
-	
+	UNREFERENCED_PARAMETER(DmfModule);
+	UNREFERENCED_PARAMETER(Queue);
+	UNREFERENCED_PARAMETER(Request);
+	UNREFERENCED_PARAMETER(IoctlCode);
+	UNREFERENCED_PARAMETER(InputBufferSize);
+	UNREFERENCED_PARAMETER(OutputBufferSize);
+	UNREFERENCED_PARAMETER(OutputBuffer);
+	UNREFERENCED_PARAMETER(BytesReturned);
+
+	FuncEntry(TRACE_QUEUE);
+
+	PVIGEM_CHECK_VERSION pCheckVersion = (PVIGEM_CHECK_VERSION)InputBuffer;
+
+	NTSTATUS status = (pCheckVersion->Version == VIGEM_COMMON_VERSION) ? STATUS_SUCCESS : STATUS_NOT_SUPPORTED;
+
+	TraceVerbose(
+		TRACE_QUEUE,
+		"Requested version: 0x%04X, compiled version: 0x%04X",
+		pCheckVersion->Version, VIGEM_COMMON_VERSION);
+
+	FuncExit(TRACE_QUEUE, "status=%!STATUS!", status);
+
+	return status;
 }
 
 NTSTATUS
@@ -504,7 +100,43 @@ Bus_WaitDeviceReadyHandler(
 	_Out_ size_t* BytesReturned
 )
 {
-	
+	UNREFERENCED_PARAMETER(DmfModule);
+	UNREFERENCED_PARAMETER(Request);
+	UNREFERENCED_PARAMETER(IoctlCode);
+	UNREFERENCED_PARAMETER(InputBufferSize);
+	UNREFERENCED_PARAMETER(OutputBufferSize);
+	UNREFERENCED_PARAMETER(OutputBuffer);
+	UNREFERENCED_PARAMETER(BytesReturned);
+
+	NTSTATUS status;
+
+	FuncEntry(TRACE_QUEUE);
+
+	PVIGEM_WAIT_DEVICE_READY pWaitDeviceReady = (PVIGEM_WAIT_DEVICE_READY)InputBuffer;
+
+	// This request only supports a single PDO at a time
+	if (pWaitDeviceReady->SerialNo == 0)
+	{
+		TraceError(
+			TRACE_QUEUE,
+			"Invalid serial 0 submitted");
+
+		status = STATUS_INVALID_PARAMETER;
+		goto exit;
+	}
+
+	status = EmulationTargetPDO::EnqueueWaitDeviceReady(
+		WdfIoQueueGetDevice(Queue),
+		pWaitDeviceReady->SerialNo,
+		Request
+	);
+
+	status = NT_SUCCESS(status) ? STATUS_PENDING : STATUS_DEVICE_DOES_NOT_EXIST;
+
+exit:
+	FuncExit(TRACE_QUEUE, "status=%!STATUS!", status);
+
+	return status;
 }
 
 NTSTATUS
@@ -520,7 +152,22 @@ Bus_PluginTargetHandler(
 	_Out_ size_t* BytesReturned
 )
 {
-	
+	UNREFERENCED_PARAMETER(DmfModule);
+	UNREFERENCED_PARAMETER(Request);
+	UNREFERENCED_PARAMETER(IoctlCode);
+	UNREFERENCED_PARAMETER(InputBufferSize);
+	UNREFERENCED_PARAMETER(InputBuffer);
+	UNREFERENCED_PARAMETER(OutputBufferSize);
+	UNREFERENCED_PARAMETER(OutputBuffer);
+	UNREFERENCED_PARAMETER(BytesReturned);
+
+	FuncEntry(TRACE_QUEUE);
+
+	NTSTATUS status = Bus_PlugInDevice(WdfIoQueueGetDevice(Queue), Request, FALSE, BytesReturned);
+
+	FuncExit(TRACE_QUEUE, "status=%!STATUS!", status);
+
+	return status;
 }
 
 NTSTATUS
@@ -536,7 +183,22 @@ Bus_UnplugTargetHandler(
 	_Out_ size_t* BytesReturned
 )
 {
-	
+	UNREFERENCED_PARAMETER(DmfModule);
+	UNREFERENCED_PARAMETER(Request);
+	UNREFERENCED_PARAMETER(IoctlCode);
+	UNREFERENCED_PARAMETER(InputBufferSize);
+	UNREFERENCED_PARAMETER(InputBuffer);
+	UNREFERENCED_PARAMETER(OutputBufferSize);
+	UNREFERENCED_PARAMETER(OutputBuffer);
+	UNREFERENCED_PARAMETER(BytesReturned);
+
+	FuncEntry(TRACE_QUEUE);
+
+	NTSTATUS status = Bus_UnPlugDevice(WdfIoQueueGetDevice(Queue), Request, FALSE, BytesReturned);
+
+	FuncExit(TRACE_QUEUE, "status=%!STATUS!", status);
+
+	return status;
 }
 
 NTSTATUS
@@ -552,7 +214,41 @@ Bus_XusbSubmitReportHandler(
 	_Out_ size_t* BytesReturned
 )
 {
-	
+	UNREFERENCED_PARAMETER(DmfModule);
+	UNREFERENCED_PARAMETER(Request);
+	UNREFERENCED_PARAMETER(IoctlCode);
+	UNREFERENCED_PARAMETER(InputBufferSize);
+	UNREFERENCED_PARAMETER(InputBuffer);
+	UNREFERENCED_PARAMETER(OutputBufferSize);
+	UNREFERENCED_PARAMETER(OutputBuffer);
+	UNREFERENCED_PARAMETER(BytesReturned);
+
+	FuncEntry(TRACE_QUEUE);
+
+	NTSTATUS status;
+	EmulationTargetPDO* pdo;
+	PXUSB_SUBMIT_REPORT xusbSubmit = (PXUSB_SUBMIT_REPORT)InputBuffer;
+
+	// This request only supports a single PDO at a time
+	if (xusbSubmit->SerialNo == 0)
+	{
+		TraceError(
+			TRACE_QUEUE,
+			"Invalid serial 0 submitted");
+
+		status = STATUS_INVALID_PARAMETER;
+		goto exit;
+	}
+
+	if (!EmulationTargetPDO::GetPdoByTypeAndSerial(WdfIoQueueGetDevice(Queue), Xbox360Wired, xusbSubmit->SerialNo, &pdo))
+		status = STATUS_DEVICE_DOES_NOT_EXIST;
+	else
+		status = pdo->SubmitReport(xusbSubmit);
+
+exit:
+	FuncExit(TRACE_QUEUE, "status=%!STATUS!", status);
+
+	return status;
 }
 
 NTSTATUS
@@ -568,7 +264,45 @@ Bus_XusbRequestNotificationHandler(
 	_Out_ size_t* BytesReturned
 )
 {
-	
+	UNREFERENCED_PARAMETER(DmfModule);
+	UNREFERENCED_PARAMETER(Request);
+	UNREFERENCED_PARAMETER(IoctlCode);
+	UNREFERENCED_PARAMETER(InputBufferSize);
+	UNREFERENCED_PARAMETER(InputBuffer);
+	UNREFERENCED_PARAMETER(OutputBufferSize);
+	UNREFERENCED_PARAMETER(OutputBuffer);
+	UNREFERENCED_PARAMETER(BytesReturned);
+
+	FuncEntry(TRACE_QUEUE);
+
+	NTSTATUS status;
+	EmulationTargetPDO* pdo;
+	PXUSB_REQUEST_NOTIFICATION xusbNotify = (PXUSB_REQUEST_NOTIFICATION)InputBuffer;
+
+	// This request only supports a single PDO at a time
+	if (xusbNotify->SerialNo == 0)
+	{
+		TraceError(
+			TRACE_QUEUE,
+			"Invalid serial 0 submitted");
+
+		status = STATUS_INVALID_PARAMETER;
+		goto exit;
+	}
+
+	if (!EmulationTargetPDO::GetPdoByTypeAndSerial(WdfIoQueueGetDevice(Queue), Xbox360Wired, xusbNotify->SerialNo, &pdo))
+		status = STATUS_DEVICE_DOES_NOT_EXIST;
+	else
+	{
+		status = pdo->EnqueueNotification(Request);
+
+		status = (NT_SUCCESS(status)) ? STATUS_PENDING : status;
+	}
+
+exit:
+	FuncExit(TRACE_QUEUE, "status=%!STATUS!", status);
+
+	return status;
 }
 
 NTSTATUS
@@ -584,7 +318,71 @@ Bus_Ds4SubmitReportHandler(
 	_Out_ size_t* BytesReturned
 )
 {
-	
+	UNREFERENCED_PARAMETER(DmfModule);
+	UNREFERENCED_PARAMETER(Request);
+	UNREFERENCED_PARAMETER(IoctlCode);
+	UNREFERENCED_PARAMETER(OutputBufferSize);
+	UNREFERENCED_PARAMETER(OutputBuffer);
+	UNREFERENCED_PARAMETER(BytesReturned);
+
+	FuncEntry(TRACE_QUEUE);
+
+	NTSTATUS status;
+	EmulationTargetPDO* pdo;
+	PDS4_SUBMIT_REPORT ds4Submit = (PDS4_SUBMIT_REPORT)InputBuffer;
+
+	//
+		// Check if buffer is within expected bounds
+		// 
+	if (InputBufferSize < sizeof(DS4_SUBMIT_REPORT) || InputBufferSize > sizeof(DS4_SUBMIT_REPORT_EX))
+	{
+		TraceVerbose(
+			TRACE_QUEUE,
+			"Unexpected buffer size: %d",
+			static_cast<ULONG>(InputBufferSize)
+		);
+
+		status = STATUS_INVALID_BUFFER_SIZE;
+		goto exit;
+	}
+
+	//
+	// Check if this makes sense before passing it on
+	// 
+	if (InputBufferSize != ds4Submit->Size)
+	{
+		TraceVerbose(
+			TRACE_QUEUE,
+			"Invalid buffer size: %d",
+			ds4Submit->Size
+		);
+
+		status = STATUS_INVALID_BUFFER_SIZE;
+		goto exit;
+	}
+
+	// 
+	// This request only supports a single PDO at a time
+	// 
+	if (ds4Submit->SerialNo == 0)
+	{
+		TraceError(
+			TRACE_QUEUE,
+			"Invalid serial 0 submitted");
+
+		status = STATUS_INVALID_PARAMETER;
+		goto exit;
+	}
+
+	if (!EmulationTargetPDO::GetPdoByTypeAndSerial(WdfIoQueueGetDevice(Queue), DualShock4Wired, ds4Submit->SerialNo, &pdo))
+		status = STATUS_DEVICE_DOES_NOT_EXIST;
+	else
+		status = pdo->SubmitReport(ds4Submit);
+
+exit:
+	FuncExit(TRACE_QUEUE, "status=%!STATUS!", status);
+
+	return status;
 }
 
 NTSTATUS
@@ -600,7 +398,44 @@ Bus_Ds4RequestNotificationHandler(
 	_Out_ size_t* BytesReturned
 )
 {
-	
+	UNREFERENCED_PARAMETER(DmfModule);
+	UNREFERENCED_PARAMETER(Request);
+	UNREFERENCED_PARAMETER(IoctlCode);
+	UNREFERENCED_PARAMETER(OutputBufferSize);
+	UNREFERENCED_PARAMETER(InputBufferSize);
+	UNREFERENCED_PARAMETER(OutputBuffer);
+	UNREFERENCED_PARAMETER(BytesReturned);
+
+	FuncEntry(TRACE_QUEUE);
+
+	NTSTATUS status;
+	EmulationTargetPDO* pdo;
+	PDS4_REQUEST_NOTIFICATION ds4Notify = (PDS4_REQUEST_NOTIFICATION)InputBuffer;
+
+	// This request only supports a single PDO at a time
+	if (ds4Notify->SerialNo == 0)
+	{
+		TraceError(
+			TRACE_QUEUE,
+			"Invalid serial 0 submitted");
+
+		status = STATUS_INVALID_PARAMETER;
+		goto exit;
+	}
+
+	if (!EmulationTargetPDO::GetPdoByTypeAndSerial(WdfIoQueueGetDevice(Queue), DualShock4Wired, ds4Notify->SerialNo, &pdo))
+		status = STATUS_DEVICE_DOES_NOT_EXIST;
+	else
+	{
+		status = pdo->EnqueueNotification(Request);
+
+		status = (NT_SUCCESS(status)) ? STATUS_PENDING : status;
+	}
+
+exit:
+	FuncExit(TRACE_QUEUE, "status=%!STATUS!", status);
+
+	return status;
 }
 
 NTSTATUS
@@ -616,7 +451,39 @@ Bus_XusbGetUserIndexHandler(
 	_Out_ size_t* BytesReturned
 )
 {
-	
+	UNREFERENCED_PARAMETER(DmfModule);
+	UNREFERENCED_PARAMETER(Request);
+	UNREFERENCED_PARAMETER(IoctlCode);
+	UNREFERENCED_PARAMETER(OutputBufferSize);
+	UNREFERENCED_PARAMETER(InputBufferSize);
+	UNREFERENCED_PARAMETER(OutputBuffer);
+	UNREFERENCED_PARAMETER(BytesReturned);
+
+	FuncEntry(TRACE_QUEUE);
+
+	NTSTATUS status;
+	EmulationTargetPDO* pdo;
+	PXUSB_GET_USER_INDEX pXusbGetUserIndex = (PXUSB_GET_USER_INDEX)InputBuffer;
+
+	// This request only supports a single PDO at a time
+	if (pXusbGetUserIndex->SerialNo == 0)
+	{
+		status = STATUS_INVALID_PARAMETER;
+		goto exit;
+	}
+
+	if (!EmulationTargetPDO::GetPdoByTypeAndSerial(WdfIoQueueGetDevice(Queue), Xbox360Wired, pXusbGetUserIndex->SerialNo, &pdo))
+	{
+		status = STATUS_DEVICE_DOES_NOT_EXIST;
+		goto exit;
+	}
+
+	status = static_cast<EmulationTargetXUSB*>(pdo)->GetUserIndex(&pXusbGetUserIndex->UserIndex);
+
+exit:
+	FuncExit(TRACE_QUEUE, "status=%!STATUS!", status);
+
+	return status;
 }
 
 EXTERN_C_END

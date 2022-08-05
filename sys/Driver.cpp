@@ -122,10 +122,8 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 {
 	WDF_CHILD_LIST_CONFIG config;
 	NTSTATUS status;
-	WDFDEVICE device;
-	WDF_IO_QUEUE_CONFIG queueConfig;
+	WDFDEVICE device = NULL;
 	PNP_BUS_INFORMATION busInfo;
-	WDFQUEUE queue;
 	WDF_FILEOBJECT_CONFIG foConfig;
 	WDF_OBJECT_ATTRIBUTES fdoAttributes;
 	WDF_OBJECT_ATTRIBUTES fileHandleAttributes;
@@ -244,27 +242,6 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
 #pragma endregion
 
-#pragma region Create default I/O queue for FDO
-
-		WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
-
-		queueConfig.EvtIoDeviceControl = Bus_EvtIoDeviceControl;
-
-		__analysis_assume(queueConfig.EvtIoStop != 0);
-		status = WdfIoQueueCreate(device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
-		__analysis_assume(queueConfig.EvtIoStop == 0);
-
-		if (!NT_SUCCESS(status))
-		{
-			TraceError(
-				TRACE_DRIVER,
-				"WdfIoQueueCreate failed with status %!STATUS!",
-				status);
-			break;
-		}
-
-#pragma endregion
-
 #pragma region Expose FDO interface
 
 		if (!NT_SUCCESS(status = WdfDeviceCreateDeviceInterface(
@@ -317,6 +294,8 @@ DmfDeviceModulesAdd(
 	_In_ PDMFMODULE_INIT DmfModuleInit
 )
 {
+	UNREFERENCED_PARAMETER(Device);
+
 	FuncEntry(TRACE_DRIVER);
 
 	DMF_MODULE_ATTRIBUTES moduleAttributes = {0};

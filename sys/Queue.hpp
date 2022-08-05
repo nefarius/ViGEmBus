@@ -37,8 +37,6 @@
 
 EXTERN_C_START
 
-EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL Bus_EvtIoDeviceControl;
-
 EVT_DMF_IoctlHandler_Callback Bus_CheckVersionHandler;
 EVT_DMF_IoctlHandler_Callback Bus_WaitDeviceReadyHandler;
 EVT_DMF_IoctlHandler_Callback Bus_PluginTargetHandler;
