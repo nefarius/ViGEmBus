@@ -59,6 +59,19 @@ using ViGEm::Bus::Targets::EmulationTargetDS4;
 
 EXTERN_C_START
 
+IoctlHandler_IoctlRecord ViGEmBus_IoctlSpecification[] =
+{
+	{IOCTL_VIGEM_CHECK_VERSION, sizeof(VIGEM_CHECK_VERSION), 0, Bus_CheckVersionHandler},
+	{IOCTL_VIGEM_WAIT_DEVICE_READY, sizeof(VIGEM_WAIT_DEVICE_READY), 0, Bus_WaitDeviceReadyHandler},
+	{IOCTL_VIGEM_PLUGIN_TARGET, sizeof(VIGEM_PLUGIN_TARGET), 0, Bus_PluginTargetHandler},
+	{IOCTL_VIGEM_UNPLUG_TARGET, sizeof(VIGEM_UNPLUG_TARGET), 0, Bus_UnplugTargetHandler},
+	{IOCTL_XUSB_SUBMIT_REPORT, sizeof(XUSB_SUBMIT_REPORT), 0, Bus_XusbSubmitReportHandler},
+	{IOCTL_XUSB_REQUEST_NOTIFICATION, sizeof(XUSB_REQUEST_NOTIFICATION), sizeof(XUSB_REQUEST_NOTIFICATION), Bus_XusbRequestNotificationHandler},
+	{IOCTL_DS4_SUBMIT_REPORT, sizeof(DS4_SUBMIT_REPORT), 0, Bus_Ds4SubmitReportHandler},
+	{IOCTL_DS4_REQUEST_NOTIFICATION, sizeof(DS4_REQUEST_NOTIFICATION), sizeof(DS4_REQUEST_NOTIFICATION), Bus_Ds4RequestNotificationHandler},
+	{IOCTL_XUSB_GET_USER_INDEX, sizeof(XUSB_GET_USER_INDEX), sizeof(XUSB_GET_USER_INDEX), Bus_XusbGetUserIndexHandler},
+};
+
 //
 // Driver entry routine.
 // 
@@ -107,23 +120,22 @@ NTSTATUS DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING Registry
 // 
 NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 {
-	WDF_CHILD_LIST_CONFIG       config;
-	NTSTATUS                    status;
-	WDFDEVICE                   device;
-	WDF_IO_QUEUE_CONFIG         queueConfig;
-	PNP_BUS_INFORMATION         busInfo;
-	WDFQUEUE                    queue;
-	WDF_FILEOBJECT_CONFIG       foConfig;
-	WDF_OBJECT_ATTRIBUTES       fdoAttributes;
-	WDF_OBJECT_ATTRIBUTES       fileHandleAttributes;
-	PFDO_DEVICE_DATA            pFDOData;
-	PWSTR                       pSymbolicNameList;
+	WDF_CHILD_LIST_CONFIG config;
+	NTSTATUS status;
+	WDFDEVICE device = NULL;
+	PNP_BUS_INFORMATION busInfo;
+	WDF_FILEOBJECT_CONFIG foConfig;
+	WDF_OBJECT_ATTRIBUTES fdoAttributes;
+	WDF_OBJECT_ATTRIBUTES fileHandleAttributes;
+	PFDO_DEVICE_DATA pFDOData;
+	PWSTR pSymbolicNameList;
+	PDMFDEVICE_INIT dmfDeviceInit = NULL;
 
 	UNREFERENCED_PARAMETER(Driver);
 
 	PAGED_CODE();
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	FuncEntry(TRACE_DRIVER);
 
 #pragma region Check for duplicated FDO
 
@@ -132,13 +144,12 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 	// and use of named device object. Food for thought for future.
 	// 
 
-	status = IoGetDeviceInterfaces(
+	if (NT_SUCCESS(status = IoGetDeviceInterfaces(
 		&GUID_DEVINTERFACE_BUSENUM_VIGEM,
 		NULL,
 		0, // Important!
 		&pSymbolicNameList
-	);
-	if (NT_SUCCESS(status))
+	)))
 	{
 		const bool deviceAlreadyExists = (0 != *pSymbolicNameList);
 		ExFreePool(pSymbolicNameList);
@@ -165,109 +176,171 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
 #pragma endregion
 
-	WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
-	// More than one process may talk to the bus at the same time
-	WdfDeviceInitSetExclusive(DeviceInit, FALSE);
+	do
+	{
+		dmfDeviceInit = DMF_DmfDeviceInitAllocate(DeviceInit);
+
+		if (dmfDeviceInit == NULL)
+		{
+			TraceError(
+				TRACE_DRIVER,
+				"DMF_DmfDeviceInitAllocate failed"
+			);
+
+			status = STATUS_INSUFFICIENT_RESOURCES;
+			break;
+		}
+
+		DMF_DmfDeviceInitHookPnpPowerEventCallbacks(dmfDeviceInit, NULL);
+		DMF_DmfDeviceInitHookPowerPolicyEventCallbacks(dmfDeviceInit, NULL);
+
+		WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
 
 #pragma region Prepare child list
 
-	WDF_CHILD_LIST_CONFIG_INIT(&config, sizeof(PDO_IDENTIFICATION_DESCRIPTION), Bus_EvtDeviceListCreatePdo);
+		WDF_CHILD_LIST_CONFIG_INIT(&config, sizeof(PDO_IDENTIFICATION_DESCRIPTION), Bus_EvtDeviceListCreatePdo);
 
-	config.EvtChildListIdentificationDescriptionCompare = EmulationTargetPDO::EvtChildListIdentificationDescriptionCompare;
+		config.EvtChildListIdentificationDescriptionCompare = EmulationTargetPDO::EvtChildListIdentificationDescriptionCompare;
 
-	WdfFdoInitSetDefaultChildListConfig(DeviceInit, &config, WDF_NO_OBJECT_ATTRIBUTES);
+		WdfFdoInitSetDefaultChildListConfig(DeviceInit, &config, WDF_NO_OBJECT_ATTRIBUTES);
 
 #pragma endregion
 
 #pragma region Assign File Object Configuration
 
-	WDF_FILEOBJECT_CONFIG_INIT(&foConfig, Bus_DeviceFileCreate, Bus_FileClose, NULL);
+		WDF_FILEOBJECT_CONFIG_INIT(&foConfig, Bus_DeviceFileCreate, Bus_FileClose, NULL);
 
-	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&fileHandleAttributes, FDO_FILE_DATA);
+		WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&fileHandleAttributes, FDO_FILE_DATA);
 
-	WdfDeviceInitSetFileObjectConfig(DeviceInit, &foConfig, &fileHandleAttributes);
+		DMF_DmfDeviceInitHookFileObjectConfig(dmfDeviceInit, &foConfig);
+
+		WdfDeviceInitSetFileObjectConfig(DeviceInit, &foConfig, &fileHandleAttributes);
 
 #pragma endregion
 
 #pragma region Create FDO
 
-	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&fdoAttributes, FDO_DEVICE_DATA);
+		WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&fdoAttributes, FDO_DEVICE_DATA);
 
-	status = WdfDeviceCreate(&DeviceInit, &fdoAttributes, &device);
+		if (!NT_SUCCESS(status = WdfDeviceCreate(
+			&DeviceInit,
+			&fdoAttributes,
+			&device
+		)))
+		{
+			TraceError(
+				TRACE_DRIVER,
+				"WdfDeviceCreate failed with status %!STATUS!",
+				status);
+			break;
+		}
 
-	if (!NT_SUCCESS(status))
-	{
-		TraceError(
-			TRACE_DRIVER,
-			"WdfDeviceCreate failed with status %!STATUS!",
-			status);
-		return status;
-	}
+		pFDOData = FdoGetData(device);
 
-	pFDOData = FdoGetData(device);
-	if (pFDOData == NULL)
-	{
-		TraceError(
-			TRACE_DRIVER,
-			"FdoGetData failed");
-		return STATUS_UNSUCCESSFUL;
-	}
-
-	pFDOData->InterfaceReferenceCounter = 0;
-	pFDOData->NextSessionId = FDO_FIRST_SESSION_ID;
-
-#pragma endregion
-
-#pragma region Create default I/O queue for FDO
-
-	WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
-
-	queueConfig.EvtIoDeviceControl = Bus_EvtIoDeviceControl;
-
-	__analysis_assume(queueConfig.EvtIoStop != 0);
-	status = WdfIoQueueCreate(device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
-	__analysis_assume(queueConfig.EvtIoStop == 0);
-
-	if (!NT_SUCCESS(status))
-	{
-		TraceError(
-			TRACE_DRIVER,
-			"WdfIoQueueCreate failed with status %!STATUS!",
-			status);
-		return status;
-	}
+		pFDOData->InterfaceReferenceCounter = 0;
+		pFDOData->NextSessionId = FDO_FIRST_SESSION_ID;
 
 #pragma endregion
 
 #pragma region Expose FDO interface
 
-	status = WdfDeviceCreateDeviceInterface(device, &GUID_DEVINTERFACE_BUSENUM_VIGEM, NULL);
-
-	if (!NT_SUCCESS(status))
-	{
-		TraceError(
-			TRACE_DRIVER,
-			"WdfDeviceCreateDeviceInterface failed with status %!STATUS!",
-			status);
-		return status;
-	}
+		if (!NT_SUCCESS(status = WdfDeviceCreateDeviceInterface(
+			device,
+			&GUID_DEVINTERFACE_BUSENUM_VIGEM,
+			NULL
+		)))
+		{
+			TraceError(
+				TRACE_DRIVER,
+				"WdfDeviceCreateDeviceInterface failed with status %!STATUS!",
+				status);
+			break;
+		}
 
 #pragma endregion
 
 #pragma region Set bus information
 
-	busInfo.BusTypeGuid = GUID_BUS_TYPE_USB;
-	busInfo.LegacyBusType = PNPBus;
-	busInfo.BusNumber = 0;
+		busInfo.BusTypeGuid = GUID_BUS_TYPE_USB;
+		busInfo.LegacyBusType = PNPBus;
+		busInfo.BusNumber = 0;
 
-	WdfDeviceSetBusInformationForChildren(device, &busInfo);
+		WdfDeviceSetBusInformationForChildren(device, &busInfo);
 
 #pragma endregion
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit with status %!STATUS!", status);
+		//
+		// DMF Module initialization
+		//
+		DMF_EVENT_CALLBACKS dmfEventCallbacks;
+		DMF_EVENT_CALLBACKS_INIT(&dmfEventCallbacks);
+		dmfEventCallbacks.EvtDmfDeviceModulesAdd = DmfDeviceModulesAdd;
+		DMF_DmfDeviceInitSetEventCallbacks(
+			dmfDeviceInit,
+			&dmfEventCallbacks
+		);
+
+		status = DMF_ModulesCreate(device, &dmfDeviceInit);
+
+		if (!NT_SUCCESS(status))
+		{
+			TraceEvents(
+				TRACE_LEVEL_ERROR,
+				TRACE_DRIVER,
+				"DMF_ModulesCreate failed with status %!STATUS!",
+				status
+			);
+			break;
+		}
+
+	} while (FALSE);
+
+	if (dmfDeviceInit != NULL)
+	{
+		DMF_DmfDeviceInitFree(&dmfDeviceInit);
+	}
+
+	if (!NT_SUCCESS(status) && device != NULL)
+	{
+		WdfObjectDelete(device);
+	}
+
+	FuncExit(TRACE_DRIVER, "status=%!STATUS!", status);
 
 	return status;
 }
+
+#pragma code_seg("PAGED")
+_IRQL_requires_max_(PASSIVE_LEVEL)
+VOID
+DmfDeviceModulesAdd(
+	_In_ WDFDEVICE Device,
+	_In_ PDMFMODULE_INIT DmfModuleInit
+)
+{
+	UNREFERENCED_PARAMETER(Device);
+
+	FuncEntry(TRACE_DRIVER);
+
+	DMF_MODULE_ATTRIBUTES moduleAttributes;
+	DMF_CONFIG_IoctlHandler ioctlHandlerConfig;
+	DMF_CONFIG_IoctlHandler_AND_ATTRIBUTES_INIT(&ioctlHandlerConfig, &moduleAttributes);
+
+	ioctlHandlerConfig.DeviceInterfaceGuid = GUID_DEVINTERFACE_BUSENUM_VIGEM;
+	ioctlHandlerConfig.IoctlRecordCount = ARRAYSIZE(ViGEmBus_IoctlSpecification);
+	ioctlHandlerConfig.IoctlRecords = ViGEmBus_IoctlSpecification;
+	ioctlHandlerConfig.ForwardUnhandledRequests = FALSE;
+
+	DMF_DmfModuleAdd(
+		DmfModuleInit,
+		&moduleAttributes,
+		WDF_NO_OBJECT_ATTRIBUTES,
+		NULL
+	);
+
+	FuncExitNoReturn(TRACE_DRIVER);
+}
+#pragma code_seg()
 
 // Gets called when the user-land process (or kernel driver) exits or closes the handle,
 // and all IO has completed.

@@ -104,6 +104,13 @@ EVT_WDF_OBJECT_CONTEXT_CLEANUP Bus_EvtDriverContextCleanup;
 
 #pragma endregion
 
+_IRQL_requires_max_(PASSIVE_LEVEL)
+VOID
+DmfDeviceModulesAdd(
+    _In_ WDFDEVICE Device,
+    _In_ PDMFMODULE_INIT DmfModuleInit
+    );
+
 #pragma region Bus enumeration-specific functions
 
 NTSTATUS
