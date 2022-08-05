@@ -195,7 +195,7 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 		DMF_DmfDeviceInitHookPowerPolicyEventCallbacks(dmfDeviceInit, NULL);
 
 		WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_BUS_EXTENDER);
-		
+
 #pragma region Prepare child list
 
 		WDF_CHILD_LIST_CONFIG_INIT(&config, sizeof(PDO_IDENTIFICATION_DESCRIPTION), Bus_EvtDeviceListCreatePdo);
@@ -269,6 +269,30 @@ NTSTATUS Bus_EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 
 #pragma endregion
 
+		//
+		// DMF Module initialization
+		//
+		DMF_EVENT_CALLBACKS dmfEventCallbacks;
+		DMF_EVENT_CALLBACKS_INIT(&dmfEventCallbacks);
+		dmfEventCallbacks.EvtDmfDeviceModulesAdd = DmfDeviceModulesAdd;
+		DMF_DmfDeviceInitSetEventCallbacks(
+			dmfDeviceInit,
+			&dmfEventCallbacks
+		);
+
+		status = DMF_ModulesCreate(device, &dmfDeviceInit);
+
+		if (!NT_SUCCESS(status))
+		{
+			TraceEvents(
+				TRACE_LEVEL_ERROR,
+				TRACE_DRIVER,
+				"DMF_ModulesCreate failed with status %!STATUS!",
+				status
+			);
+			break;
+		}
+
 	} while (FALSE);
 
 	if (dmfDeviceInit != NULL)
@@ -298,8 +322,8 @@ DmfDeviceModulesAdd(
 
 	FuncEntry(TRACE_DRIVER);
 
-	DMF_MODULE_ATTRIBUTES moduleAttributes = {0};
-	DMF_CONFIG_IoctlHandler ioctlHandlerConfig = {0};
+	DMF_MODULE_ATTRIBUTES moduleAttributes;
+	DMF_CONFIG_IoctlHandler ioctlHandlerConfig;
 	DMF_CONFIG_IoctlHandler_AND_ATTRIBUTES_INIT(&ioctlHandlerConfig, &moduleAttributes);
 
 	ioctlHandlerConfig.DeviceInterfaceGuid = GUID_DEVINTERFACE_BUSENUM_VIGEM;
