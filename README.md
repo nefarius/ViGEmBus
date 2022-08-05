@@ -13,13 +13,19 @@ Individuals: support continued maintenance and development via [PayPal](https://
 
 ----
 
+## 🚨 FEATURE-FREEZE 🚨
+
+This project will not receive any new features (e.g. additional emulated devices) besides stability improvements and bugfixes [in favour to focus on a successor solution](https://github.com/ViGEm/ViGEmBus/issues/139). More news to come, stay tuned 😁
+
+---
+
 ## About
 
 The `ViGEmBus` driver and `ViGEmClient` libraries represent the core of the Virtual Gamepad Emulation Framework (or `ViGEm` , for short). `ViGEm` aims for a 100% accurate [emulation](<https://en.wikipedia.org/wiki/Emulator>) of well-known gaming peripherals as pure software-based devices at kernel level. As it mimics "the real thing" games and other processes require no additional modification whatsoever to detect `ViGEm`-based devices (no Proxy-DLLs or API-Hooking) and simply work out of the box. While the (now obsolete) [Scarlett.Crush Productions Virtual Bus Driver](<https://github.com/nefarius/ScpVBus>) is the spiritual father of this project, `ViGEm` has been designed and written from the ground up utilizing Microsoft's [Kernel-Mode Driver Framework](https://en.wikipedia.org/wiki/Kernel-Mode_Driver_Framework).
 
 ### Emulated devices
 
-Currently supports emulation of the following USB Gamepads:
+Emulation of the following USB Gamepads is supported:
 
 - [Microsoft Xbox 360 Controller](https://en.wikipedia.org/wiki/Xbox_360_controller)
 - [Sony DualShock 4 Controller](https://en.wikipedia.org/wiki/DualShock#DualShock_4)
@@ -68,11 +74,11 @@ Do bear in mind that you'll need to **sign** the driver to use it without [test 
 
 Found a bug and want it fixed? Open a detailed issue on the [GitHub issue tracker](../../issues)!
 
-Have an idea for a new feature? Let's have a chat about your request on [Discord](https://discord.vigem.org) or the [community forums](https://forums.vigem.org).
+Have an idea for a new feature? Let's have a chat about your request on [Discord](https://discord.vigem.org).
 
 ### Questions & Support
 
-Please respect that the GitHub issue tracker isn't a helpdesk. We offer a [Discord server](https://discord.vigem.org) and [forums](https://forums.vigem.org), where you're welcome to check out and engage in discussions!
+Please respect that the GitHub issue tracker isn't a helpdesk. We offer a [range of support resources](https://vigem.org/Community-Support/) you're welcome to check out!
 
 ## Installation
 
