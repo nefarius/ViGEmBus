@@ -2,11 +2,25 @@
 //
 
 #define WIN32_LEAN_AND_MEAN
+#include <iomanip>
 #include <Windows.h>
 #include <ViGEm/Client.h>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
+#include <thread>
+#include <bitset>
 
 #pragma comment(lib, "setupapi.lib")
+
+static std::string hexStr(unsigned char* data, int len)
+{
+	std::stringstream ss;
+	ss << std::hex;
+	for (int i = 0; i < len; ++i)
+		ss << std::setw(2) << std::setfill('0') << static_cast<int>(data[i]) << ' ';
+	return ss.str();
+}
 
 int main()
 {
@@ -20,7 +34,19 @@ int main()
 
 	DS4_OUTPUT_BUFFER out;
 
-	while (TRUE) {
-		error = vigem_target_ds4_await_output_report(client, ds4, &out);
+	while (TRUE) 
+	{
+		error = vigem_target_ds4_await_output_report(client, ds4, 250, &out);
+		
+		if (VIGEM_SUCCESS(error))
+		{
+			std::cout << hexStr(out.Buffer, sizeof(DS4_OUTPUT_BUFFER)) << std::endl;
+		}
+		else if (error != VIGEM_ERROR_TIMED_OUT)
+		{
+			auto win32 = GetLastError();
+
+			auto t = 0;
+		}
 	}
 }
