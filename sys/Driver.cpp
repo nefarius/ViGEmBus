@@ -570,6 +570,8 @@ void Bus_EvtUserNotifyRequestComplete(
 	_In_ NTSTATUS NtStatus
 )
 {
+	FuncEntry(TRACE_DRIVER);
+
 	UNREFERENCED_PARAMETER(DmfModule);
 
 	auto pOutput = reinterpret_cast<PDS4_AWAIT_OUTPUT>(Context);
@@ -590,6 +592,8 @@ void Bus_EvtUserNotifyRequestComplete(
 	}
 
 	WdfRequestComplete(Request, NtStatus);
+
+	FuncExit(TRACE_DRIVER, "status=%!STATUS!", NtStatus);
 }
 
 void Util_DumpAsHex(PCSTR Prefix, PVOID Buffer, ULONG BufferLength)
