@@ -486,4 +486,54 @@ exit:
 	return status;
 }
 
+NTSTATUS
+Bus_Ds4AwaitOutputHandler(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFQUEUE Queue,
+	_In_ WDFREQUEST Request,
+	_In_ ULONG IoctlCode,
+	_In_reads_(InputBufferSize) VOID* InputBuffer,
+	_In_ size_t InputBufferSize,
+	_Out_writes_(OutputBufferSize) VOID* OutputBuffer,
+	_In_ size_t OutputBufferSize,
+	_Out_ size_t* BytesReturned
+)
+{
+	UNREFERENCED_PARAMETER(DmfModule);
+	UNREFERENCED_PARAMETER(Request);
+	UNREFERENCED_PARAMETER(IoctlCode);
+	UNREFERENCED_PARAMETER(OutputBufferSize);
+	UNREFERENCED_PARAMETER(InputBufferSize);
+	UNREFERENCED_PARAMETER(OutputBuffer);
+	UNREFERENCED_PARAMETER(BytesReturned);
+
+	FuncEntry(TRACE_QUEUE);
+
+	NTSTATUS status;
+	EmulationTargetPDO* pdo;
+	PDS4_AWAIT_OUTPUT pDs4AwaitOut = (PDS4_AWAIT_OUTPUT)InputBuffer;
+
+	// This request only supports a single PDO at a time
+	if (pDs4AwaitOut->SerialNo == 0)
+	{
+		status = STATUS_INVALID_PARAMETER;
+		goto exit;
+	}
+
+	if (!EmulationTargetPDO::GetPdoByTypeAndSerial(WdfIoQueueGetDevice(Queue), DualShock4Wired, pDs4AwaitOut->SerialNo, &pdo))
+	{
+		status = STATUS_DEVICE_DOES_NOT_EXIST;
+		goto exit;
+	}
+
+	status = static_cast<EmulationTargetDS4*>(pdo)->OutputReportRequestProcess(Request);
+
+	status = NT_SUCCESS(status) ? STATUS_PENDING : status;
+
+exit:
+	FuncExit(TRACE_QUEUE, "status=%!STATUS!", status);
+
+	return status;
+}
+
 EXTERN_C_END

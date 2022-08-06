@@ -144,7 +144,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareDevice(PWDFDEVICE_IN
 			status);
 		return status;
 	}
-
+	
 	return STATUS_SUCCESS;
 }
 
@@ -192,162 +192,160 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 	// PDO is parent
 	timerAttribs.ParentObject = this->_PdoDevice;
 
-	// Create timer
-	status = WdfTimerCreate(
-		&timerConfig,
-		&timerAttribs,
-		&this->_PendingUsbInRequestsTimer
-	);
-	if (!NT_SUCCESS(status))
+	do
 	{
-		TraceError(
-			TRACE_DS4,
-			"WdfTimerCreate failed with status %!STATUS!",
-			status);
-		return status;
-	}
-
-	// Load/generate MAC address
-
-	// 
-	// TODO: tidy up this region
-	// 
-
-	WDFKEY keyParams, keyTargets, keyDS, keySerial;
-	UNICODE_STRING keyName, valueName;
-
-	status = WdfDriverOpenParametersRegistryKey(
-		WdfGetDriver(),
-		STANDARD_RIGHTS_ALL,
-		WDF_NO_OBJECT_ATTRIBUTES,
-		&keyParams
-	);
-	if (!NT_SUCCESS(status))
-	{
-		TraceError(
-			TRACE_DS4,
-			"WdfDriverOpenParametersRegistryKey failed with status %!STATUS!",
-			status);
-		return status;
-	}
-
-	RtlUnicodeStringInit(&keyName, L"Targets");
-
-	status = WdfRegistryCreateKey(
-		keyParams,
-		&keyName,
-		KEY_ALL_ACCESS,
-		REG_OPTION_NON_VOLATILE,
-		nullptr,
-		WDF_NO_OBJECT_ATTRIBUTES,
-		&keyTargets
-	);
-	if (!NT_SUCCESS(status))
-	{
-		TraceError(
-			TRACE_DS4,
-			"WdfRegistryCreateKey failed with status %!STATUS!",
-			status);
-		return status;
-	}
-
-	RtlUnicodeStringInit(&keyName, L"DualShock");
-
-	status = WdfRegistryCreateKey(
-		keyTargets,
-		&keyName,
-		KEY_ALL_ACCESS,
-		REG_OPTION_NON_VOLATILE,
-		nullptr,
-		WDF_NO_OBJECT_ATTRIBUTES,
-		&keyDS
-	);
-	if (!NT_SUCCESS(status))
-	{
-		TraceError(
-			TRACE_DS4,
-			"WdfRegistryCreateKey failed with status %!STATUS!",
-			status);
-		return status;
-	}
-
-	DECLARE_UNICODE_STRING_SIZE(serialPath, 4);
-	RtlUnicodeStringPrintf(&serialPath, L"%04d", this->_SerialNo);
-
-	status = WdfRegistryCreateKey(
-		keyDS,
-		&serialPath,
-		KEY_ALL_ACCESS,
-		REG_OPTION_NON_VOLATILE,
-		nullptr,
-		WDF_NO_OBJECT_ATTRIBUTES,
-		&keySerial
-	);
-	if (!NT_SUCCESS(status))
-	{
-		TraceError(
-			TRACE_DS4,
-			"WdfRegistryCreateKey failed with status %!STATUS!",
-			status);
-		return status;
-	}
-
-	RtlUnicodeStringInit(&valueName, L"TargetMacAddress");
-
-	status = WdfRegistryQueryValue(
-		keySerial,
-		&valueName,
-		sizeof(MAC_ADDRESS),
-		&this->_TargetMacAddress,
-		nullptr,
-		nullptr
-	);
-
-	TraceEvents(TRACE_LEVEL_INFORMATION,
-		TRACE_DS4,
-		"MAC-Address: %02X:%02X:%02X:%02X:%02X:%02X\n",
-		this->_TargetMacAddress.Vendor0,
-		this->_TargetMacAddress.Vendor1,
-		this->_TargetMacAddress.Vendor2,
-		this->_TargetMacAddress.Nic0,
-		this->_TargetMacAddress.Nic1,
-		this->_TargetMacAddress.Nic2);
-
-	if (status == STATUS_OBJECT_NAME_NOT_FOUND)
-	{
-		GenerateRandomMacAddress(&this->_TargetMacAddress);
-
-		status = WdfRegistryAssignValue(
-			keySerial,
-			&valueName,
-			REG_BINARY,
-			sizeof(MAC_ADDRESS),
-			static_cast<PVOID>(&this->_TargetMacAddress)
-		);
-		if (!NT_SUCCESS(status))
+		// Create timer
+		if (!NT_SUCCESS(status = WdfTimerCreate(
+			&timerConfig,
+			&timerAttribs,
+			&this->_PendingUsbInRequestsTimer
+		)))
 		{
 			TraceError(
 				TRACE_DS4,
-				"WdfRegistryAssignValue failed with status %!STATUS!",
+				"WdfTimerCreate failed with status %!STATUS!",
 				status);
-			return status;
+			break;
 		}
-	}
-	else if (!NT_SUCCESS(status))
-	{
-		TraceError(
+
+		// Load/generate MAC address
+
+		// 
+		// TODO: tidy up this region
+		// 
+
+		WDFKEY keyParams, keyTargets, keyDS, keySerial;
+		UNICODE_STRING keyName, valueName;
+
+		if (!NT_SUCCESS(status = WdfDriverOpenParametersRegistryKey(
+			WdfGetDriver(),
+			STANDARD_RIGHTS_ALL,
+			WDF_NO_OBJECT_ATTRIBUTES,
+			&keyParams
+		)))
+		{
+			TraceError(
+				TRACE_DS4,
+				"WdfDriverOpenParametersRegistryKey failed with status %!STATUS!",
+				status);
+			break;
+		}
+
+		RtlUnicodeStringInit(&keyName, L"Targets");
+
+		if (!NT_SUCCESS(status = WdfRegistryCreateKey(
+			keyParams,
+			&keyName,
+			KEY_ALL_ACCESS,
+			REG_OPTION_NON_VOLATILE,
+			nullptr,
+			WDF_NO_OBJECT_ATTRIBUTES,
+			&keyTargets
+		)))
+		{
+			TraceError(
+				TRACE_DS4,
+				"WdfRegistryCreateKey failed with status %!STATUS!",
+				status);
+			break;
+		}
+
+		RtlUnicodeStringInit(&keyName, L"DualShock");
+
+		if (!NT_SUCCESS(status = WdfRegistryCreateKey(
+			keyTargets,
+			&keyName,
+			KEY_ALL_ACCESS,
+			REG_OPTION_NON_VOLATILE,
+			nullptr,
+			WDF_NO_OBJECT_ATTRIBUTES,
+			&keyDS
+		)))
+		{
+			TraceError(
+				TRACE_DS4,
+				"WdfRegistryCreateKey failed with status %!STATUS!",
+				status);
+			break;
+		}
+
+		DECLARE_UNICODE_STRING_SIZE(serialPath, 4);
+		RtlUnicodeStringPrintf(&serialPath, L"%04d", this->_SerialNo);
+
+		if (!NT_SUCCESS(status = WdfRegistryCreateKey(
+			keyDS,
+			&serialPath,
+			KEY_ALL_ACCESS,
+			REG_OPTION_NON_VOLATILE,
+			nullptr,
+			WDF_NO_OBJECT_ATTRIBUTES,
+			&keySerial
+		)))
+		{
+			TraceError(
+				TRACE_DS4,
+				"WdfRegistryCreateKey failed with status %!STATUS!",
+				status);
+			break;
+		}
+
+		RtlUnicodeStringInit(&valueName, L"TargetMacAddress");
+
+		status = WdfRegistryQueryValue(
+			keySerial,
+			&valueName,
+			sizeof(MAC_ADDRESS),
+			&this->_TargetMacAddress,
+			nullptr,
+			nullptr
+		);
+
+		TraceEvents(TRACE_LEVEL_INFORMATION,
 			TRACE_DS4,
-			"WdfRegistryQueryValue failed with status %!STATUS!",
-			status);
-		return status;
-	}
+			"MAC-Address: %02X:%02X:%02X:%02X:%02X:%02X\n",
+			this->_TargetMacAddress.Vendor0,
+			this->_TargetMacAddress.Vendor1,
+			this->_TargetMacAddress.Vendor2,
+			this->_TargetMacAddress.Nic0,
+			this->_TargetMacAddress.Nic1,
+			this->_TargetMacAddress.Nic2);
 
-	WdfRegistryClose(keySerial);
-	WdfRegistryClose(keyDS);
-	WdfRegistryClose(keyTargets);
-	WdfRegistryClose(keyParams);
+		if (status == STATUS_OBJECT_NAME_NOT_FOUND)
+		{
+			GenerateRandomMacAddress(&this->_TargetMacAddress);
 
-	return STATUS_SUCCESS;
+			if (!NT_SUCCESS(status = WdfRegistryAssignValue(
+				keySerial,
+				&valueName,
+				REG_BINARY,
+				sizeof(MAC_ADDRESS),
+				static_cast<PVOID>(&this->_TargetMacAddress)
+			)))
+			{
+				TraceError(
+					TRACE_DS4,
+					"WdfRegistryAssignValue failed with status %!STATUS!",
+					status);
+				break;
+			}
+		}
+		else if (!NT_SUCCESS(status))
+		{
+			TraceError(
+				TRACE_DS4,
+				"WdfRegistryQueryValue failed with status %!STATUS!",
+				status);
+			break;
+		}
+
+		WdfRegistryClose(keySerial);
+		WdfRegistryClose(keyDS);
+		WdfRegistryClose(keyTargets);
+		WdfRegistryClose(keyParams);
+		
+	} while (FALSE);
+	
+	return status;
 }
 
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length)
@@ -999,8 +997,8 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbGetStringDescriptorType(PUR
 
 NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request)
 {
-	NTSTATUS     status = STATUS_SUCCESS;
-	WDFREQUEST   notifyRequest;
+	NTSTATUS status = STATUS_SUCCESS;
+	WDFREQUEST notifyRequest;
 
 	// Data coming FROM us TO higher driver
 	if (pTransfer->TransferFlags & USBD_TRANSFER_DIRECTION_IN
@@ -1022,6 +1020,20 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 	RtlCopyBytes(&this->_OutputReport,
 		static_cast<PUCHAR>(pTransfer->TransferBuffer) + DS4_OUTPUT_BUFFER_OFFSET,
 		DS4_OUTPUT_BUFFER_LENGTH);
+
+	if (!NT_SUCCESS(status = DMF_NotifyUserWithRequestMultiple_DataBroadcast(
+		this->_OutputReportNotify,
+		pTransfer->TransferBuffer,
+		sizeof(DS4_AWAIT_OUTPUT_BUFFER),
+		STATUS_SUCCESS
+	)))
+	{
+		TraceError(
+			TRACE_USBPDO,
+			"DMF_NotifyUserWithRequestMultiple_DataBroadcast failed with status %!STATUS!",
+			status
+		);
+	}
 
 	if (NT_SUCCESS(WdfIoQueueRetrieveNextRequest(
 		this->_PendingNotificationRequests,
@@ -1327,4 +1339,65 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
 	}
 
 	TraceVerbose(TRACE_DS4, "%!FUNC! Exit with status %!STATUS!", status);
+}
+
+VOID ViGEm::Bus::Targets::EmulationTargetDS4::EvtUserNotifyRequestComplete(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFREQUEST Request,
+	_In_opt_ ULONG_PTR Context,
+	_In_ NTSTATUS NtStatus
+)
+{
+	UNREFERENCED_PARAMETER(DmfModule);
+
+	FuncEntry(TRACE_DS4);
+
+	PDS4_AWAIT_OUTPUT pNotify = NULL;
+	size_t bufLen = 0;
+
+	const PUCHAR pBuffer = reinterpret_cast<PUCHAR>(Context);
+
+	if (NT_SUCCESS(WdfRequestRetrieveOutputBuffer(
+		Request,
+		sizeof(DS4_AWAIT_OUTPUT),
+		reinterpret_cast<PVOID*>(&pNotify),
+		&bufLen
+	)))
+	{
+		RtlCopyMemory(pNotify->Report.Buffer, pBuffer, sizeof(DS4_AWAIT_OUTPUT_BUFFER));
+		WdfRequestSetInformation(Request, sizeof(DS4_AWAIT_OUTPUT));
+	}
+
+	WdfRequestComplete(Request, NtStatus);
+
+	FuncExitNoReturn(TRACE_DS4);
+}
+
+NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::OutputReportRequestProcess(WDFREQUEST Request) const
+{
+	return DMF_NotifyUserWithRequestMultiple_RequestProcess(
+		this->_OutputReportNotify,
+		Request
+	);
+}
+
+VOID ViGEm::Bus::Targets::EmulationTargetDS4::DmfDeviceModulesAdd(_In_ PDMFMODULE_INIT DmfModuleInit)
+{
+	DMF_CONFIG_NotifyUserWithRequestMultiple notifyConfig;
+	DMF_MODULE_ATTRIBUTES moduleAttributes;
+
+	DMF_CONFIG_NotifyUserWithRequestMultiple_AND_ATTRIBUTES_INIT(&notifyConfig, &moduleAttributes);
+
+	notifyConfig.MaximumNumberOfPendingRequests = 64 * 2;
+	notifyConfig.SizeOfDataBuffer = sizeof(DS4_AWAIT_OUTPUT_BUFFER);
+	notifyConfig.MaximumNumberOfPendingDataBuffers = 64;
+	notifyConfig.ModeType.Modes.ReplayLastMessageToNewClients = TRUE;
+	notifyConfig.CompletionCallback = EvtUserNotifyRequestComplete;
+
+	DMF_DmfModuleAdd(
+		DmfModuleInit,
+		&moduleAttributes,
+		WDF_NO_OBJECT_ATTRIBUTES,
+		&this->_OutputReportNotify
+	);
 }

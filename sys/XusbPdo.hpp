@@ -99,6 +99,7 @@ namespace ViGEm::Bus::Targets
 
 	protected:
 		void ProcessPendingNotification(WDFQUEUE Queue) override;
+		void DmfDeviceModulesAdd(_In_ PDMFMODULE_INIT DmfModuleInit) override;
 	private:
 		static PCWSTR _deviceDescription;
 

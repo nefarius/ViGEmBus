@@ -1138,3 +1138,8 @@ void ViGEm::Bus::Targets::EmulationTargetXUSB::ProcessPendingNotification(WDFQUE
 
 	TraceVerbose(TRACE_BUSENUM, "%!FUNC! Exit");
 }
+
+VOID ViGEm::Bus::Targets::EmulationTargetXUSB::DmfDeviceModulesAdd(_In_ PDMFMODULE_INIT DmfModuleInit)
+{
+	UNREFERENCED_PARAMETER(DmfModuleInit);
+}
