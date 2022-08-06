@@ -584,10 +584,48 @@ void Bus_EvtUserNotifyRequestComplete(
 	{
 		RtlCopyMemory(pNotify, pOutput, sizeof(DS4_AWAIT_OUTPUT));
 
+		Util_DumpAsHex("NOTIFY_COMPLETE", pNotify, sizeof(DS4_AWAIT_OUTPUT));
+
 		WdfRequestSetInformation(Request, sizeof(DS4_AWAIT_OUTPUT));
 	}
 
 	WdfRequestComplete(Request, NtStatus);
+}
+
+void Util_DumpAsHex(PCSTR Prefix, PVOID Buffer, ULONG BufferLength)
+{
+#ifdef DBG
+
+	size_t dumpBufferLength = ((BufferLength * sizeof(CHAR)) * 2) + 1;
+	PSTR dumpBuffer = static_cast<PSTR>(ExAllocatePoolZero(
+		NonPagedPoolNx,
+		dumpBufferLength,
+		'1234'
+	));
+	if (dumpBuffer)
+	{
+
+		RtlZeroMemory(dumpBuffer, dumpBufferLength);
+
+		for (ULONG i = 0; i < BufferLength; i++)
+		{
+			sprintf(&dumpBuffer[i * 2], "%02X", static_cast<PUCHAR>(Buffer)[i]);
+		}
+
+		TraceVerbose(TRACE_BUSPDO,
+			"%s - Buffer length: %04d, buffer content: %s\n",
+			Prefix,
+			BufferLength,
+			dumpBuffer
+		);
+
+		ExFreePoolWithTag(dumpBuffer, '1234');
+	}
+#else
+	UNREFERENCED_PARAMETER(Prefix);
+	UNREFERENCED_PARAMETER(Buffer);
+	UNREFERENCED_PARAMETER(BufferLength);
+#endif
 }
 
 EXTERN_C_END

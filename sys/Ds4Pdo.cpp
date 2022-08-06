@@ -1032,6 +1032,11 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 		: sizeof(DS4_OUTPUT_BUFFER)
 	);
 
+	DumpAsHex("!! XUSB_REQUEST_NOTIFICATION",
+		&this->_AwaitOutputCache,
+		sizeof(DS4_AWAIT_OUTPUT)
+	);
+
 	if (!NT_SUCCESS(status = DMF_NotifyUserWithRequestMultiple_DataBroadcast(
 		this->_OutputReportNotify,
 		&this->_AwaitOutputCache,

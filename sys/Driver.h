@@ -124,6 +124,8 @@ void Bus_EvtUserNotifyRequestComplete(
 	_In_ NTSTATUS NtStatus
 );
 
+void Util_DumpAsHex(PCSTR Prefix, PVOID Buffer, ULONG BufferLength);
+
 #pragma region Bus enumeration-specific functions
 
 NTSTATUS
