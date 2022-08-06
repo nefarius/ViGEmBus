@@ -65,6 +65,11 @@ typedef struct _FDO_DEVICE_DATA
     // 
     LONG NextSessionId;
 
+    //
+    // Notification DMF module
+    // 
+    DMFMODULE UserNotification;
+
 } FDO_DEVICE_DATA, * PFDO_DEVICE_DATA;
 
 #define FDO_FIRST_SESSION_ID 100
@@ -77,7 +82,8 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(FDO_DEVICE_DATA, FdoGetData)
 typedef struct _FDO_FILE_DATA
 {
     //
-    // SessionId associated with file handle.  Used to map file handles to emulated gamepad devices
+    // SessionId associated with file handle.  
+    // Used to map file handles to emulated gamepad devices.
     // 
     LONG SessionId;
 
@@ -110,6 +116,13 @@ DmfDeviceModulesAdd(
     _In_ WDFDEVICE Device,
     _In_ PDMFMODULE_INIT DmfModuleInit
     );
+
+void Bus_EvtUserNotifyRequestComplete(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFREQUEST Request,
+	_In_opt_ ULONG_PTR Context,
+	_In_ NTSTATUS NtStatus
+);
 
 #pragma region Bus enumeration-specific functions
 

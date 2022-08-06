@@ -99,7 +99,7 @@ namespace ViGEm::Bus::Targets
 
 		NTSTATUS SubmitReportImpl(PVOID NewReport) override;
 
-		NTSTATUS OutputReportRequestProcess(WDFREQUEST Request) const;
+		VOID SetOutputReportNotifyModule(DMFMODULE Module);
 
 	private:
 		static EVT_WDF_TIMER PendingUsbRequestsTimerFunc;
@@ -108,8 +108,6 @@ namespace ViGEm::Bus::Targets
 
 		static VOID GenerateRandomMacAddress(PMAC_ADDRESS Address);
 
-		static EVT_DMF_NotifyUserWithRequest_Complete EvtUserNotifyRequestComplete;
-		
 	protected:
 		void ProcessPendingNotification(WDFQUEUE Queue) override;
 
@@ -171,5 +169,10 @@ namespace ViGEm::Bus::Targets
 		// User-mode notification on new output report
 		// 
 		DMFMODULE _OutputReportNotify;
+
+		//
+		// Memory for full output report request
+		// 
+		DS4_AWAIT_OUTPUT _AwaitOutputCache;
 	};
 }

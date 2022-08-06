@@ -189,6 +189,11 @@ EXTERN_C NTSTATUS Bus_PlugInDevice(
 		goto pluginEnd;
 	}
 
+	if (plugIn->TargetType == DualShock4Wired)
+	{
+		static_cast<EmulationTargetDS4*>(description.Target)->SetOutputReportNotifyModule(FdoGetData(Device)->UserNotification);
+	}
+
 	status = WdfChildListAddOrUpdateChildDescriptionAsPresent(
 		WdfFdoGetDefaultChildList(Device),
 		&description.Header,

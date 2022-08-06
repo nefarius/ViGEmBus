@@ -144,7 +144,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoPrepareDevice(PWDFDEVICE_IN
 			status);
 		return status;
 	}
-	
+
 	return STATUS_SUCCESS;
 }
 
@@ -342,9 +342,9 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::PdoInitContext()
 		WdfRegistryClose(keyDS);
 		WdfRegistryClose(keyTargets);
 		WdfRegistryClose(keyParams);
-		
+
 	} while (FALSE);
-	
+
 	return status;
 }
 
@@ -1021,10 +1021,21 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 		static_cast<PUCHAR>(pTransfer->TransferBuffer) + DS4_OUTPUT_BUFFER_OFFSET,
 		DS4_OUTPUT_BUFFER_LENGTH);
 
+
+	this->_AwaitOutputCache.Size = sizeof(DS4_AWAIT_OUTPUT);
+	this->_AwaitOutputCache.SerialNo = this->_SerialNo;
+	RtlCopyMemory(
+		this->_AwaitOutputCache.Report.Buffer,
+		pTransfer->TransferBuffer,
+		pTransfer->TransferBufferLength <= sizeof(DS4_OUTPUT_BUFFER)
+		? pTransfer->TransferBufferLength
+		: sizeof(DS4_OUTPUT_BUFFER)
+	);
+
 	if (!NT_SUCCESS(status = DMF_NotifyUserWithRequestMultiple_DataBroadcast(
 		this->_OutputReportNotify,
-		pTransfer->TransferBuffer,
-		sizeof(DS4_AWAIT_OUTPUT_BUFFER),
+		&this->_AwaitOutputCache,
+		sizeof(DS4_AWAIT_OUTPUT),
 		STATUS_SUCCESS
 	)))
 	{
@@ -1034,6 +1045,7 @@ NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::UsbBulkOrInterruptTransfer(_UR
 			status
 		);
 	}
+
 
 	if (NT_SUCCESS(WdfIoQueueRetrieveNextRequest(
 		this->_PendingNotificationRequests,
@@ -1341,63 +1353,12 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::PendingUsbRequestsTimerFunc(
 	TraceVerbose(TRACE_DS4, "%!FUNC! Exit with status %!STATUS!", status);
 }
 
-VOID ViGEm::Bus::Targets::EmulationTargetDS4::EvtUserNotifyRequestComplete(
-	_In_ DMFMODULE DmfModule,
-	_In_ WDFREQUEST Request,
-	_In_opt_ ULONG_PTR Context,
-	_In_ NTSTATUS NtStatus
-)
-{
-	UNREFERENCED_PARAMETER(DmfModule);
-
-	FuncEntry(TRACE_DS4);
-
-	PDS4_AWAIT_OUTPUT pNotify = NULL;
-	size_t bufLen = 0;
-
-	const auto pBuffer = reinterpret_cast<PUCHAR>(Context);
-
-	if (NT_SUCCESS(WdfRequestRetrieveOutputBuffer(
-		Request,
-		sizeof(DS4_AWAIT_OUTPUT),
-		reinterpret_cast<PVOID*>(&pNotify),
-		&bufLen
-	)))
-	{
-		RtlCopyMemory(pNotify->Report.Buffer, pBuffer, sizeof(DS4_AWAIT_OUTPUT_BUFFER));
-		WdfRequestSetInformation(Request, sizeof(DS4_AWAIT_OUTPUT));
-	}
-
-	WdfRequestComplete(Request, NtStatus);
-
-	FuncExitNoReturn(TRACE_DS4);
-}
-
-NTSTATUS ViGEm::Bus::Targets::EmulationTargetDS4::OutputReportRequestProcess(WDFREQUEST Request) const
-{
-	return DMF_NotifyUserWithRequestMultiple_RequestProcess(
-		this->_OutputReportNotify,
-		Request
-	);
-}
-
 VOID ViGEm::Bus::Targets::EmulationTargetDS4::DmfDeviceModulesAdd(_In_ PDMFMODULE_INIT DmfModuleInit)
 {
-	DMF_CONFIG_NotifyUserWithRequestMultiple notifyConfig;
-	DMF_MODULE_ATTRIBUTES moduleAttributes;
+	UNREFERENCED_PARAMETER(DmfModuleInit);
+}
 
-	DMF_CONFIG_NotifyUserWithRequestMultiple_AND_ATTRIBUTES_INIT(&notifyConfig, &moduleAttributes);
-
-	notifyConfig.MaximumNumberOfPendingRequests = 64 * 2;
-	notifyConfig.SizeOfDataBuffer = sizeof(DS4_AWAIT_OUTPUT_BUFFER);
-	notifyConfig.MaximumNumberOfPendingDataBuffers = 64;
-	notifyConfig.ModeType.Modes.ReplayLastMessageToNewClients = TRUE;
-	notifyConfig.CompletionCallback = EvtUserNotifyRequestComplete;
-
-	DMF_DmfModuleAdd(
-		DmfModuleInit,
-		&moduleAttributes,
-		WDF_NO_OBJECT_ATTRIBUTES,
-		&this->_OutputReportNotify
-	);
+VOID ViGEm::Bus::Targets::EmulationTargetDS4::SetOutputReportNotifyModule(DMFMODULE Module)
+{
+	this->_OutputReportNotify = Module;
 }

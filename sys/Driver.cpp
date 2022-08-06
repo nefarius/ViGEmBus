@@ -70,7 +70,7 @@ IoctlHandler_IoctlRecord ViGEmBus_IoctlSpecification[] =
 	{IOCTL_DS4_SUBMIT_REPORT, sizeof(DS4_SUBMIT_REPORT), 0, Bus_Ds4SubmitReportHandler},
 	{IOCTL_DS4_REQUEST_NOTIFICATION, sizeof(DS4_REQUEST_NOTIFICATION), sizeof(DS4_REQUEST_NOTIFICATION), Bus_Ds4RequestNotificationHandler},
 	{IOCTL_XUSB_GET_USER_INDEX, sizeof(XUSB_GET_USER_INDEX), sizeof(XUSB_GET_USER_INDEX), Bus_XusbGetUserIndexHandler},
-	{IOCTL_DS4_AWAIT_OUTPUT, sizeof(DS4_AWAIT_OUTPUT), sizeof(DS4_AWAIT_OUTPUT), Bus_Ds4AwaitOutputHandler},
+	{IOCTL_DS4_AWAIT_OUTPUT_AVAILABLE, sizeof(DS4_AWAIT_OUTPUT), sizeof(DS4_AWAIT_OUTPUT), Bus_Ds4AwaitOutputHandler},
 };
 
 //
@@ -319,9 +319,9 @@ DmfDeviceModulesAdd(
 	_In_ PDMFMODULE_INIT DmfModuleInit
 )
 {
-	UNREFERENCED_PARAMETER(Device);
-
 	FuncEntry(TRACE_DRIVER);
+
+	PFDO_DEVICE_DATA pDevCtx = FdoGetData(Device);
 
 	DMF_MODULE_ATTRIBUTES moduleAttributes;
 	DMF_CONFIG_IoctlHandler ioctlHandlerConfig;
@@ -337,6 +337,22 @@ DmfDeviceModulesAdd(
 		&moduleAttributes,
 		WDF_NO_OBJECT_ATTRIBUTES,
 		NULL
+	);
+
+	DMF_CONFIG_NotifyUserWithRequestMultiple notifyConfig;
+	DMF_CONFIG_NotifyUserWithRequestMultiple_AND_ATTRIBUTES_INIT(&notifyConfig, &moduleAttributes);
+
+	notifyConfig.MaximumNumberOfPendingRequests = 64 * 2;
+	notifyConfig.SizeOfDataBuffer = sizeof(DS4_AWAIT_OUTPUT);
+	notifyConfig.MaximumNumberOfPendingDataBuffers = 64;
+	notifyConfig.ModeType.Modes.ReplayLastMessageToNewClients = FALSE;
+	notifyConfig.CompletionCallback = Bus_EvtUserNotifyRequestComplete;
+
+	DMF_DmfModuleAdd(
+		DmfModuleInit,
+		&moduleAttributes,
+		WDF_NO_OBJECT_ATTRIBUTES,
+		&pDevCtx->UserNotification
 	);
 
 	FuncExitNoReturn(TRACE_DRIVER);
@@ -545,6 +561,33 @@ Return Value:
 	//
 	WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
 
+}
+
+void Bus_EvtUserNotifyRequestComplete(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFREQUEST Request,
+	_In_opt_ ULONG_PTR Context,
+	_In_ NTSTATUS NtStatus
+)
+{
+	UNREFERENCED_PARAMETER(DmfModule);
+
+	auto pOutput = reinterpret_cast<PDS4_AWAIT_OUTPUT>(Context);
+	PDS4_AWAIT_OUTPUT pNotify = NULL;
+	size_t length = 0;
+
+	if (NT_SUCCESS(WdfRequestRetrieveOutputBuffer(
+		Request,
+		sizeof(DS4_AWAIT_OUTPUT),
+		reinterpret_cast<PVOID*>(&pNotify),
+		&length)))
+	{
+		RtlCopyMemory(pNotify, pOutput, sizeof(DS4_AWAIT_OUTPUT));
+
+		WdfRequestSetInformation(Request, sizeof(DS4_AWAIT_OUTPUT));
+	}
+
+	WdfRequestComplete(Request, NtStatus);
 }
 
 EXTERN_C_END
