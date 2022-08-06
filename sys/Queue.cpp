@@ -3,7 +3,7 @@
 *
 * BSD 3-Clause License
 *
-* Copyright (c) 2018-2020, Nefarius Software Solutions e.U. and Contributors
+* Copyright (c) 2018-2022, Nefarius Software Solutions e.U. and Contributors
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
