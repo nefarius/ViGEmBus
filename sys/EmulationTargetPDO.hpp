@@ -270,11 +270,6 @@ namespace ViGEm::Bus::Core
 		// Queue for interrupt out requests delivered to user-land
 		// 
 		DMFMODULE _UsbInterruptOutBufferQueue{};
-
-		//
-		// DMF event callbacks
-		// 
-		DMF_EVENT_CALLBACKS _DmfEventCallbacks;
 	};
 
 	typedef struct _PDO_IDENTIFICATION_DESCRIPTION
