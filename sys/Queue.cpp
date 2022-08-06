@@ -503,22 +503,15 @@ Bus_Ds4AwaitOutputHandler(
 	UNREFERENCED_PARAMETER(IoctlCode);
 	UNREFERENCED_PARAMETER(OutputBufferSize);
 	UNREFERENCED_PARAMETER(InputBufferSize);
+	UNREFERENCED_PARAMETER(InputBuffer);
 	UNREFERENCED_PARAMETER(OutputBuffer);
 	UNREFERENCED_PARAMETER(BytesReturned);
 
 	FuncEntry(TRACE_QUEUE);
 
 	NTSTATUS status;
-	PDS4_AWAIT_OUTPUT pDs4AwaitOut = (PDS4_AWAIT_OUTPUT)InputBuffer;
 	PFDO_DEVICE_DATA pDevCtx = FdoGetData(DMF_ParentDeviceGet(DmfModule));
-
-	// This request only supports a single PDO at a time
-	if (pDs4AwaitOut->SerialNo == 0)
-	{
-		status = STATUS_INVALID_PARAMETER;
-		goto exit;
-	}
-
+	
 	if (!NT_SUCCESS(status = DMF_NotifyUserWithRequestMultiple_RequestProcess(
 		pDevCtx->UserNotification,
 		Request
