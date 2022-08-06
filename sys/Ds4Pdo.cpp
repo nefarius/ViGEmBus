@@ -1355,7 +1355,7 @@ VOID ViGEm::Bus::Targets::EmulationTargetDS4::EvtUserNotifyRequestComplete(
 	PDS4_AWAIT_OUTPUT pNotify = NULL;
 	size_t bufLen = 0;
 
-	const PUCHAR pBuffer = reinterpret_cast<PUCHAR>(Context);
+	const auto pBuffer = reinterpret_cast<PUCHAR>(Context);
 
 	if (NT_SUCCESS(WdfRequestRetrieveOutputBuffer(
 		Request,
