@@ -29,7 +29,6 @@ SOFTWARE.
 #include <Windows.h>
 #include <SetupAPI.h>
 #include <initguid.h>
-#include <Dbghelp.h>
 
 //
 // Driver shared
@@ -53,26 +52,6 @@ SOFTWARE.
 // 
 #include "Internal.h"
 
-//
-// Uncomment to compile in crash dump handler
-// 
-//#define VIGEM_USE_CRASH_HANDLER
-
-
-#ifdef VIGEM_USE_CRASH_HANDLER
-typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(
-    HANDLE hProcess,
-    DWORD dwPid,
-    HANDLE hFile,
-    MINIDUMP_TYPE DumpType,
-    CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
-    CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
-    CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam
-    );
-
-LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExceptionInfo);
-#endif
-
 
 //
 // Initializes a virtual gamepad object.
@@ -94,57 +73,8 @@ PVIGEM_TARGET FORCEINLINE VIGEM_TARGET_ALLOC_INIT(
     return target;
 }
 
-#ifdef VIGEM_USE_CRASH_HANDLER
-LONG WINAPI vigem_internal_exception_handler(struct _EXCEPTION_POINTERS* apExceptionInfo)
-{
-    const auto mhLib = LoadLibrary(L"dbghelp.dll");
-    const auto pDump = reinterpret_cast<MINIDUMPWRITEDUMP>(GetProcAddress(mhLib, "MiniDumpWriteDump"));
-
-    const auto hFile = CreateFile(
-        L"ViGEmClient.dmp",
-        GENERIC_WRITE,
-        FILE_SHARE_WRITE,
-        nullptr,
-        CREATE_ALWAYS,
-        FILE_ATTRIBUTE_NORMAL,
-        nullptr
-    );
-
-	const DWORD flags = MiniDumpWithFullMemory | MiniDumpWithHandleData | MiniDumpWithUnloadedModules |
-		MiniDumpWithUnloadedModules | MiniDumpWithProcessThreadData |
-		MiniDumpWithFullMemoryInfo | MiniDumpWithThreadInfo |
-		MiniDumpWithFullAuxiliaryState | MiniDumpIgnoreInaccessibleMemory |
-		MiniDumpWithTokenInformation;
-
-    if (hFile != INVALID_HANDLE_VALUE)
-    {
-        _MINIDUMP_EXCEPTION_INFORMATION ExInfo;
-        ExInfo.ThreadId = GetCurrentThreadId();
-        ExInfo.ExceptionPointers = apExceptionInfo;
-        ExInfo.ClientPointers = FALSE;
-
-        pDump(
-			GetCurrentProcess(), 
-			GetCurrentProcessId(), 
-			hFile, 
-			(MINIDUMP_TYPE)flags,
-			&ExInfo, 
-			nullptr, 
-			nullptr
-		);
-        CloseHandle(hFile);
-    }
-
-    return EXCEPTION_CONTINUE_SEARCH;
-}
-#endif
-
 PVIGEM_CLIENT vigem_alloc()
 {
-#ifdef VIGEM_USE_CRASH_HANDLER
-    SetUnhandledExceptionFilter(vigem_internal_exception_handler);
-#endif
-
     const auto driver = static_cast<PVIGEM_CLIENT>(malloc(sizeof(VIGEM_CLIENT)));
 
     if (!driver)
