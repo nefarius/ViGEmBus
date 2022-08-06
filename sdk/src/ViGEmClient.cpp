@@ -500,15 +500,15 @@ VIGEM_ERROR vigem_target_x360_register_notification(
     target->Notification = reinterpret_cast<FARPROC>(notification);
     target->NotificationUserData = userData;
 
-    if (target->cancelNotificationThreadEvent == nullptr)
-	    target->cancelNotificationThreadEvent = CreateEvent(
+    if (target->CancelNotificationThreadEvent == nullptr)
+	    target->CancelNotificationThreadEvent = CreateEvent(
             nullptr, 
             TRUE, 
             FALSE, 
             nullptr
         );
     else
-	    ResetEvent(target->cancelNotificationThreadEvent);
+	    ResetEvent(target->CancelNotificationThreadEvent);
 
     std::thread _async{
 	    [](
@@ -592,15 +592,15 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
     target->Notification = reinterpret_cast<FARPROC>(notification);
     target->NotificationUserData = userData;
 
-	if (target->cancelNotificationThreadEvent == 0)
-		target->cancelNotificationThreadEvent = CreateEvent(
+	if (target->CancelNotificationThreadEvent == 0)
+		target->CancelNotificationThreadEvent = CreateEvent(
             nullptr, 
             TRUE, 
             FALSE,
             nullptr
         );
 	else
-		ResetEvent(target->cancelNotificationThreadEvent);
+		ResetEvent(target->CancelNotificationThreadEvent);
 
     std::thread _async{
 	    [](
@@ -663,13 +663,13 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
 
 void vigem_target_x360_unregister_notification(PVIGEM_TARGET target)
 {	
-	if (target->cancelNotificationThreadEvent != 0)
-		SetEvent(target->cancelNotificationThreadEvent);
+	if (target->CancelNotificationThreadEvent != 0)
+		SetEvent(target->CancelNotificationThreadEvent);
     
-	if (target->cancelNotificationThreadEvent != nullptr)
+	if (target->CancelNotificationThreadEvent != nullptr)
 	{
-		CloseHandle(target->cancelNotificationThreadEvent);
-		target->cancelNotificationThreadEvent = nullptr;
+		CloseHandle(target->CancelNotificationThreadEvent);
+		target->CancelNotificationThreadEvent = nullptr;
 	}
 
 	target->Notification = nullptr;
