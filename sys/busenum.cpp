@@ -3,7 +3,7 @@
 *
 * BSD 3-Clause License
 *
-* Copyright (c) 2018-2020, Nefarius Software Solutions e.U. and Contributors
+* Copyright (c) 2018-2022, Nefarius Software Solutions e.U. and Contributors
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -187,6 +187,11 @@ EXTERN_C NTSTATUS Bus_PlugInDevice(
 	if (!NT_SUCCESS(description.Target->PdoPrepare(Device)))
 	{
 		goto pluginEnd;
+	}
+
+	if (plugIn->TargetType == DualShock4Wired)
+	{
+		static_cast<EmulationTargetDS4*>(description.Target)->SetOutputReportNotifyModule(FdoGetData(Device)->UserNotification);
 	}
 
 	status = WdfChildListAddOrUpdateChildDescriptionAsPresent(

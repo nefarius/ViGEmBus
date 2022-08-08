@@ -138,7 +138,7 @@ namespace ViGEm::Bus::Core
 		);
 
 		NTSTATUS EnqueueWaitDeviceReady(WDFREQUEST Request);
-		
+
 		HANDLE _WaitDeviceReadyCompletionWorkerThreadHandle{};
 
 	protected:
@@ -147,7 +147,7 @@ namespace ViGEm::Bus::Core
 		static const int MAX_INSTANCE_ID_LEN = 80;
 
 		static const size_t MAX_OUT_BUFFER_QUEUE_COUNT = 64;
-		
+
 		static const size_t MAX_OUT_BUFFER_QUEUE_SIZE = 128;
 
 		static PCWSTR _deviceLocation;
@@ -181,7 +181,9 @@ namespace ViGEm::Bus::Core
 		static VOID WaitDeviceReadyCompletionWorkerRoutine(IN PVOID StartContext);
 
 		static VOID DumpAsHex(PCSTR Prefix, PVOID Buffer, ULONG BufferLength);
-		
+
+		static VOID DmfDeviceModulesAdd(_In_ WDFDEVICE Device, _In_ PDMFMODULE_INIT DmfModuleInit);
+
 		virtual VOID GetConfigurationDescriptorType(PUCHAR Buffer, ULONG Length) = 0;
 
 		virtual NTSTATUS SelectConfiguration(PURB Urb) = 0;
@@ -191,6 +193,8 @@ namespace ViGEm::Bus::Core
 		virtual NTSTATUS SubmitReportImpl(PVOID NewReport) = 0;
 
 		virtual VOID ProcessPendingNotification(WDFQUEUE Queue) = 0;
+
+		virtual void DmfDeviceModulesAdd(_In_ PDMFMODULE_INIT DmfModuleInit) = 0;
 
 		//
 		// PNP Capabilities may differ from device to device

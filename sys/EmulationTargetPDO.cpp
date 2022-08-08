@@ -3,7 +3,7 @@
 *
 * BSD 3-Clause License
 *
-* Copyright (c) 2018-2020, Nefarius Software Solutions e.U. and Contributors
+* Copyright (c) 2018-2022, Nefarius Software Solutions e.U. and Contributors
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,8 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 	WDF_IO_QUEUE_CONFIG usbInQueueConfig;
 	WDF_IO_QUEUE_CONFIG notificationsQueueConfig;
 	PEMULATION_TARGET_PDO_CONTEXT pPdoContext;
+	PDMFDEVICE_INIT dmfDeviceInit = NULL;
+	DMF_EVENT_CALLBACKS dmfEventCallbacks;
 
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Entry");
 
@@ -74,6 +76,22 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 
 	do
 	{
+		dmfDeviceInit = DMF_DmfDeviceInitAllocate(DeviceInit);
+
+		if (dmfDeviceInit == NULL)
+		{
+			TraceError(
+				TRACE_BUSPDO,
+				"DMF_DmfDeviceInitAllocate failed"
+			);
+			status = STATUS_NO_MEMORY;
+			break;
+		}
+
+		DMF_DmfDeviceInitHookPnpPowerEventCallbacks(dmfDeviceInit, NULL);
+		DMF_DmfDeviceInitHookFileObjectConfig(dmfDeviceInit, NULL);
+		DMF_DmfDeviceInitHookPowerPolicyEventCallbacks(dmfDeviceInit, NULL);
+
 #pragma region Prepare PDO
 
 		status = this->PdoPrepareDevice(DeviceInit, &deviceId, &deviceDescription);
@@ -272,6 +290,8 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 
 		defaultPdoQueueConfig.EvtIoInternalDeviceControl = EvtIoInternalDeviceControl;
 
+		DMF_DmfDeviceInitHookQueueConfig(dmfDeviceInit, &defaultPdoQueueConfig);
+
 		status = WdfIoQueueCreate(
 			this->_PdoDevice,
 			&defaultPdoQueueConfig,
@@ -311,7 +331,40 @@ NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::PdoCreateDevice(WDFDEVICE ParentD
 		WdfDeviceSetPowerCapabilities(this->_PdoDevice, &this->_PowerCapabilities);
 
 #pragma endregion
+
+#pragma region DMF Initialization
+
+		DMF_EVENT_CALLBACKS_INIT(&dmfEventCallbacks);
+		dmfEventCallbacks.EvtDmfDeviceModulesAdd = DmfDeviceModulesAdd;
+		DMF_DmfDeviceInitSetEventCallbacks(dmfDeviceInit, &dmfEventCallbacks);
+
+		if (!NT_SUCCESS(status = DMF_ModulesCreate(
+			this->_PdoDevice,
+			&dmfDeviceInit
+		)))
+		{
+			TraceEvents(
+				TRACE_LEVEL_ERROR,
+				TRACE_DS4,
+				"DMF_ModulesCreate failed with status %!STATUS!",
+				status
+			);
+			break;
+		}
+
+#pragma endregion
+
 	} while (FALSE);
+
+	if (dmfDeviceInit)
+	{
+		DMF_DmfDeviceInitFree(&dmfDeviceInit);
+	}
+
+	if (!NT_SUCCESS(status) && this->_PdoDevice != nullptr)
+	{
+		WdfObjectDelete(this->_PdoDevice);
+	}
 
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BUSPDO, "%!FUNC! Exit with status %!STATUS!", status);
 
@@ -824,7 +877,6 @@ BOOLEAN ViGEm::Bus::Core::EmulationTargetPDO::EvtChildListIdentificationDescript
 	return (lhs->SerialNo == rhs->SerialNo) ? TRUE : FALSE;
 }
 
-
 NTSTATUS ViGEm::Bus::Core::EmulationTargetPDO::EnqueueWaitDeviceReady(WDFDEVICE ParentDevice, ULONG SerialNo,
 	WDFREQUEST Request)
 {
@@ -1176,4 +1228,11 @@ void ViGEm::Bus::Core::EmulationTargetPDO::EvtWdfIoPendingNotificationQueueState
 	}
 
 	pThis->ProcessPendingNotification(Queue);
+}
+
+VOID ViGEm::Bus::Core::EmulationTargetPDO::DmfDeviceModulesAdd(_In_ WDFDEVICE Device, _In_ PDMFMODULE_INIT DmfModuleInit)
+{
+	const auto pThis = static_cast<EmulationTargetPDO*>(EmulationTargetPdoGetContext(Device)->Target);
+
+	pThis->DmfDeviceModulesAdd(DmfModuleInit);
 }

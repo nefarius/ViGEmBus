@@ -53,7 +53,7 @@ namespace ViGEm::Bus::Targets
 		UCHAR Nic1;
 		UCHAR Nic2;
 	} MAC_ADDRESS, * PMAC_ADDRESS;
-	
+
 	constexpr unsigned char hid_get_report_id(struct _URB_CONTROL_VENDOR_OR_CLASS_REQUEST* pReq)
 	{
 		return pReq->Value & 0xFF;
@@ -70,8 +70,8 @@ namespace ViGEm::Bus::Targets
 		EmulationTargetDS4(ULONG Serial, LONG SessionId, USHORT VendorId = 0x054C, USHORT ProductId = 0x05C4);
 
 		NTSTATUS PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit,
-		                          PUNICODE_STRING DeviceId,
-		                          PUNICODE_STRING DeviceDescription) override;
+			PUNICODE_STRING DeviceId,
+			PUNICODE_STRING DeviceDescription) override;
 
 		NTSTATUS PdoPrepareHardware() override;
 
@@ -84,21 +84,23 @@ namespace ViGEm::Bus::Targets
 		NTSTATUS SelectConfiguration(PURB Urb) override;
 
 		void AbortPipe() override;
-		
+
 		NTSTATUS UsbClassInterface(PURB Urb) override;
-		
+
 		NTSTATUS UsbGetDescriptorFromInterface(PURB Urb) override;
-		
+
 		NTSTATUS UsbSelectInterface(PURB Urb) override;
-		
+
 		NTSTATUS UsbGetStringDescriptorType(PURB Urb) override;
-		
+
 		NTSTATUS UsbBulkOrInterruptTransfer(_URB_BULK_OR_INTERRUPT_TRANSFER* pTransfer, WDFREQUEST Request) override;
-		
+
 		NTSTATUS UsbControlTransfer(PURB Urb) override;
-		
+
 		NTSTATUS SubmitReportImpl(PVOID NewReport) override;
-		
+
+		VOID SetOutputReportNotifyModule(DMFMODULE Module);
+
 	private:
 		static EVT_WDF_TIMER PendingUsbRequestsTimerFunc;
 
@@ -108,6 +110,8 @@ namespace ViGEm::Bus::Targets
 
 	protected:
 		void ProcessPendingNotification(WDFQUEUE Queue) override;
+
+		void DmfDeviceModulesAdd(_In_ PDMFMODULE_INIT DmfModuleInit) override;
 	private:
 		static PCWSTR _deviceDescription;
 
@@ -159,6 +163,16 @@ namespace ViGEm::Bus::Targets
 		//
 		// Default MAC address of the host (not used)
 		//
-		MAC_ADDRESS _HostMacAddress;	
+		MAC_ADDRESS _HostMacAddress;
+
+		//
+		// User-mode notification on new output report
+		// 
+		DMFMODULE _OutputReportNotify;
+
+		//
+		// Memory for full output report request
+		// 
+		DS4_AWAIT_OUTPUT _AwaitOutputCache;
 	};
 }

@@ -1,0 +1,3 @@
+[submodule "sdk"]
+	path = sdk
+	url = https://github.com/ViGEm/ViGEmClient.git

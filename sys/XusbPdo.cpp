@@ -3,7 +3,7 @@
 *
 * BSD 3-Clause License
 *
-* Copyright (c) 2018-2020, Nefarius Software Solutions e.U. and Contributors
+* Copyright (c) 2018-2022, Nefarius Software Solutions e.U. and Contributors
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -1137,4 +1137,9 @@ void ViGEm::Bus::Targets::EmulationTargetXUSB::ProcessPendingNotification(WDFQUE
 	}
 
 	TraceVerbose(TRACE_BUSENUM, "%!FUNC! Exit");
+}
+
+VOID ViGEm::Bus::Targets::EmulationTargetXUSB::DmfDeviceModulesAdd(_In_ PDMFMODULE_INIT DmfModuleInit)
+{
+	UNREFERENCED_PARAMETER(DmfModuleInit);
 }

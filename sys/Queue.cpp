@@ -3,7 +3,7 @@
 *
 * BSD 3-Clause License
 *
-* Copyright (c) 2018-2020, Nefarius Software Solutions e.U. and Contributors
+* Copyright (c) 2018-2022, Nefarius Software Solutions e.U. and Contributors
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -479,6 +479,48 @@ Bus_XusbGetUserIndexHandler(
 	}
 
 	status = static_cast<EmulationTargetXUSB*>(pdo)->GetUserIndex(&pXusbGetUserIndex->UserIndex);
+
+exit:
+	FuncExit(TRACE_QUEUE, "status=%!STATUS!", status);
+
+	return status;
+}
+
+NTSTATUS
+Bus_Ds4AwaitOutputHandler(
+	_In_ DMFMODULE DmfModule,
+	_In_ WDFQUEUE Queue,
+	_In_ WDFREQUEST Request,
+	_In_ ULONG IoctlCode,
+	_In_reads_(InputBufferSize) VOID* InputBuffer,
+	_In_ size_t InputBufferSize,
+	_Out_writes_(OutputBufferSize) VOID* OutputBuffer,
+	_In_ size_t OutputBufferSize,
+	_Out_ size_t* BytesReturned
+)
+{
+	UNREFERENCED_PARAMETER(Queue);
+	UNREFERENCED_PARAMETER(IoctlCode);
+	UNREFERENCED_PARAMETER(OutputBufferSize);
+	UNREFERENCED_PARAMETER(InputBufferSize);
+	UNREFERENCED_PARAMETER(InputBuffer);
+	UNREFERENCED_PARAMETER(OutputBuffer);
+	UNREFERENCED_PARAMETER(BytesReturned);
+
+	FuncEntry(TRACE_QUEUE);
+
+	NTSTATUS status;
+	PFDO_DEVICE_DATA pDevCtx = FdoGetData(DMF_ParentDeviceGet(DmfModule));
+	
+	if (!NT_SUCCESS(status = DMF_NotifyUserWithRequestMultiple_RequestProcess(
+		pDevCtx->UserNotification,
+		Request
+	)))
+	{
+		goto exit;
+	}
+
+	status = NT_SUCCESS(status) ? STATUS_PENDING : status;
 
 exit:
 	FuncExit(TRACE_QUEUE, "status=%!STATUS!", status);
