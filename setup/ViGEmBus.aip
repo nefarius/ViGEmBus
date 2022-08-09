@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<DOCUMENT Type="Advanced Installer" CreateVersion="19.5" version="19.5" Modules="enterprise" RootPath="." Language="en_GB" Id="{AF87FF38-9FCC-4C1C-9EB0-FFD1F6AE0A13}">
+<DOCUMENT Type="Advanced Installer" CreateVersion="19.5" version="19.7.1" Modules="enterprise" RootPath="." Language="en_GB" Id="{AF87FF38-9FCC-4C1C-9EB0-FFD1F6AE0A13}">
   <COMPONENT cid="caphyon.advinst.msicomp.ProjectOptionsComponent">
-    <ROW Name="HiddenItems" Value="AppXProductDetailsComponent;AppXDependenciesComponent;AppXAppDetailsComponent;AppXVisualAssetsComponent;AppXCapabilitiesComponent;AppXAppDeclarationsComponent;AppXUriRulesComponent;SccmComponent;ActSyncAppComponent;CPLAppletComponent;FixupComponent;MsiXDiffComponent;MsixManifestEditorComponent"/>
+    <ROW Name="HiddenItems" Value="ActSyncAppComponent;CPLAppletComponent;AutorunComponent;GameUxComponent;SilverlightSlnComponent;SharePointSlnComponent;AppXAppDetailsComponent;FixupComponent;AppXCapabilitiesComponent;AppXDependenciesComponent;AppXProductDetailsComponent;AppXVisualAssetsComponent;AppXAppDeclarationsComponent;AppXUriRulesComponent;MsiXDiffComponent;MsixManifestEditorComponent"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
     <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
     <ROW Property="AI_CURRENT_YEAR" Value="2022" ValueLocId="-"/>
     <ROW Property="AI_FINDEXE_TITLE" Value="Select the installation package for [|ProductName]" ValueLocId="AI.Property.FindExeTitle"/>
-    <ROW Property="AI_PACKAGING_TOOL" Value="Advanced Installer 19.5 build 36301275" ValueLocId="-"/>
+    <ROW Property="AI_PACKAGING_TOOL" Value="Advanced Installer 19.7.1 build e09f3004" ValueLocId="-"/>
     <ROW Property="ALLUSERS" Value="1"/>
     <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
     <ROW Property="ARPHELPLINK" Value="https://vigem.org/projects/ViGEm/"/>
@@ -19,10 +19,10 @@
     <ROW Property="AiLicenseAgreementLink" Value="https://github.com/ViGEm/ViGEmBus/blob/master/LICENSE" Type="4"/>
     <ROW Property="IAgree" Value="No" Type="4"/>
     <ROW Property="Manufacturer" Value="Nefarius Software Solutions e.U."/>
-    <ROW Property="ProductCode" Value="2057:{28A084F8-FBA9-4097-9CA6-3A9C70C6585B} " Type="16"/>
+    <ROW Property="ProductCode" Value="2057:{B0FC4EEB-B3CC-4CCD-8818-F7D857939145} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="ViGEm Bus Driver"/>
-    <ROW Property="ProductVersion" Value="1.18.367"/>
+    <ROW Property="ProductVersion" Value="1.19.418"/>
     <ROW Property="REBOOT" MultiBuildValue="DefaultBuild:Force"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND;AI_SETUPEXEPATH;SETUPEXEDIR;UPGRADE_1"/>
     <ROW Property="UpgradeCode" Value="{67175F6C-AA18-43A7-AE60-2FC3FD10BF79}"/>
@@ -38,24 +38,32 @@
   <COMPONENT cid="caphyon.advinst.msicomp.MsiDirsComponent">
     <ROW Directory="AI_Bin32_Dir" Directory_Parent="APPDIR" DefaultDir="32-bit"/>
     <ROW Directory="APPDIR" Directory_Parent="TARGETDIR" DefaultDir="APPDIR:." IsPseudoRoot="1"/>
+    <ROW Directory="ARM64_Dir" Directory_Parent="APPDIR" DefaultDir="ARM64"/>
     <ROW Directory="SHORTCUTDIR" Directory_Parent="TARGETDIR" DefaultDir="SHORTC~1|SHORTCUTDIR" IsPseudoRoot="1"/>
     <ROW Directory="TARGETDIR" DefaultDir="SourceDir"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
     <ROW Component="AI_ExePath" ComponentId="{756493E7-566A-49DE-8EC3-07AE9D1BD9C4}" Directory_="APPDIR" Attributes="4" KeyPath="AI_ExePath"/>
     <ROW Component="APPDIR" ComponentId="{947691BF-6B7F-4A14-9027-3E1ECF87784A}" Directory_="APPDIR" Attributes="0"/>
+    <ROW Component="LICENSE" ComponentId="{60476948-DBD4-4515-B1B1-6EECCB99AE99}" Directory_="ARM64_Dir" Attributes="0" KeyPath="LICENSE_2" Type="0"/>
     <ROW Component="ProductInformation" ComponentId="{E2F0A6FF-AB27-4BBA-AF65-9D70B244A328}" Directory_="APPDIR" Attributes="4" KeyPath="Version"/>
-    <ROW Component="ViGEmBus.pdb" ComponentId="{2BD2B055-FC59-4343-AEA0-C2C7948101B3}" Directory_="APPDIR" Attributes="256" Condition="VersionNT64" KeyPath="ViGEmBus.pdb" Type="4"/>
-    <ROW Component="ViGEmBus.pdb_1" ComponentId="{C14BA15C-3FE5-4BEA-A343-284469DE22F5}" Directory_="AI_Bin32_Dir" Attributes="0" Condition="NOT VersionNT64" KeyPath="ViGEmBus.pdb_1" Type="4"/>
-    <ROW Component="ViGEmBus.sys" ComponentId="{DA974243-DAFB-49CF-8693-FF51C234CBD5}" Directory_="APPDIR" Attributes="256" Condition="VersionNT64" KeyPath="ViGEmBus.sys" Type="0"/>
-    <ROW Component="nefconw.exe" ComponentId="{AEADABD6-0FA7-4BF5-A3F5-1043F5D911F9}" Directory_="APPDIR" Attributes="256" Condition="VersionNT64" KeyPath="nefconw.exe"/>
-    <ROW Component="nefconw.exe_1" ComponentId="{E0BCC5D1-4762-490A-AD7E-9A36C8DF724C}" Directory_="AI_Bin32_Dir" Attributes="0" Condition="NOT VersionNT64" KeyPath="nefconw.exe_1"/>
+    <ROW Component="ViGEmBus.inf" ComponentId="{E79736E3-4F2D-4E11-9BED-7A17521333E7}" Directory_="ARM64_Dir" Attributes="0" Condition="AiArm64" KeyPath="ViGEmBus.inf_2"/>
+    <ROW Component="ViGEmBus.pdb" ComponentId="{2BD2B055-FC59-4343-AEA0-C2C7948101B3}" Directory_="APPDIR" Attributes="256" Condition="VersionNT64 AND NOT AiArm64" KeyPath="ViGEmBus.pdb" Type="4"/>
+    <ROW Component="ViGEmBus.pdb_1" ComponentId="{C14BA15C-3FE5-4BEA-A343-284469DE22F5}" Directory_="AI_Bin32_Dir" Attributes="0" Condition="NOT VersionNT64 AND NOT AiArm64" KeyPath="ViGEmBus.pdb_1" Type="4"/>
+    <ROW Component="ViGEmBus.pdb_2" ComponentId="{D5820AD4-FEA4-4E4B-BD3E-49274DCE91F4}" Directory_="ARM64_Dir" Attributes="0" Condition="AiArm64" KeyPath="ViGEmBus.pdb_2" Type="4"/>
+    <ROW Component="ViGEmBus.sys" ComponentId="{DA974243-DAFB-49CF-8693-FF51C234CBD5}" Directory_="APPDIR" Attributes="256" Condition="VersionNT64 AND NOT AiArm64" KeyPath="ViGEmBus.sys" Type="0"/>
+    <ROW Component="nefconw.exe" ComponentId="{AEADABD6-0FA7-4BF5-A3F5-1043F5D911F9}" Directory_="APPDIR" Attributes="256" Condition="VersionNT64 AND NOT AiArm64" KeyPath="nefconw.exe"/>
+    <ROW Component="nefconw.exe_1" ComponentId="{E0BCC5D1-4762-490A-AD7E-9A36C8DF724C}" Directory_="AI_Bin32_Dir" Attributes="0" Condition="NOT VersionNT64 AND NOT AiArm64" KeyPath="nefconw.exe_1"/>
+    <ROW Component="nefconw.exe_2" ComponentId="{B25A0000-3F39-43D0-95F8-4B804DAB3DE5}" Directory_="ARM64_Dir" Attributes="256" Condition="AiArm64" KeyPath="nefconw.exe_2"/>
     <ROW Component="updater.exe" ComponentId="{08EB2B6D-47C1-4EED-8A5C-FF31B6F28651}" Directory_="APPDIR" Attributes="0" KeyPath="updater.exe"/>
-    <ROW Component="vigembus.cat" ComponentId="{CEA011F4-933A-459C-B951-B1BC17E4E671}" Directory_="AI_Bin32_Dir" Attributes="0" Condition="NOT VersionNT64" KeyPath="vigembus.cat_1" Type="0"/>
+    <ROW Component="vigembus.cat" ComponentId="{CEA011F4-933A-459C-B951-B1BC17E4E671}" Directory_="AI_Bin32_Dir" Attributes="0" Condition="NOT VersionNT64 AND NOT AiArm64" KeyPath="vigembus.cat_1" Type="0"/>
+    <ROW Component="vigembus.cat_1" ComponentId="{300845F0-6D4A-4954-A8BC-93B4345FCD3E}" Directory_="ARM64_Dir" Attributes="0" Condition="AiArm64" KeyPath="ViGEmBus.sys_2" Type="0"/>
+    <ROW Component="vigembus.cat_2" ComponentId="{E0F5FE8D-4431-42DE-B766-8E05D53D2672}" Directory_="ARM64_Dir" Attributes="0" Condition="AiArm64" KeyPath="vigembus.cat_2"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
     <ROW Feature="AI32BitFiles" Title="32-bit" Description="32-bit Executables and Libraries" Display="5" Level="1" Directory_="APPDIR" Attributes="0"/>
     <ROW Feature="AI64BitFiles" Title="64-bit" Description="64-bit Executables and Libraries" Display="3" Level="1" Directory_="APPDIR" Attributes="0"/>
+    <ROW Feature="ARM64" Title="ARM64" Description="ARM64" Display="7" Level="1" Directory_="APPDIR" Attributes="0"/>
     <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0"/>
     <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
   </COMPONENT>
@@ -73,12 +81,18 @@
     <ROW File="ViGEmBus.sys_1" Component_="vigembus.cat" FileName="ViGEmBus.sys" Attributes="0" SourcePath="..\drivers\x86\ViGEmBus.sys" SelfReg="false"/>
     <ROW File="LICENSE_1" Component_="vigembus.cat" FileName="LICENSE" Attributes="0" SourcePath="..\drivers\x86\LICENSE" SelfReg="false"/>
     <ROW File="updater.exe" Component_="updater.exe" FileName="VIGEMB~1.EXE|ViGEmBus_Updater.exe" Version="65535.65535.65535.65535" Attributes="0" SourcePath="&lt;AI_STUBS&gt;updater.exe" SelfReg="false" DigSign="true"/>
+    <ROW File="nefconw.exe_2" Component_="nefconw.exe_2" FileName="nefconw.exe" Attributes="0" SourcePath="..\drivers\arm64\nefconw.exe" SelfReg="false"/>
+    <ROW File="vigembus.cat_2" Component_="vigembus.cat_2" FileName="vigembus.cat" Attributes="0" SourcePath="..\drivers\arm64\vigembus.cat" SelfReg="false"/>
+    <ROW File="ViGEmBus.inf_2" Component_="ViGEmBus.inf" FileName="ViGEmBus.inf" Attributes="0" SourcePath="..\drivers\arm64\ViGEmBus.inf" SelfReg="false"/>
+    <ROW File="ViGEmBus.pdb_2" Component_="ViGEmBus.pdb_2" FileName="ViGEmBus.pdb" Attributes="0" SourcePath="..\drivers\arm64\ViGEmBus.pdb" SelfReg="false"/>
+    <ROW File="ViGEmBus.sys_2" Component_="vigembus.cat_1" FileName="ViGEmBus.sys" Attributes="0" SourcePath="..\drivers\arm64\ViGEmBus.sys" SelfReg="false"/>
+    <ROW File="LICENSE_2" Component_="LICENSE" FileName="LICENSE" Attributes="0" SourcePath="..\drivers\arm64\LICENSE" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
     <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[AppDataFolder][|Manufacturer]\[|ProductName]\prerequisites" Options="2"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
-    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFolder="Setup Files" Languages="en_GB" InstallationType="2" CabsLocation="1" CompressCabs="false" UseLzma="true" LzmaMethod="2" LzmaCompressionLevel="4" PackageType="1" FilesInsideExe="true" ExeIconPath="ViGEm.ico" ExtractionFolder="[AppDataFolder][|Manufacturer]\[|ProductName] [|ProductVersion]\install" ExtUI="true" UseLargeSchema="true" ExeName="ViGEmBus_[|ProductVersion]_x64_x86" MsiPackageType="AI_ALL"/>
+    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFolder="Setup Files" Languages="en_GB" InstallationType="2" CabsLocation="1" CompressCabs="false" UseLzma="true" LzmaMethod="2" LzmaCompressionLevel="4" PackageType="1" FilesInsideExe="true" ExeIconPath="ViGEm.ico" ExtractionFolder="[AppDataFolder][|Manufacturer]\[|ProductName] [|ProductVersion]\install" ExtUI="true" UseLargeSchema="true" ExeName="ViGEmBus_[|ProductVersion]_x64_x86_arm64" MsiPackageType="AI_ALL"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.DictionaryComponent">
     <ROW Path="&lt;AI_DICTS&gt;ui.ail"/>
@@ -126,8 +140,9 @@
     <ROW Name="lzmaextractor.dll" SourcePath="&lt;AI_CUSTACTS&gt;lzmaextractor.dll"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiConditionComponent">
-    <ROW Feature_="AI64BitFiles" Level="0" Condition="NOT VersionNT64"/>
-    <ROW Feature_="AI32BitFiles" Level="0" Condition="VersionNT64"/>
+    <ROW Feature_="AI64BitFiles" Level="0" Condition="NOT VersionNT64 OR AiArm64"/>
+    <ROW Feature_="AI32BitFiles" Level="0" Condition="VersionNT64 OR AiArm64"/>
+    <ROW Feature_="ARM64" Level="0" Condition="NOT AiArm64"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiControlComponent">
     <ROW Dialog_="LicenseAgreementDlg" Control="AgreementText" Type="ScrollableText" X="20" Y="60" Width="330" Height="120" Attributes="7" Order="400" TextLocId="Control.Text.LicenseAgreementDlg#AgreementText" MsiKey="LicenseAgreementDlg#AgreementText"/>
@@ -197,6 +212,10 @@
     <ROW Action="SET_APPDIR" Type="307" Source="APPDIR" Target="[ProgramFilesFolder][Manufacturer]\[ProductName]" MultiBuildTarget="DefaultBuild:[AI_ProgramFiles]Nefarius Software Solutions\[ProductName]"/>
     <ROW Action="SET_SHORTCUTDIR" Type="307" Source="SHORTCUTDIR" Target="[ProgramMenuFolder][ProductName]"/>
     <ROW Action="SET_TARGETDIR_TO_APPDIR" Type="51" Source="TARGETDIR" Target="[APPDIR]"/>
+    <ROW Action="arm64_AddDeviceNode" Type="1106" Source="nefconw.exe_2" Target="--create-device-node --hardware-id Nefarius\ViGEmBus\Gen1 --class-name System --class-guid 4D36E97D-E325-11CE-BFC1-08002BE10318"/>
+    <ROW Action="arm64_InstallDriver" Type="1106" Source="nefconw.exe_2" Target="--install-driver --inf-path &quot;[#ViGEmBus.inf_2]&quot;"/>
+    <ROW Action="arm64_UninstallDevice" Type="1106" Source="nefconw.exe_2" Target="--remove-device-node --hardware-id Nefarius\ViGEmBus\Gen1 --class-guid 4D36E97D-E325-11CE-BFC1-08002BE10318"/>
+    <ROW Action="arm64_UninstallDriver" Type="1106" Source="nefconw.exe_2" Target="--uninstall-driver --inf-path &quot;[#ViGEmBus.inf]&quot;"/>
     <ROW Action="x64_AddDeviceNode" Type="1106" Source="nefconw.exe" Target="--create-device-node --hardware-id Nefarius\ViGEmBus\Gen1 --class-name System --class-guid 4D36E97D-E325-11CE-BFC1-08002BE10318"/>
     <ROW Action="x64_InstallDriver" Type="1106" Source="nefconw.exe" Target="--install-driver --inf-path &quot;[#ViGEmBus.inf]&quot;"/>
     <ROW Action="x64_UninstallDevice" Type="1106" Source="nefconw.exe" Target="--remove-device-node --hardware-id Nefarius\ViGEmBus\Gen1 --class-guid 4D36E97D-E325-11CE-BFC1-08002BE10318"/>
@@ -219,6 +238,12 @@
     <ROW Feature_="AI32BitFiles" Component_="vigembus.cat"/>
     <ROW Feature_="AI32BitFiles" Component_="ViGEmBus.pdb_1"/>
     <ROW Feature_="MainFeature" Component_="updater.exe"/>
+    <ROW Feature_="ARM64" Component_="nefconw.exe_2"/>
+    <ROW Feature_="ARM64" Component_="ViGEmBus.pdb_2"/>
+    <ROW Feature_="ARM64" Component_="vigembus.cat_2"/>
+    <ROW Feature_="ARM64" Component_="ViGEmBus.inf"/>
+    <ROW Feature_="ARM64" Component_="vigembus.cat_1"/>
+    <ROW Feature_="MainFeature" Component_="LICENSE"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
     <ROW Name="ViGEm.exe" SourcePath="ViGEm.ico" Index="0"/>
@@ -238,7 +263,7 @@
   <COMPONENT cid="caphyon.advinst.msicomp.MsiInstExSeqComponent">
     <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="210"/>
     <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="747"/>
-    <ROW Action="AI_STORE_LOCATION" Condition="(Not Installed) OR REINSTALL" Sequence="1508"/>
+    <ROW Action="AI_STORE_LOCATION" Condition="(Not Installed) OR REINSTALL" Sequence="1510"/>
     <ROW Action="AI_PREPARE_UPGRADE" Condition="AI_UPGRADE=&quot;No&quot; AND (Not Installed)" Sequence="1397"/>
     <ROW Action="AI_ResolveKnownFolders" Sequence="52"/>
     <ROW Action="AI_EnableDebugLog" Sequence="51"/>
@@ -261,16 +286,20 @@
     <ROW Action="AI_ProcessTasks2" Condition="(VersionNT &gt;= 600) AND (REMOVE&lt;&gt;&quot;ALL&quot;)" Sequence="1624"/>
     <ROW Action="AI_UninstallTasks2" Condition="(VersionNT &gt;= 600) AND (REMOVE=&quot;ALL&quot;)" Sequence="1699"/>
     <ROW Action="ForceReboot" Condition="AI_UPGRADE&lt;&gt;&quot;No&quot; AND OLDPRODUCTS AND AFTERREBOOT&lt;&gt;1" Sequence="1501" SeqType="0"/>
-    <ROW Action="x64_AddDeviceNode" Condition="( NOT Installed ) AND ( VersionNT64 )" Sequence="6401"/>
-    <ROW Action="x64_InstallDriver" Condition="( NOT Installed ) AND ( VersionNT64 )" Sequence="6403"/>
-    <ROW Action="x64_UninstallDevice_Old" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( VersionNT64 )" Sequence="1502"/>
-    <ROW Action="x64_UninstallDevice" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( VersionNT64 )" Sequence="1504"/>
-    <ROW Action="x64_UninstallDriver" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( VersionNT64 )" Sequence="1506"/>
-    <ROW Action="x86_UninstallDevice_Old" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( NOT VersionNT64 )" Sequence="1503"/>
-    <ROW Action="x86_UninstallDevice" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( NOT VersionNT64 )" Sequence="1505"/>
-    <ROW Action="x86_UninstallDriver" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( NOT VersionNT64 )" Sequence="1507"/>
-    <ROW Action="x86_AddDeviceNode" Condition="( NOT Installed ) AND ( NOT VersionNT64 )" Sequence="6402"/>
-    <ROW Action="x86_InstallDriver" Condition="( NOT Installed ) AND ( NOT VersionNT64 )" Sequence="6404"/>
+    <ROW Action="x64_AddDeviceNode" Condition="( NOT Installed ) AND ( VersionNT64 AND NOT AiArm64 )" Sequence="6401"/>
+    <ROW Action="x64_InstallDriver" Condition="( NOT Installed ) AND ( VersionNT64 AND NOT AiArm64 )" Sequence="6404"/>
+    <ROW Action="x64_UninstallDevice_Old" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( VersionNT64 AND NOT AiArm64 )" Sequence="1502"/>
+    <ROW Action="x64_UninstallDevice" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( VersionNT64 AND NOT AiArm64 )" Sequence="1504"/>
+    <ROW Action="x64_UninstallDriver" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( VersionNT64 AND NOT AiArm64 )" Sequence="1507"/>
+    <ROW Action="x86_UninstallDevice_Old" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( NOT VersionNT64 AND NOT AiArm64 )" Sequence="1503"/>
+    <ROW Action="x86_UninstallDevice" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( NOT VersionNT64 AND NOT AiArm64 )" Sequence="1505"/>
+    <ROW Action="x86_UninstallDriver" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( NOT VersionNT64 AND NOT AiArm64 )" Sequence="1508"/>
+    <ROW Action="x86_AddDeviceNode" Condition="( NOT Installed ) AND ( NOT VersionNT64 AND NOT AiArm64 )" Sequence="6402"/>
+    <ROW Action="x86_InstallDriver" Condition="( NOT Installed ) AND ( NOT VersionNT64 AND NOT AiArm64 )" Sequence="6405"/>
+    <ROW Action="arm64_AddDeviceNode" Condition="( NOT Installed ) AND ( AiArm64 )" Sequence="6403"/>
+    <ROW Action="arm64_InstallDriver" Condition="( NOT Installed ) AND ( AiArm64 )" Sequence="6406"/>
+    <ROW Action="arm64_UninstallDevice" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( AiArm64 )" Sequence="1506"/>
+    <ROW Action="arm64_UninstallDriver" Condition="( ( NOT Installed ) OR ( Installed AND ( REMOVE = &quot;ALL&quot; OR AI_INSTALL_MODE = &quot;Remove&quot; ) ) ) AND ( AiArm64 )" Sequence="1509"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiInstallUISequenceComponent">
     <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="747"/>
