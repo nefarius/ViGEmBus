@@ -36,7 +36,8 @@ int main()
 
 	while (TRUE) 
 	{
-		error = vigem_target_ds4_await_output_report(client, ds4, &out);
+		//error = vigem_target_ds4_await_output_report(client, ds4, &out);
+		error = vigem_target_ds4_await_output_report_timeout(client, ds4, 100, &out);
 		
 		if (VIGEM_SUCCESS(error))
 		{
