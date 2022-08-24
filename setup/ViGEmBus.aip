@@ -19,10 +19,10 @@
     <ROW Property="AiLicenseAgreementLink" Value="https://github.com/ViGEm/ViGEmBus/blob/master/LICENSE" Type="4"/>
     <ROW Property="IAgree" Value="No" Type="4"/>
     <ROW Property="Manufacturer" Value="Nefarius Software Solutions e.U."/>
-    <ROW Property="ProductCode" Value="2057:{B0FC4EEB-B3CC-4CCD-8818-F7D857939145} " Type="16"/>
+    <ROW Property="ProductCode" Value="2057:{728108CC-B96F-4976-B1D9-9B4FF0672A5E} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="ViGEm Bus Driver"/>
-    <ROW Property="ProductVersion" Value="1.19.418"/>
+    <ROW Property="ProductVersion" Value="1.20.432"/>
     <ROW Property="REBOOT" MultiBuildValue="DefaultBuild:Force"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND;AI_SETUPEXEPATH;SETUPEXEDIR;UPGRADE_1"/>
     <ROW Property="UpgradeCode" Value="{67175F6C-AA18-43A7-AE60-2FC3FD10BF79}"/>
