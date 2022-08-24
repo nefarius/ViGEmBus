@@ -1,4 +1,4 @@
-version: 1.19.{build}.0
+version: 1.20.{build}.0
 image: Visual Studio 2019
 skip_commits:
   files:
