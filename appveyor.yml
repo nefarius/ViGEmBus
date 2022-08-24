@@ -18,6 +18,7 @@ install:
 - ps: iwr "https://download.microsoft.com/download/c/f/8/cf80b955-d578-4635-825c-2801911f9d79/wdk/wdksetup.exe" -OutFile wdksetup.exe
 - cmd: .\wdksetup.exe /features + /q /norestart
 - cmd: git submodule -q update --init
+- cmd: git apply --directory="C:\projects\DMF" "%APPVEYOR_BUILD_FOLDER%\patches\dmf-optimizations.diff
 - cmd: git clone -q https://github.com/microsoft/DMF.git C:\projects\DMF 2> nul || set ERRORLEVEL=0
 - cmd: |
     cd "C:\projects\DMF"
