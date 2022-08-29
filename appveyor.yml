@@ -5,7 +5,7 @@ skip_commits:
     - '**/*.md'
     - '**/*.aip'
 cache:
-- C:\projects\DMF -> appveyor.yml
+- C:\projects\DMF
 - C:\projects\ViGEmBus\vpatch.exe
 platform:
 - x86
@@ -21,7 +21,7 @@ install:
 - cmd: |
     cd "C:\projects\DMF"
     git pull > NUL
-    git apply --reject "%APPVEYOR_BUILD_FOLDER%\patches\dmf.diff > NUL
+    git apply --reject "%APPVEYOR_BUILD_FOLDER%\patches\dmf.diff 2> NUL
     cd %appveyor_build_folder%
 before_build:
 - ps: Invoke-WebRequest "https://github.com/nefarius/vpatch/releases/latest/download/vpatch.exe" -OutFile vpatch.exe
