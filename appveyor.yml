@@ -4,7 +4,7 @@ skip_commits:
   files:
     - '**/*.md'
 cache:
-- C:\projects\DMF
+- C:\projects\DMF -> appveyor.yml
 - C:\projects\ViGEmBus\vpatch.exe
 platform:
 - x86
