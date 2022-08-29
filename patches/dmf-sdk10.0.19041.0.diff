@@ -1,0 +1,342 @@
+ Dmf/Solution/DmfK/DmfK.vcxproj                               | 12 ++++++------
+ Dmf/Solution/DmfKFramework/DmfKFramework.vcxproj             | 12 ++++++------
+ Dmf/Solution/DmfKModules.Library/DmfKModules.Library.vcxproj | 12 ++++++------
+ .../DmfKModules.Template/DmfKModules.Template.vcxproj        | 12 ++++++------
+ Dmf/Solution/DmfU/DmfU.vcxproj                               |  2 +-
+ Dmf/Solution/DmfUFramework/DmfUFramework.vcxproj             | 12 ++++++------
+ Dmf/Solution/DmfUModules.Library/DmfUModules.Library.vcxproj | 12 ++++++------
+ .../DmfUModules.Template/DmfUModules.Template.vcxproj        |  8 ++++----
+ 8 files changed, 41 insertions(+), 41 deletions(-)
+
+diff --git a/Dmf/Solution/DmfK/DmfK.vcxproj b/Dmf/Solution/DmfK/DmfK.vcxproj
+index 738397c..3e3a9e2 100644
+--- a/Dmf/Solution/DmfK/DmfK.vcxproj
++++ b/Dmf/Solution/DmfK/DmfK.vcxproj
+@@ -44,37 +44,37 @@
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup>
+     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+diff --git a/Dmf/Solution/DmfKFramework/DmfKFramework.vcxproj b/Dmf/Solution/DmfKFramework/DmfKFramework.vcxproj
+index 13d2475..5393c32 100644
+--- a/Dmf/Solution/DmfKFramework/DmfKFramework.vcxproj
++++ b/Dmf/Solution/DmfKFramework/DmfKFramework.vcxproj
+@@ -80,37 +80,37 @@
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup>
+     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+diff --git a/Dmf/Solution/DmfKModules.Library/DmfKModules.Library.vcxproj b/Dmf/Solution/DmfKModules.Library/DmfKModules.Library.vcxproj
+index 1ba20c5..e420619 100644
+--- a/Dmf/Solution/DmfKModules.Library/DmfKModules.Library.vcxproj
++++ b/Dmf/Solution/DmfKModules.Library/DmfKModules.Library.vcxproj
+@@ -167,37 +167,37 @@
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup>
+     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+diff --git a/Dmf/Solution/DmfKModules.Template/DmfKModules.Template.vcxproj b/Dmf/Solution/DmfKModules.Template/DmfKModules.Template.vcxproj
+index 0d0ef4c..c46ff9e 100644
+--- a/Dmf/Solution/DmfKModules.Template/DmfKModules.Template.vcxproj
++++ b/Dmf/Solution/DmfKModules.Template/DmfKModules.Template.vcxproj
+@@ -44,13 +44,13 @@
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <CharacterSet>Unicode</CharacterSet>
+     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup>
+     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+@@ -132,13 +132,13 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
+-      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'" >/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+       <AdditionalDependencies>%(AdditionalDependencies);setupapi.lib;cfgmgr32.lib;wpprecorder.lib;</AdditionalDependencies>
+       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+-      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'" >/guard:delayloadsignret %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/guard:delayloadsignret %(AdditionalOptions)</AdditionalOptions>
+     </Link>
+     <ProjectReference>
+       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+@@ -206,13 +206,13 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
+-      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'" >/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+       <AdditionalDependencies>%(AdditionalDependencies);setupapi.lib;cfgmgr32.lib;wpprecorder.lib;</AdditionalDependencies>
+       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+-      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'" >/guard:delayloadsignret %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/guard:delayloadsignret %(AdditionalOptions)</AdditionalOptions>
+     </Link>
+     <ProjectReference>
+       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+diff --git a/Dmf/Solution/DmfU/DmfU.vcxproj b/Dmf/Solution/DmfU/DmfU.vcxproj
+index 9b9dd48..e8c31a4 100644
+--- a/Dmf/Solution/DmfU/DmfU.vcxproj
++++ b/Dmf/Solution/DmfU/DmfU.vcxproj
+@@ -46,7 +46,7 @@
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+     <UseDebugLibraries Condition="'$(Configuration)'=='Release'">False</UseDebugLibraries>
+     <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">True</UseDebugLibraries>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup>
+     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+diff --git a/Dmf/Solution/DmfUFramework/DmfUFramework.vcxproj b/Dmf/Solution/DmfUFramework/DmfUFramework.vcxproj
+index 7ba02d9..54342c8 100644
+--- a/Dmf/Solution/DmfUFramework/DmfUFramework.vcxproj
++++ b/Dmf/Solution/DmfUFramework/DmfUFramework.vcxproj
+@@ -45,32 +45,32 @@
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup>
+     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+diff --git a/Dmf/Solution/DmfUModules.Library/DmfUModules.Library.vcxproj b/Dmf/Solution/DmfUModules.Library/DmfUModules.Library.vcxproj
+index 214e8bb..f11336b 100644
+--- a/Dmf/Solution/DmfUModules.Library/DmfUModules.Library.vcxproj
++++ b/Dmf/Solution/DmfUModules.Library/DmfUModules.Library.vcxproj
+@@ -45,32 +45,32 @@
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup>
+     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+diff --git a/Dmf/Solution/DmfUModules.Template/DmfUModules.Template.vcxproj b/Dmf/Solution/DmfUModules.Template/DmfUModules.Template.vcxproj
+index 7c285cc..c83ffe0 100644
+--- a/Dmf/Solution/DmfUModules.Template/DmfUModules.Template.vcxproj
++++ b/Dmf/Solution/DmfUModules.Template/DmfUModules.Template.vcxproj
+@@ -45,12 +45,12 @@
+   <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+     <UseDebugLibraries>true</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+     <UseDebugLibraries>false</UseDebugLibraries>
+     <PlatformToolset>WindowsUserModeDriver10.0</PlatformToolset>
+-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
++    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+   </PropertyGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+   <PropertyGroup>
+@@ -86,7 +86,7 @@
+       <LanguageStandard>stdcpp17</LanguageStandard>
+     </ClCompile>
+     <ClCompile Condition="'$(Platform)'=='ARM64'">
+-      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'" >/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
+     </ClCompile>
+     <Link>
+       <AdditionalDependencies>%(AdditionalDependencies);hid.lib;setupapi.lib;cfgmgr32.lib;</AdditionalDependencies>
+@@ -94,7 +94,7 @@
+   </ItemDefinitionGroup>
+   <ItemDefinitionGroup Condition="'$(Platform)'=='ARM64'">
+     <Link>
+-      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'" >/guard:delayloadsignret %(AdditionalOptions)</AdditionalOptions>
++      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/guard:delayloadsignret %(AdditionalOptions)</AdditionalOptions>
+     </Link>
+   </ItemDefinitionGroup>
+   <ItemGroup>
