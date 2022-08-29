@@ -1,8 +1,9 @@
-version: 1.20.{build}.0
+version: 1.21.{build}.0
 image: Visual Studio 2019
 skip_commits:
   files:
     - '**/*.md'
+    - '**/*.aip'
 cache:
 - C:\projects\DMF -> appveyor.yml
 - C:\projects\ViGEmBus\vpatch.exe
@@ -15,14 +16,12 @@ configuration:
 environment:
   DmfRootPath: C:\projects\DMF
 install:
-- ps: iwr "https://download.microsoft.com/download/c/f/8/cf80b955-d578-4635-825c-2801911f9d79/wdk/wdksetup.exe" -OutFile wdksetup.exe
-- cmd: .\wdksetup.exe /features + /q /norestart
 - cmd: git submodule -q update --init
 - cmd: git clone -q https://github.com/microsoft/DMF.git C:\projects\DMF 2> nul || set ERRORLEVEL=0
 - cmd: |
     cd "C:\projects\DMF"
     git pull > NUL
-    git apply --reject "%APPVEYOR_BUILD_FOLDER%\patches\dmf.diff
+    git apply --reject "%APPVEYOR_BUILD_FOLDER%\patches\dmf.diff > NUL
     cd %appveyor_build_folder%
 before_build:
 - ps: Invoke-WebRequest "https://github.com/nefarius/vpatch/releases/latest/download/vpatch.exe" -OutFile vpatch.exe
@@ -37,7 +36,6 @@ artifacts:
 - path: 'bin**\$(APPVEYOR_PROJECT_NAME)\*.sys'
 - path: 'bin**\*.pdb'
 - path: 'disk1\*.cab'
-- path: 'bin**\*.msi'
 deploy:
 - provider: Environment
   name: BUILDBOT
