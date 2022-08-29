@@ -22,8 +22,7 @@ install:
 - cmd: |
     cd "C:\projects\DMF"
     git pull > NUL
-    git apply "%APPVEYOR_BUILD_FOLDER%\patches\dmf-optimizations.diff
-    git apply "%APPVEYOR_BUILD_FOLDER%\patches\dmf-sdk10.0.19041.0.diff
+    git apply "%APPVEYOR_BUILD_FOLDER%\patches\dmf.diff
     cd %appveyor_build_folder%
 before_build:
 - ps: Invoke-WebRequest "https://github.com/nefarius/vpatch/releases/latest/download/vpatch.exe" -OutFile vpatch.exe

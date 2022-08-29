@@ -1,15 +1,15 @@
- Dmf/Solution/DmfK/DmfK.vcxproj                               | 12 ++++++------
- Dmf/Solution/DmfKFramework/DmfKFramework.vcxproj             | 12 ++++++------
- Dmf/Solution/DmfKModules.Library/DmfKModules.Library.vcxproj | 12 ++++++------
- .../DmfKModules.Template/DmfKModules.Template.vcxproj        | 12 ++++++------
- Dmf/Solution/DmfU/DmfU.vcxproj                               |  2 +-
- Dmf/Solution/DmfUFramework/DmfUFramework.vcxproj             | 12 ++++++------
- Dmf/Solution/DmfUModules.Library/DmfUModules.Library.vcxproj | 12 ++++++------
- .../DmfUModules.Template/DmfUModules.Template.vcxproj        |  8 ++++----
- 8 files changed, 41 insertions(+), 41 deletions(-)
+ Dmf/Solution/DmfK/DmfK.vcxproj                     | 28 +++++++++++++++++-----
+ Dmf/Solution/DmfKFramework/DmfKFramework.vcxproj   | 28 +++++++++++++++++-----
+ .../DmfKModules.Library.vcxproj                    | 28 +++++++++++++++++-----
+ .../DmfKModules.Template.vcxproj                   | 28 +++++++++++++++++-----
+ Dmf/Solution/DmfU/DmfU.vcxproj                     | 18 +++++++++++++-
+ Dmf/Solution/DmfUFramework/DmfUFramework.vcxproj   | 28 +++++++++++++++++-----
+ .../DmfUModules.Library.vcxproj                    | 28 +++++++++++++++++-----
+ .../DmfUModules.Template.vcxproj                   | 24 +++++++++++++++----
+ 8 files changed, 169 insertions(+), 41 deletions(-)
 
 diff --git a/Dmf/Solution/DmfK/DmfK.vcxproj b/Dmf/Solution/DmfK/DmfK.vcxproj
-index 738397c..3e3a9e2 100644
+index 738397c..de0b165 100644
 --- a/Dmf/Solution/DmfK/DmfK.vcxproj
 +++ b/Dmf/Solution/DmfK/DmfK.vcxproj
 @@ -44,37 +44,37 @@
@@ -56,8 +56,66 @@ index 738397c..3e3a9e2 100644
    </PropertyGroup>
    <PropertyGroup>
      <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+@@ -110,6 +110,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -139,6 +142,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -169,6 +175,8 @@
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
+       <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -199,6 +207,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -228,6 +239,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -258,6 +272,8 @@
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
+       <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 diff --git a/Dmf/Solution/DmfKFramework/DmfKFramework.vcxproj b/Dmf/Solution/DmfKFramework/DmfKFramework.vcxproj
-index 13d2475..5393c32 100644
+index 13d2475..b2d481c 100644
 --- a/Dmf/Solution/DmfKFramework/DmfKFramework.vcxproj
 +++ b/Dmf/Solution/DmfKFramework/DmfKFramework.vcxproj
 @@ -80,37 +80,37 @@
@@ -104,8 +162,66 @@ index 13d2475..5393c32 100644
    </PropertyGroup>
    <PropertyGroup>
      <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+@@ -147,6 +147,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -174,6 +177,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -202,6 +208,8 @@
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
+       <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -230,6 +238,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -257,6 +268,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -285,6 +299,8 @@
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
+       <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 diff --git a/Dmf/Solution/DmfKModules.Library/DmfKModules.Library.vcxproj b/Dmf/Solution/DmfKModules.Library/DmfKModules.Library.vcxproj
-index 1ba20c5..e420619 100644
+index 1ba20c5..ec7dbed 100644
 --- a/Dmf/Solution/DmfKModules.Library/DmfKModules.Library.vcxproj
 +++ b/Dmf/Solution/DmfKModules.Library/DmfKModules.Library.vcxproj
 @@ -167,37 +167,37 @@
@@ -152,8 +268,66 @@ index 1ba20c5..e420619 100644
    </PropertyGroup>
    <PropertyGroup>
      <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+@@ -234,6 +234,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -263,6 +266,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -293,6 +299,8 @@
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
+       <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -323,6 +331,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -352,6 +363,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -382,6 +396,8 @@
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
+       <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 diff --git a/Dmf/Solution/DmfKModules.Template/DmfKModules.Template.vcxproj b/Dmf/Solution/DmfKModules.Template/DmfKModules.Template.vcxproj
-index 0d0ef4c..c46ff9e 100644
+index 0d0ef4c..ce1f791 100644
 --- a/Dmf/Solution/DmfKModules.Template/DmfKModules.Template.vcxproj
 +++ b/Dmf/Solution/DmfKModules.Template/DmfKModules.Template.vcxproj
 @@ -44,13 +44,13 @@
@@ -172,12 +346,34 @@ index 0d0ef4c..c46ff9e 100644
    </PropertyGroup>
    <PropertyGroup>
      <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-@@ -132,13 +132,13 @@
+@@ -84,6 +84,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -108,6 +111,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -132,13 +138,15 @@
        <DebugInformationFormat>OldStyle</DebugInformationFormat>
        <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
        <WppRecorderEnabled>true</WppRecorderEnabled>
 -      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'" >/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
 +      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
      </ClCompile>
      <Link>
        <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -188,12 +384,34 @@ index 0d0ef4c..c46ff9e 100644
      </Link>
      <ProjectReference>
        <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
-@@ -206,13 +206,13 @@
+@@ -158,6 +166,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -182,6 +193,9 @@
+       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+     <Link>
+       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+@@ -206,13 +220,15 @@
        <DebugInformationFormat>OldStyle</DebugInformationFormat>
        <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
        <WppRecorderEnabled>true</WppRecorderEnabled>
 -      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'" >/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
 +      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
++      <Optimization>MaxSpeed</Optimization>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
      </ClCompile>
      <Link>
        <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -205,7 +423,7 @@ index 0d0ef4c..c46ff9e 100644
      <ProjectReference>
        <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
 diff --git a/Dmf/Solution/DmfU/DmfU.vcxproj b/Dmf/Solution/DmfU/DmfU.vcxproj
-index 9b9dd48..e8c31a4 100644
+index 9b9dd48..521b273 100644
 --- a/Dmf/Solution/DmfU/DmfU.vcxproj
 +++ b/Dmf/Solution/DmfU/DmfU.vcxproj
 @@ -46,7 +46,7 @@
@@ -217,8 +435,31 @@ index 9b9dd48..e8c31a4 100644
    </PropertyGroup>
    <PropertyGroup>
      <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+@@ -83,6 +83,22 @@
+       <WppFileExtensions>.c.C.cpp.CPP.h.H</WppFileExtensions>
+       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..;</AdditionalIncludeDirectories>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Speed</FavorSizeOrSpeed>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Speed</FavorSizeOrSpeed>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</WholeProgramOptimization>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</WholeProgramOptimization>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
+     </ClCompile>
+     <ClCompile Condition="'$(Platform)'=='ARM64'">
+       <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
 diff --git a/Dmf/Solution/DmfUFramework/DmfUFramework.vcxproj b/Dmf/Solution/DmfUFramework/DmfUFramework.vcxproj
-index 7ba02d9..54342c8 100644
+index 7ba02d9..cc174c6 100644
 --- a/Dmf/Solution/DmfUFramework/DmfUFramework.vcxproj
 +++ b/Dmf/Solution/DmfUFramework/DmfUFramework.vcxproj
 @@ -45,32 +45,32 @@
@@ -260,8 +501,31 @@ index 7ba02d9..54342c8 100644
    </PropertyGroup>
    <PropertyGroup>
      <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+@@ -125,6 +125,22 @@
+       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories);..\..\Framework;..\..\Framework\Modules.Core</AdditionalIncludeDirectories>
+       <WppRecorderEnabled>true</WppRecorderEnabled>
+       <WppEnabled>true</WppEnabled>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Speed</FavorSizeOrSpeed>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Speed</FavorSizeOrSpeed>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</WholeProgramOptimization>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</WholeProgramOptimization>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
+     </ClCompile>
+     <ClCompile Condition="'$(Platform)'=='ARM64'">
+       <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
 diff --git a/Dmf/Solution/DmfUModules.Library/DmfUModules.Library.vcxproj b/Dmf/Solution/DmfUModules.Library/DmfUModules.Library.vcxproj
-index 214e8bb..f11336b 100644
+index 214e8bb..d863a9b 100644
 --- a/Dmf/Solution/DmfUModules.Library/DmfUModules.Library.vcxproj
 +++ b/Dmf/Solution/DmfUModules.Library/DmfUModules.Library.vcxproj
 @@ -45,32 +45,32 @@
@@ -303,8 +567,31 @@ index 214e8bb..f11336b 100644
    </PropertyGroup>
    <PropertyGroup>
      <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+@@ -141,6 +141,22 @@
+       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdcpp17</LanguageStandard>
+       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp17</LanguageStandard>
+       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp17</LanguageStandard>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Speed</FavorSizeOrSpeed>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Speed</FavorSizeOrSpeed>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</WholeProgramOptimization>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</WholeProgramOptimization>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
+     </ClCompile>
+     <ClCompile Condition="'$(Platform)'=='ARM64'">
+       <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'">/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
 diff --git a/Dmf/Solution/DmfUModules.Template/DmfUModules.Template.vcxproj b/Dmf/Solution/DmfUModules.Template/DmfUModules.Template.vcxproj
-index 7c285cc..c83ffe0 100644
+index 7c285cc..436bf4f 100644
 --- a/Dmf/Solution/DmfUModules.Template/DmfUModules.Template.vcxproj
 +++ b/Dmf/Solution/DmfUModules.Template/DmfUModules.Template.vcxproj
 @@ -45,12 +45,12 @@
@@ -322,8 +609,26 @@ index 7c285cc..c83ffe0 100644
    </PropertyGroup>
    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
    <PropertyGroup>
-@@ -86,7 +86,7 @@
+@@ -84,9 +84,25 @@
+       <WppRecorderEnabled>true</WppRecorderEnabled>
+       <WppEnabled>true</WppEnabled>
        <LanguageStandard>stdcpp17</LanguageStandard>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Speed</FavorSizeOrSpeed>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Speed</FavorSizeOrSpeed>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</WholeProgramOptimization>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</WholeProgramOptimization>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
++      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
++      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Speed</FavorSizeOrSpeed>
++      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
      </ClCompile>
      <ClCompile Condition="'$(Platform)'=='ARM64'">
 -      <AdditionalOptions Condition="'$(_NT_TARGET_VERSION)'=='$(_NT_TARGET_VERSION_WIN10_CO)'" >/d2guardsignret %(AdditionalOptions)</AdditionalOptions>
@@ -331,7 +636,7 @@ index 7c285cc..c83ffe0 100644
      </ClCompile>
      <Link>
        <AdditionalDependencies>%(AdditionalDependencies);hid.lib;setupapi.lib;cfgmgr32.lib;</AdditionalDependencies>
-@@ -94,7 +94,7 @@
+@@ -94,7 +110,7 @@
    </ItemDefinitionGroup>
    <ItemDefinitionGroup Condition="'$(Platform)'=='ARM64'">
      <Link>
