@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<DOCUMENT Type="Advanced Installer" CreateVersion="19.5" version="19.7.1" Modules="enterprise" RootPath="." Language="en_GB" Id="{AF87FF38-9FCC-4C1C-9EB0-FFD1F6AE0A13}">
+<DOCUMENT Type="Advanced Installer" CreateVersion="19.5" version="19.9" Modules="enterprise" RootPath="." Language="en_GB" Id="{AF87FF38-9FCC-4C1C-9EB0-FFD1F6AE0A13}">
   <COMPONENT cid="caphyon.advinst.msicomp.ProjectOptionsComponent">
     <ROW Name="HiddenItems" Value="ActSyncAppComponent;CPLAppletComponent;AutorunComponent;GameUxComponent;SilverlightSlnComponent;SharePointSlnComponent;AppXAppDetailsComponent;FixupComponent;AppXCapabilitiesComponent;AppXDependenciesComponent;AppXProductDetailsComponent;AppXVisualAssetsComponent;AppXAppDeclarationsComponent;AppXUriRulesComponent;MsiXDiffComponent;MsixManifestEditorComponent"/>
   </COMPONENT>
@@ -7,7 +7,7 @@
     <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
     <ROW Property="AI_CURRENT_YEAR" Value="2022" ValueLocId="-"/>
     <ROW Property="AI_FINDEXE_TITLE" Value="Select the installation package for [|ProductName]" ValueLocId="AI.Property.FindExeTitle"/>
-    <ROW Property="AI_PACKAGING_TOOL" Value="Advanced Installer 19.7.1 build e09f3004" ValueLocId="-"/>
+    <ROW Property="AI_PACKAGING_TOOL" Value="Advanced Installer 19.9 build de6d6401" ValueLocId="-"/>
     <ROW Property="ALLUSERS" Value="1"/>
     <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
     <ROW Property="ARPHELPLINK" Value="https://vigem.org/projects/ViGEm/"/>
@@ -23,7 +23,6 @@
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="ViGEm Bus Driver"/>
     <ROW Property="ProductVersion" Value="1.21.442"/>
-    <ROW Property="REBOOT" MultiBuildValue="DefaultBuild:Force"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND;AI_SETUPEXEPATH;SETUPEXEDIR;UPGRADE_1"/>
     <ROW Property="UpgradeCode" Value="{67175F6C-AA18-43A7-AE60-2FC3FD10BF79}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
@@ -96,7 +95,7 @@
     <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[AppDataFolder][|Manufacturer]\[|ProductName]\prerequisites" Options="2"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
-    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFolder="Setup Files" Languages="en_GB" InstallationType="2" CabsLocation="1" CompressCabs="false" UseLzma="true" LzmaMethod="2" LzmaCompressionLevel="4" PackageType="1" FilesInsideExe="true" ExeIconPath="ViGEm.ico" ExtractionFolder="[AppDataFolder][|Manufacturer]\[|ProductName] [|ProductVersion]\install" ExtUI="true" UseLargeSchema="true" ExeName="ViGEmBus_[|ProductVersion]_x64_x86_arm64" MsiPackageType="AI_ALL"/>
+    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFolder="Setup Files" Languages="en_GB" InstallationType="2" CabsLocation="1" CompressCabs="false" UseLzma="true" LzmaMethod="2" LzmaCompressionLevel="4" PackageType="1" FilesInsideExe="true" ExeIconPath="ViGEm.ico" ExtractionFolder="[CommonAppDataFolder]Nefarius Software Solutions\[|ProductName] [|ProductVersion]\install" ExtUI="true" UseLargeSchema="true" ExeName="ViGEmBus_[|ProductVersion]_x64_x86_arm64" MsiPackageType="AI_ALL"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.DictionaryComponent">
     <ROW Path="&lt;AI_DICTS&gt;ui.ail"/>
