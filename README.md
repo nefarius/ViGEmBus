@@ -43,7 +43,9 @@ A few examples of the most common use cases for `ViGEm` are:
 
 ## Supported Systems
 
-🛑 **Windows Server** might work but is **not supported** and bug reports/support requests regarding a Server OS will be discarded 🛑
+🛑 **Windows Server** might work but is **not supported** 🛑
+
+Bug reports/support requests regarding running on a Server OS will be discarded.
 
 ### Version 1.16 and below
 
