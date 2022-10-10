@@ -43,13 +43,15 @@ A few examples of the most common use cases for `ViGEm` are:
 
 ## Supported Systems
 
+🛑 **Windows Server** might work but is **not supported** and bug reports/support requests regarding a Server OS will be discarded 🛑
+
 ### Version 1.16 and below
 
-The driver is built for Windows 7/8.1/10/Server 2016/Server 2019 (x86 and amd64).
+The driver is built for Windows 7/8.1/10 (x86 and amd64).
 
 ### Version 1.17 and above
 
-The driver is built for Windows 10/Server 2016/Server 2019 only (x86 and amd64).
+The driver is built for Windows 10/11 only (x86, amd64 and ARM64).
 
 ## License
 
@@ -82,7 +84,7 @@ Please respect that the GitHub issue tracker isn't a helpdesk. We offer a [range
 
 ## Installation
 
-Pre-built production-signed binaries are provided by `Nefarius Software Solutions e.U.` and [available as an all-in-one setup](../../releases/latest).
+Pre-built production-signed binaries **for Windows 10/11** are provided by `Nefarius Software Solutions e.U.` [as an all-in-one setup](../../releases/latest).
 
 ## Sponsors
 
