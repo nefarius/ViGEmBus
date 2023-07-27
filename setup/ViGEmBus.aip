@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<DOCUMENT Type="Advanced Installer" CreateVersion="19.5" version="19.9" Modules="enterprise" RootPath="." Language="en_GB" Id="{AF87FF38-9FCC-4C1C-9EB0-FFD1F6AE0A13}">
+<DOCUMENT Type="Advanced Installer" CreateVersion="19.5" version="20.6" Modules="enterprise" RootPath="." Language="en_GB" Id="{AF87FF38-9FCC-4C1C-9EB0-FFD1F6AE0A13}">
   <COMPONENT cid="caphyon.advinst.msicomp.ProjectOptionsComponent">
     <ROW Name="HiddenItems" Value="ActSyncAppComponent;CPLAppletComponent;AutorunComponent;GameUxComponent;SilverlightSlnComponent;SharePointSlnComponent;AppXAppDetailsComponent;FixupComponent;AppXCapabilitiesComponent;AppXDependenciesComponent;AppXProductDetailsComponent;AppXVisualAssetsComponent;AppXAppDeclarationsComponent;AppXUriRulesComponent;MsiXDiffComponent;MsixManifestEditorComponent"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
     <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
-    <ROW Property="AI_CURRENT_YEAR" Value="2022" ValueLocId="-"/>
     <ROW Property="AI_FINDEXE_TITLE" Value="Select the installation package for [|ProductName]" ValueLocId="AI.Property.FindExeTitle"/>
-    <ROW Property="AI_PACKAGING_TOOL" Value="Advanced Installer 19.9 build de6d6401" ValueLocId="-"/>
     <ROW Property="ALLUSERS" Value="1"/>
     <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
     <ROW Property="ARPHELPLINK" Value="https://vigem.org/projects/ViGEm/"/>
@@ -197,6 +195,7 @@
     <ROW Action="AI_FindExeLzma" Type="1" Source="lzmaextractor.dll" Target="FindEXE"/>
     <ROW Action="AI_InstallModeCheck" Type="1" Source="aicustact.dll" Target="UpdateInstallMode" WithoutSeq="true"/>
     <ROW Action="AI_PREPARE_UPGRADE" Type="65" Source="aicustact.dll" Target="PrepareUpgrade"/>
+    <ROW Action="AI_PRESERVE_INSTALL_TYPE" Type="65" Source="aicustact.dll" Target="PreserveInstallType"/>
     <ROW Action="AI_ProcessTasks2" Type="1" Source="aischeduler2.dll" Target="ProcessTasks"/>
     <ROW Action="AI_REDIRECT_32BIT_FOLDER" Type="51" Source="AI_Bin32_Dir" Target="[APPDIR]"/>
     <ROW Action="AI_REDIRECT_32BIT_SH_FOLDER" Type="51" Source="AI_Sh32_Dir" Target="[SHORTCUTDIR]"/>
@@ -313,6 +312,7 @@
     <ROW Action="AI_RESTORE_AI_SETUPEXEPATH" Condition="AI_SETUPEXEPATH_ORIGINAL" Sequence="101"/>
     <ROW Action="AI_SETPROGRAMFILES64" Condition="VersionNT64" Sequence="748"/>
     <ROW Action="AI_SETPROGRAMFILES" Condition="NOT VersionNT64" Sequence="749"/>
+    <ROW Action="AI_PRESERVE_INSTALL_TYPE" Sequence="199"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiLaunchConditionsComponent">
     <ROW Condition="( Version9X OR ( NOT VersionNT64 ) OR ( VersionNT64 AND ((VersionNT64 &lt;&gt; 600) OR (MsiNTProductType &lt;&gt; 1)) AND ((VersionNT64 &lt;&gt; 600) OR (MsiNTProductType = 1)) AND ((VersionNT64 &lt;&gt; 601) OR (MsiNTProductType &lt;&gt; 1)) AND ((VersionNT64 &lt;&gt; 601) OR (MsiNTProductType = 1)) AND ((VersionNT64 &lt;&gt; 602) OR (MsiNTProductType &lt;&gt; 1)) AND ((VersionNT64 &lt;&gt; 602) OR (MsiNTProductType = 1)) AND ((VersionNT64 &lt;&gt; 603) OR (MsiNTProductType &lt;&gt; 1)) AND ((VersionNT64 &lt;&gt; 603) OR (MsiNTProductType = 1)) AND ((VersionNT64 &lt;&gt; 1000) OR (MsiNTProductType = 1)) ) )" Description="[ProductName] can not be installed on the following Windows versions: [WindowsTypeNT64Display]." DescriptionLocId="AI.LaunchCondition.NoSpecificNT64" IsPredefined="true" Builds="DefaultBuild"/>
@@ -349,7 +349,7 @@
     <ROW UpgradeCode="{0A4A02DE-0BE3-4BF4-91F0-1EA47AD26881}" VersionMax="1.17.333.0" Attributes="1541" ActionProperty="UPGRADE_1"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.ScheduledTasksComponent">
-    <ROW TaskId="AI_ViGEmBus_Updater" TaskName="ViGEmBus_Updater" Run="[#updater.exe]" CmdLine="/silent" WorkDir="[APPDIR]" UserProp="[%UserDomain]\[LogonUser]" Flags="24576" Trigger="1|1|1|1|0|0|0||20480|0" Settings="2|4320" Condition="1" TaskVersion="2.0"/>
+    <ROW TaskId="AI_ViGEmBus_Updater" TaskName="ViGEmBus_Updater" Run="[#updater.exe]" CmdLine="/silent" WorkDir="[APPDIR]" UserProp="[%UserDomain]\[LogonUser]" Flags="24576" Trigger="1|1|1|1|0|0|0||20480|0|0" Settings="2|4320" Condition="1" TaskVersion="2.0"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.UpdaterComponent">
     <ROW Updater="updater.exe" URL="URL" SearchFreq="CheckFrequency" DownloadsFolder="DownloadsFolder" ID="ID" TargetDir="AppDir" AppName="ApplicationName" AppVersion="ApplicationVersion" CompanyName="CompanyName" DefCommandLine="DefaultCommandLine" Flags="Flags" IconPath="ViGEm.ico" IconIndex="0" UnistallCASeq="AI_UPDATER_UNINSTALL" TaskId="AI_ViGEmBus_Updater" Description="[|UpdaterName] [|ProductVersion]"/>
