@@ -2,14 +2,7 @@
 
 Windows kernel-mode driver emulating well-known USB game controllers.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/rv74ufluwib52dq2?svg=true)](https://ci.appveyor.com/project/nefarius/vigembus) [![GitHub All Releases](https://img.shields.io/github/downloads/ViGEm/ViGEmBus/total)](https://somsubhra.github.io/github-release-stats/?username=ViGEm&repository=ViGEmBus) [![Discord](https://img.shields.io/discord/346756263763378176.svg)](https://discord.vigem.org) [![Website](https://img.shields.io/website-up-down-green-red/https/vigem.org.svg?label=ViGEm.org)](https://vigem.org/) [![GitHub followers](https://img.shields.io/github/followers/nefarius.svg?style=social&label=Follow)](https://github.com/nefarius) [![Twitter Follow](https://img.shields.io/twitter/follow/nefariusmaximus.svg?style=social&label=Follow)](https://twitter.com/nefariusmaximus)
-
-<sub>(This project is available under a free and permissive license, but needs financial support to sustain its continued improvements. In addition to maintenance and stability there are many desirable features yet to be added. If your company is using components of ViGEm, please consider reaching out.)</sub>
-
-Businesses: support continued development via invoiced technical support, maintenance, sponsoring contracts:
-<br>&nbsp;&nbsp;_E-mail: vigem @ nefarius dot at_
-
-Individuals: support continued maintenance and development via [PayPal](https://paypal.me/NefariusMaximus) donations.
+[![Build status](https://ci.appveyor.com/api/projects/status/rv74ufluwib52dq2?svg=true)](https://ci.appveyor.com/project/nefarius/vigembus) [![GitHub All Releases](https://img.shields.io/github/downloads/ViGEm/ViGEmBus/total)](https://somsubhra.github.io/github-release-stats/?username=ViGEm&repository=ViGEmBus) [![Discord](https://img.shields.io/discord/346756263763378176.svg)](https://discord.nefarius.at) [![Website](https://img.shields.io/website-up-down-green-red/https/vigem.org.svg?label=docs.nefarius.at)](https://docs.nefarius.at/) [![GitHub followers](https://img.shields.io/github/followers/nefarius.svg?style=social&label=Follow)](https://github.com/nefarius) [![Mastodon Follow](https://img.shields.io/mastodon/follow/109321120351128938?domain=https%3A%2F%2Ffosstodon.org%2F&style=social)](https://fosstodon.org/@Nefarius)
 
 ----
 
@@ -78,11 +71,11 @@ Do bear in mind that you'll need to **sign** the driver to use it without [test 
 
 Found a bug and want it fixed? Open a detailed issue on the [GitHub issue tracker](../../issues)!
 
-Have an idea for a new feature? Let's have a chat about your request on [Discord](https://discord.vigem.org).
+Have an idea for a new feature? Let's have a chat about your request on [Discord](https://discord.nefarius.at).
 
 ### Questions & Support
 
-Please respect that the GitHub issue tracker isn't a helpdesk. We offer a [range of support resources](https://vigem.org/Community-Support/) you're welcome to check out!
+Please respect that the GitHub issue tracker isn't a helpdesk. We offer a [range of support resources](https://docs.nefarius.at/Community-Support/) you're welcome to check out!
 
 ## Installation
 
@@ -94,7 +87,6 @@ Sponsors listed here have helped the project flourish by either financial suppor
 
 - [3dRudder](https://www.3drudder.com/)
 - [Parsec](https://parsec.app/)
-- [Rainway, Inc](https://rainway.com/)
 - [JetBrains](https://www.jetbrains.com/resharper/)
 - [Advanced Installer](https://www.advancedinstaller.com/)
 - [ICAROS](https://www.icaros.com/)
@@ -111,7 +103,6 @@ This list is non-exhaustive, if you'd like to see your project included, contact
 - [UCR](https://github.com/Snoothy/UCR)
 - [InputMapper](https://inputmapper.com/)
 - [Oculus VR, LLC.](https://www.oculus.com/)
-- [Rainway, Inc](https://rainway.com/)
 - [WiimoteHook](https://forum.cemu.info/showthread.php/140-WiimoteHook-Nintendo-Wii-Remote-with-Motion-Rumble-and-Nunchuk-support)
 - [XJoy](https://github.com/sam0x17/XJoy)
 - [HP](https://www8.hp.com/us/en/gaming/omen.html)
@@ -123,3 +114,4 @@ This list is non-exhaustive, if you'd like to see your project included, contact
 - [BetterJoy](https://github.com/Davidobot/BetterJoy)
 - [Regame](https://github.com/ksyun-kenc/liuguang)
 - [NetInput](https://github.com/usertoroot/NetInput)
+- [NetJoy](https://github.com/Qcent/NetJoy/)
